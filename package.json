@@ -1,0 +1,38 @@
+{
+  "name": "electron-r-gui",
+  "version": "1.0.0",
+  "description": "A R Software GUI in Electron JS",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EmilianHossu/electron-r-gui.git"
+  },
+  "author": "Emilian Adrian Hossu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EmilianHossu/electron-r-gui/issues"
+  },
+  "homepage": "https://github.com/EmilianHossu/electron-r-gui#readme",
+  "devDependencies": {
+    "electron": "^5.0.2",
+    "electron-builder": "^20.41.0",
+    "electron-rebuild": "^1.8.5",
+    "eslint": "^5.16.0"
+  },
+  "build": {
+    "appId": "r.gui.app",
+    "productName": "R GUI",
+    "directories": {
+      "output": "build"
+    }
+  },
+  "dependencies": {
+    "jquery": "^3.4.1",
+    "raphael": "^2.2.8",
+    "raphael-paragraph": "0.0.1"
+  }
+}

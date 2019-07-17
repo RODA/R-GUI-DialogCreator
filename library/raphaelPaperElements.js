@@ -1,0 +1,334 @@
+/* eslint-disable no-console */
+
+var raphaelPaperElements = {
+
+    // Label element
+    addLabel: function(paper, data) 
+    {             
+        if( this.isObject(data) ) {
+
+            // check for user input
+            if(data.left < 10 || data.left > paper.width - 10){ data.left = 10; }
+            if(data.top < 10 || data.top > paper.height - 10){ data.top = 10; }
+            if(data.fontSize < 10 || data.fontSize > 20){ data.fontSize = 12; }
+
+            // data.top + 7 fix
+            let dataTop = parseInt(data.top) + 7;
+
+            // return Raphael object
+            return paper.text(data.left, dataTop, data.text).attr({fill: '#000', "font-size": data.fontSize, 'text-anchor': 'start'});
+        } else {
+            return;
+        }
+    },
+
+    // Add separator
+    addSeparator: function(paper, data)
+    {
+        if( this.isObject(data) ) {
+
+            // check for user input
+            if(data.left < 10 || data.left > paper.width - 10){ data.left = 10; }
+            if(data.top < 10 || data.top > paper.height - 10){ data.top = 10; }
+            
+            // return Raphael object
+            if(data.direction == 'x') 
+            {    
+                // width to big
+                if(data.length < 50) { data.length = 50; }
+                else if(data.length > paper.width - 30) { data.length = paper.width - 30; data.left = 15;}
+
+                let v = parseInt(data.length) + parseInt(data.left);
+                
+                return paper.path("M" + data.left + " " + data.top + "L"+ v +" " + data.top).attr({stroke: "#ccc"});
+            } 
+            else if(data.direction == 'y') 
+            {    
+                // width to big
+                if(data.length < 50) { data.length = 50; }
+                else if(data.length > paper.height - 30) { data.length = paper.height - 30; data.top = 15;}
+                
+                let v = parseInt(data.length) + parseInt(data.top);
+                
+                return paper.path("M" + data.left + " " + data.top + "L" + data.left + " " + v).attr({stroke: "#ccc"});
+            }
+        } else {
+            return;
+        }
+    },
+
+    // Add checkbox
+    addCheckbox: function(paper, data)
+    {
+        if( this.isObject(data) ) {
+
+            // check for user input
+            if(data.left < 10 || data.left > paper.width - 10){ data.left = 10; }
+            if(data.top < 10 || data.top > paper.height - 10){ data.top = 10; }
+            
+
+            // data.top + 1 fix
+            let dataTop = parseInt(data.top)+1;
+
+            // return Raphael object
+            var cb = [];
+            cb.active = true;
+            
+            // an array because the label might be arranged on multiple lines
+            cb.label = new Array(1);
+            
+            var txtanchor = "start";
+            var xpos = parseInt(data.left);
+            var ypos = dataTop;
+            var dim = 12;
+            
+            // console.log(data);
+            
+
+            // label is to the right
+            xpos += 20;
+            ypos += dim / 2;
+            let label = paper.text(xpos, ypos, data.label).attr({"text-anchor": txtanchor, "font-size": "12px"});
+            let square = paper.rect(parseInt(data.left), dataTop, dim, dim).attr({fill: (data.isChecked === 'true') ? "#97bd6c" : "#eeeeee","stroke-width": 1.2, stroke: "#a0a0a0"});
+            let checked;
+
+            if(data.isChecked === 'true'){
+                checked = paper.path([
+                    ["M", parseInt(data.left) + 0.2*dim, dataTop + 0.3*dim],
+                    ["l", 0.15*dim*2, 0.2*dim*2],
+                    ["l", 0.3*dim*2, -0.45*dim*2]
+                ]).attr({"stroke-width": 2});
+            }
+
+
+            let set = paper.set();
+            
+            if(data.isChecked === 'true'){
+                set.push( label, square, checked);
+            }else{
+                set.push( label, square );
+            }
+            return set;
+        } else {
+            return;
+        }
+    },
+
+    // Add radio button
+    addRadio: function(paper, data)
+    {
+        if( this.isObject(data) ) 
+        {    
+            // data.left + 7 fix
+            let dataLeft = parseInt(data.left)+7;
+            let dataTop = parseInt(data.top)+6;
+
+            let label = paper.text(dataLeft + 15, dataTop + 1, data.label).attr({"text-anchor": "start", "font-size": 12});
+            
+            // the regular gray circles
+            let circle = paper.circle(dataLeft, dataTop, 6.5).attr({fill: "#eeeeee", "stroke": "#a0a0a0", "stroke-width": 1.2});
+
+            let set = paper.set();
+            
+            if(data.isSelected === 'true')
+            {
+                let circle1 = paper.circle(dataLeft, dataTop, 6).attr({fill: "#97bd6c", stroke: "none"});
+                let circle2 = paper.circle(dataLeft, dataTop, 2).attr({fill: "#000000", stroke: "none"});
+
+                set.push( label, circle, circle1, circle2);
+            } else {
+                set.push( label, circle );
+            }
+            
+            return set;
+        } else {
+            return;
+        }
+    },
+
+    // Add counter
+    addCounter: function(paper, data)
+    {
+        if( this.isObject(data) ) 
+        {    
+            // data to int
+            let dataLeft = parseInt(data.left) + 22;
+            let dataTop = parseInt(data.top) + 8;
+
+            var txtanchor = "middle";
+            let crtVal = data.startval;
+        
+            // let textlabel = paper.text(dataLeft, dataTop, "")
+            //     .attr({"text-anchor": txtanchor, "font-size": "14px"});
+            
+            let textvalue = paper.text(dataLeft, dataTop, "" + data.startval)
+                .attr({"text-anchor": txtanchor, "font-size": "14px"});
+            
+            
+            let downsign = paper.path([
+                ["M", dataLeft - 12 - parseInt(data.width) / 2, dataTop - 5],
+                ["l", 12, 0],
+                ["l", -6, 12],
+                ["z"]
+            ]).attr({fill: "#eeeeee", "stroke-width": 1.2, stroke: "#a0a0a0"});
+            
+            let upsign = paper.path([
+                ["M", dataLeft + parseInt(data.width) / 2, dataTop + 5],
+                ["l", 12, 0],
+                ["l", -6, -12],
+                ["z"]
+            ]).attr({fill: "#eeeeee", "stroke-width": 1.2, stroke: "#a0a0a0"});
+            
+            // let down = paper.rect(dataLeft - 22, dataTop - 6, 15, 15)
+            //     .attr({fill: "#fff", opacity: 0, stroke: "#000", "stroke-width": 1, cursor: "pointer"});
+            
+            // let up = paper.rect(dataLeft + 8, dataTop - 8, 15, 15)
+            //     .attr({fill: "#fff", opacity: 0, stroke: "#000", "stroke-width": 1, cursor: "pointer"});
+
+            let set = paper.set();
+            
+            set.push( textvalue, downsign, upsign);
+            
+            return set;
+        } else {
+            return;
+        }
+    },
+
+    // Add button
+    addButton: function(paper, data)
+    {
+        if( this.isObject(data) ) 
+        {    
+            // data to int
+            let dataLeft = parseInt(data.left);
+            let dataTop = parseInt(data.top);
+
+            // temporari element to get the button's width
+            let labelT = paper.text(dataLeft, dataTop, data.label).attr({"text-anchor": "middle", "font-size": 14});
+            let lBBox = labelT.getBBox();
+            labelT.remove();
+
+            let rect = paper.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#f9f9f9", "stroke": "#eeeeee", "stroke-width": 0.7});
+
+            let label = paper.text(dataLeft+10, dataTop + ((Math.round(lBBox.height) / 2) + 5), data.label).attr({"text-anchor": "start", "font-size": 14});
+
+            let set = paper.set();
+            set.push( label, rect );
+            
+            return set;
+        } else {
+            return;
+        }
+    },
+
+    // Add container
+    addContainer: function(paper, data)
+    {
+        if( this.isObject(data) ) 
+        {    
+            // data to int
+            let dataLeft = parseInt(data.left);
+            let dataTop = parseInt(data.top);
+
+            // check for user input
+            if(data.width < 50) { data.width = 50; }
+            else if(data.width > paper.width - 15) { data.width = paper.width - 30; dataLeft = 15;}
+
+            if(data.height < 50) { data.height = 50; }
+            else if(data.height > paper.height - 15) { data.height = paper.height - 30; dataTop = 15; }
+
+            return paper.rect(dataLeft, dataTop, data.width, data.height).attr({fill: "#FFF", "stroke": "#d6d6d6", "stroke-width": 0.7});
+
+        } else {
+            return;
+        }
+    },
+    
+    // Add select
+    addSelect: function(paper, data)
+    {
+        // data to int
+        let dataLeft = parseInt(data.left);
+        let dataTop = parseInt(data.top);
+        // not widther than 350
+        data.width = (data.width > 350) ? 350 : data.width;
+        let dataWidth = parseInt(data.width);
+        
+
+        let rect = paper.rect(dataLeft, dataTop, dataWidth, 25).attr({fill: "#FFFFFF", "stroke": "#BBBBBB", "stroke-width": 0.3});
+        
+        let downsign = paper.path([
+            ["M", dataLeft + dataWidth- 15 , dataTop + 8 ],
+            ["l", 8, 0],
+            ["l", -4, 8],
+            ["z"]
+        ]).attr({fill: "#000000", "stroke-width": 0});
+
+
+        let set = paper.set();
+        set.push(rect, downsign);
+
+        return set;
+    },
+
+    // Make element + cover draggable
+    draggable: function(paperEvents, container){
+        var me = this,    
+            lx = 0,
+            ly = 0,
+            ox = 0,
+            oy = 0,
+            pw = this.paper.width,
+            ph = this.paper.height,
+            moveFnc = function(dx, dy) 
+            {
+                lx = dx + ox;
+                ly = dy + oy;
+
+                // do not drag outside - right side
+                if (lx + this.attr().width + this.attr().x + 10 > pw) {
+                    lx = pw - this.attr().width - this.attr().x - 10;                      
+                }
+                // do not drag outside - left side 
+                if ((lx + this.attr().x) - 10 < 10) {                
+                    lx = - this.attr().x + 10; 
+                }
+                
+                // do not drag outside - bottom side
+                if(ly + this.attr().y + this.attr().height + 10 > ph){
+                    ly = ph - (this.attr().height + this.attr().y) - 10;
+                }
+
+                // do not drag outside - top side
+                if((ly + this.attr().y) - 10 < 10){
+                    ly = - this.attr().y + 10;                         
+                }
+
+                me.transform('T' + lx + ',' + ly);
+            },
+            startFnc = function() {},
+            endFnc = function() {
+                ox = lx;
+                oy = ly;
+                // update element position and reload
+                let newBBox = me.getBBox();
+                container.elements[this.data("elId")].left = Math.round(newBBox.x)+5;
+                container.elements[this.data("elId")].top = Math.round(newBBox.y)+5;
+                paperEvents.emit('getEl', container.getElement(this.data("elId")));
+            };
+
+        this.drag(moveFnc, startFnc, endFnc);
+    },
+
+    // check if somethin is an object
+    isObject: function(obj)
+    {
+        if(typeof obj === 'object'){
+            return true;
+        }
+        return false;
+    }
+};
+
+module.exports = raphaelPaperElements;

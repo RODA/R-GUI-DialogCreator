@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <!-- <script src="../plugins/jquery.min.js"></script> -->
+    <script>window.$ = window.jQuery = require('jquery')</script>
+    <script>window.Raphael = require('raphael');</script>
+    <script src="../plugins//Raphael.InlineTextEditing-master/raphael.inline_text_editing.js"></script>
+    <script src="../plugins//raphael-paragraph/raphael-paragraph.js"></script>
+    <!-- <script src="../library/container.js"></script> -->
+    <script src="../library/interface.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- List available elements -->
+        <div class="item elements" id="elementsList"></div>
+        <!-- Dialog area -->
+        <div class="item dialog">
+            <div id="paper"></div>
+            <div id="dialogProps">
+                <div>
+                    <div class="dProp">
+                        <label for="dialogName">Name</label>
+                        <input name="name" id="dialogName" />
+                    </div>
+                    <div class="dProp">
+                        <label for="dialogTitle">Title</label>
+                        <input name="title" id="dialogTitle" />
+                    </div>
+                    <div class="dProp">
+                        <label for="dialogWidth">Width</label>
+                        <input name="width" id="dialogWidth" />
+                    </div>
+                    <div class="dProp">
+                        <label for="dialogHeight">Height</label>
+                        <input name="height" id="dialogHeight" />
+                    </div>
+                </div>
+                <div>
+                    <button id="updateDialogProps" disabled>Update</button>
+                </div>
+            </div>
+        </div>
+        <!-- Dialog elements area -->
+        <div class="item" id="properties">
+            <!-- <h4>Properties</h4> -->
+            <div id="propertiesList" style="display:none;">
+                <input type="hidden" name="elparentId" id="elparentId"/>
+                <fieldset>
+                    <legend>General</legend>
+                    <!-- all -->
+                    <div class="elprop" style="display:none;">
+                        <label for="eltype">Type</label>
+                        <input type="text" disabled name="eltype" id="eltype" readonly/>
+                    </div>
+                    <!-- usable -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elname">Name (ID)</label>
+                        <input type="text" name="elname" id="elname"/>
+                    </div>
+                    <!-- text -->
+                    <div class="elprop" style="display:none;">
+                        <label for="eltext">Text</label>
+                        <input type="text" name="eltext" id="eltext"/>
+                    </div>
+                    <!-- label -->
+                    <div class="elprop" style="display:none;">
+                        <label for="ellabel">Label</label>
+                        <input type="text" name="ellabel" id="ellabel"/>
+                    </div>
+                    <!-- Radio Group -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elradioGroup">Radio Group</label>
+                        <input type="text" name="elradioGroup" id="elradioGroup"/>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <!-- all -->
+                    <legend>Layout properties</legend>
+                    <div class="elprop" style="display:none;">
+                        <label for="elleft">Left</label>
+                        <input type="text" name="elleft" id="elleft"/>
+                    </div>
+                    <!-- all -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elTop">Top</label>
+                        <input type="text" name="eltop" id="eltop"/>
+                    </div>                    
+                    <div class="elprop" style="display:none;">
+                        <label for="elwidth">Width</label>
+                        <input type="text" name="elwidth" id="elwidth"/>
+                    </div>
+                    <div class="elprop" style="display:none;">
+                        <label for="elheight">Height</label>
+                        <input type="text" name="elheight" id="elheight"/>
+                    </div>
+                    <!-- Container Type -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elobjViewClass">Object class</label>
+                        <select name="elobjViewClass" id="elobjViewClass">
+                            <option value="dataSet">Data Set</option>
+                            <option value="variable">Variable</option>
+                            <option value="plot">Plot</option>
+                        </select>
+                    </div>
+                    <!-- label -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elfontSize">Font size</label>
+                        <input type="text" name="elfontSize" id="elfontSize"/>
+                    </div>
+                    <!-- separator -->
+                    <div class="elprop" style="display:none;">
+                        <label for="eldirection">Direction</label>
+                        <select name="eldirection" id="eldirection">
+                            <option value="x">Horizontal</option>
+                            <option value="y">Vertical</option>
+                        </select>
+                    </div>
+                    <!-- separator -->
+                    <div class="elprop" style="display:none;">
+                        <label for="ellength">Length</label>
+                        <input type="text" name="ellength" id="ellength"/>
+                    </div>
+                    <!-- checkbox -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elisChecked">is Checked</label>
+                        <select name="elisChecked" id="elisChecked">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <!-- radiobox -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elisSelected">is Selected</label>
+                        <select name="elisSelected" id="elisSelected">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <!-- isEnabled -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elisEnabled">is Enabled</label>
+                        <select name="elisEnabled" id="elisEnabled">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <!-- Counter start val -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elstartval">Start Val</label>
+                        <input type="text" name="elstartval" id="elstartval"/>
+                    </div>
+                    <!-- Counter max val -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elmaxval">Max val</label>
+                        <input type="text" name="elmaxval" id="elmaxval"/>
+                    </div>
+                    <!-- conditions  -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elconditions">Conditions</label>
+                        <input type="text" name="elconditions" id="elconditions"/>
+                    </div>
+                </fieldset>
+                <div class="buttons">
+                    <button type="button" disabled id="updateElProps">Update</button>
+                    <button type="button" disabled id="removeElement">Remove</button>
+                </div>
+            </div>
+            </div>
+    </div>
+</body>
+</html>
