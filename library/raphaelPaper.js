@@ -102,11 +102,10 @@ var raphaelPaper = {
             
             let dataSettings = this.settings[type.toLowerCase()];
 
-            // checking for duplicate names            
+            // checking for duplicate names | checking for the name propertie if exist should not be necessary as all elements should have it           
             if(dataSettings.hasOwnProperty('name')) {
                 dataSettings.name = container.elementNameReturn(dataSettings.name);
             }
-            console.log(dataSettings);
 
             let element = paperElements['add' + type](this.paper, dataSettings);            
         
@@ -210,9 +209,16 @@ var raphaelPaper = {
             data.elementIds.push(element.id);
         }
 
-        container.elements[parentID] = Object.assign({}, data);
-        // console.log(container.elements);
+        // we are modifying the data object here
+        let isDataOK = container.prepareData(data);
         
+        // check if we have errors | if true show message
+        if(isDataOK.error){
+            dialog.showMessageBox(mainWindow, {type: "error", message: isDataOK.message, title: "Error", buttons: ["OK"]});
+        }
+        
+        
+        container.elements[parentID] = Object.assign({}, data);        
     }, 
 };
 

@@ -40,12 +40,38 @@ const container = {
         delete this.elements[elID];
     },
 
+    // clean / make element data
+    prepareData: function(data)
+    {
+        let response = { error: false, message: ''};
+        // trim & convert to int data
+        for(let i in data)
+        {
+            if( i == 'text' || i == 'label' || i == 'conditions' ) {
+                data[i] = data[i].trim();
+            }
+            if( i == 'width' || i == 'height' || i == 'left' || i == 'top' || i == 'startval' || i == 'maxval' ) {
+                data[i] = parseInt(data[i]);
+            }
+        }
+
+        // check if we already have a dataSet container
+        if (data.type == 'Container' && data.objViewClass == 'dataSet') {
+            if(this.elementContainerDataSetExists()){
+                data.objViewClass = 'variable';
+                response.error = true;
+                response.message = 'You can have only one Data Set Container per dialog.';
+            }
+        }
+
+        return response;
+    },
+
     // return new element name
     elementNameReturn: function(name)
     {
         let namesList = this.elementNameList(name);
-        console.log(namesList);
-        
+
         if(namesList.length > 0) {
             while(namesList.includes(name)) {
                 name = this.elementNameMake(name);
@@ -98,6 +124,17 @@ const container = {
         }
         return [];
     },
+
+    // element type restrinctions
+    elementContainerDataSetExists()
+    {
+        for( let el in this.elements) {            
+            if( this.elements[el].type == 'Container' && this.elements[el].objViewClass == 'dataSet'){
+                return true;
+            }
+        }
+        return false;    
+    }
 };
 
 module.exports = container;

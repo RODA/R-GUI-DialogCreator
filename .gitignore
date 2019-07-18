@@ -3,3 +3,4 @@ build
 .eslintrc.json
 .jshintrc
 package-lock.json
+.jshintrc
