@@ -105,7 +105,7 @@ var raphaelPaper = {
             // checking for duplicate names | checking for the name propertie if exist should not be necessary as all elements should have it           
             if(dataSettings.hasOwnProperty('name')) {
                 dataSettings.name = container.elementNameReturn(dataSettings.name);
-            }
+            }   
 
             let element = paperElements['add' + type](this.paper, dataSettings);            
         

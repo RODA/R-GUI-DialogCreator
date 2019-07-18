@@ -8,9 +8,9 @@ var raphaelPaperSettings = {
 
     // elements -----------------------------------------------------------
 
-    label: { parentId: '', type: 'Label', name: 'label1', text: 'My label', left: '10', top: '10', fontSize: 14, isVisible: 'true', elementIds: []},
+    label: { parentId: '', type: 'Label', name: 'label1', text: 'My label', left: '10', top: '10', fontSize: 14, isVisible: 'true', elementIds: [], conditions: ''},
 
-    separator: { parentId: '', type: 'Separator', name: 'separator1', direction: 'x', left: '10', top: '10', length: 300, isVisible: 'true', elementIds: []},
+    separator: { parentId: '', type: 'Separator', name: 'separator1', direction: 'x', left: '10', top: '10', length: 300, isVisible: 'true', elementIds: [], conditions: ''},
     
     checkbox: { parentId: '', type: 'Checkbox', name: 'checkbox1', label: 'My checkbox', left: '10', top: '10', isChecked: 'false', isEnabled: 'true', isVisible: 'true', elementIds: [], conditions: ''},
     

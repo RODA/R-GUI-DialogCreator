@@ -7,9 +7,16 @@ const helpers = require("./helpers");
 
 var raphaelPaperObjects = {
     
+    // the main paper
     paper: {},
+    // list of all created objects
+    objList: {},
+    // helper for radiogroups
     radios: {},
+    // main event thread
     events: new EventEmitter(),
+    // available conditions
+    conditions: ['isVisible', 'isNotVisible', 'isEnabled', 'isNotEnabled', 'isSelected', 'isNotSelected', 'isChecked', 'isNotChecked'],
     
     makeDialog: function(container) 
     {   
@@ -27,6 +34,7 @@ var raphaelPaperObjects = {
             }
         }
     },
+    // create an object based on type
     makeObject: function(obj) 
     {        
         let elType = obj.type.toLowerCase();
@@ -57,6 +65,8 @@ var raphaelPaperObjects = {
                 break;
         }
     },
+
+    // Elements =================================================================
     // checkbox
     checkBox: function(obj) 
     {        
@@ -143,12 +153,12 @@ var raphaelPaperObjects = {
                     if (cb.isChecked) {
                         cb.box.attr({fill: "#97bd6c"});
                         cb.chk.show();
-                        raphaelPaperObjects.events.emit('clicked', obj.name);
+                        raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isChecked'});
                     }
                     else {
                          cb.box.attr({fill: "#eeeeee"});
                          cb.chk.hide();
-                         raphaelPaperObjects.events.emit('unClicked', obj.name);
+                         raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotChecked'});
                     }
                 }
             });
@@ -174,7 +184,7 @@ var raphaelPaperObjects = {
             cb.box.attr({fill: "#eeeeee"});
             cb.chk.hide();
             cb.cover.isChecked = false;
-            raphaelPaperObjects.events.emit('unClicked', obj.name);
+            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotChecked'});
         };
         
           
@@ -183,7 +193,7 @@ var raphaelPaperObjects = {
             cb.box.attr({fill: "#97bd6c"});
             cb.chk.show();
             cb.cover.isChecked = true;
-            raphaelPaperObjects.events.emit('clicked', obj.name);
+            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isChecked'});
         };
         
         cb.refresh = function(x) {
@@ -227,18 +237,18 @@ var raphaelPaperObjects = {
         };
         
 
-        raphaelPaperObjects.events.on('clicked', function(data){
-            console.log('clicked: '+data);
-            if(data == obj.conditions & !cb.isChecked){
-                cb.check();
-            }
-        });
-        raphaelPaperObjects.events.on('unClicked', function(data){
-            console.log('unClicked: '+data);
-            if(data == obj.conditions & cb.isChecked){
-                cb.uncheck();
-            }
-        });
+        // raphaelPaperObjects.events.on('iSpeak', function(data){
+        //     console.log('clicked: '+data);
+        //     if(data == obj.conditions & !cb.isChecked){
+        //         cb.check();
+        //     }
+        // });
+        // raphaelPaperObjects.events.on('iSpeak', function(data){
+        //     console.log('unClicked: '+data);
+        //     if(data == obj.conditions & cb.isChecked){
+        //         cb.uncheck();
+        //     }
+        // });
 
 
         // return(cb);
@@ -252,19 +262,50 @@ var raphaelPaperObjects = {
     // separator
     separator: function(obj)
     {
+        // 
+        let separator = {
+            name: obj.name,
+            visible: (obj.isVisible == 'true') ? true : false,
+            element: {},
+            conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
+            makeVisible: function() {
+                this.element.show();
+            },
+            makeNotVisible: function() {
+                this.element.hide();
+            },
+            isVisible: function() {
+                return this.visible;
+            }
+        };
+
         // TO DO check if properties exists - we need this for import/open dialogs
         if(obj.direction == 'x') {
             
             if(obj.length < 10 || obj.length > this.width - 20){ obj.length = 300; }
             let v = parseInt(obj.length) + parseInt(obj.left);
-            this.path("M" + obj.left + " " + obj.top + "L"+ v +" " + obj.top).attr({stroke: "#ccc"});
+            separator.element = this.path("M" + obj.left + " " + obj.top + "L"+ v +" " + obj.top).attr({stroke: "#ccc"});
         } 
         else if(obj.direction == 'y') {
 
             if(obj.length < 10 || obj.length > this.height - 20){ obj.length = 300; }
             let v = parseInt(obj.length) + parseInt(obj.top);
-            this.path("M" + obj.left + " " + obj.top + "L" + obj.left + " " + v).attr({stroke: "#ccc"});
+            separator.element = this.path("M" + obj.left + " " + obj.top + "L" + obj.left + " " + v).attr({stroke: "#ccc"});
         }
+
+        // initial status
+        if(!separator.visible){
+            separator.element.hide();
+        }
+
+        // add the element to the main list
+        raphaelPaperObjects.objList[obj.name] = separator;
+        console.log(separator.conditions);
+
+        raphaelPaperObjects.events.on('iSpeak', function(data){
+            console.log(data);
+            
+        });
     },
     // radio
     radio: function(radios, obj) 
@@ -645,7 +686,41 @@ var raphaelPaperObjects = {
             listSet.push( txt[i], cover[i] );
             position += 25;
         }        
+    },
+
+    // Conditions =================================================================
+    conditionsParser(str)
+    {
+        let response = {};
+        
+        // if no conditions return
+        if(str.length == 0) { return Object.assign({}, response); }
+
+        // to be safe
+        str.trim();
+
+        // geting conditions (Array)
+        let conditions = str.split(';');
+        // remove the last element as is going to be an empty string
+        conditions.pop();
+
+        // if conditions is empty there is a problem with the string
+        if(conditions.length == 0) { return Object.assign({}, response); }
+
+        for( let i=0; i < conditions.length; i++) 
+        {
+            let one = conditions[i].split('=');
+
+            // check for valid propertie
+            if(! raphaelPaperObjects.conditions.includes(one[0])){ continue; }
+
+            // propertie = conditions
+        
+            response[one[0]] = one[1];
+        }
+
+        return Object.assign({}, response);
     }
-};
+};  
 
 module.exports = raphaelPaperObjects;

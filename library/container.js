@@ -68,17 +68,16 @@ const container = {
     },
 
     // return new element name
-    elementNameReturn: function(name)
+    elementNameReturn: function(elName)
     {
-        let namesList = this.elementNameList(name);
+        let namesList = this.elementNameList(elName);
 
         if(namesList.length > 0) {
-            while(namesList.includes(name)) {
-                name = this.elementNameMake(name);
+            while(namesList.includes(elName)) {
+                elName = this.elementNameMake(elName);
             }
-            return name;
         }
-        return name;
+        return elName;
     },
     // generate element name
     elementNameMake: function(name)
