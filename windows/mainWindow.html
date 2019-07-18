@@ -140,8 +140,16 @@
                     </div>
                     <!-- isEnabled -->
                     <div class="elprop" style="display:none;">
-                        <label for="elisEnabled">is Enabled</label>
+                        <label for="elisEnabled">isEnabled</label>
                         <select name="elisEnabled" id="elisEnabled">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <!-- isVisible -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elisVisible">isVisible</label>
+                        <select name="elisVisible" id="elisVisible">
                             <option value="true">Yes</option>
                             <option value="false">No</option>
                         </select>
@@ -156,10 +164,13 @@
                         <label for="elmaxval">Max val</label>
                         <input type="text" name="elmaxval" id="elmaxval"/>
                     </div>
+                </fieldset>
+                <fieldset>
+                    <!-- all -->
+                    <legend>Conditions</legend>
                     <!-- conditions  -->
                     <div class="elprop" style="display:none;">
-                        <label for="elconditions">Conditions</label>
-                        <input type="text" name="elconditions" id="elconditions"/>
+                        <textarea name="elconditions" id="elconditions"></textarea>
                     </div>
                 </fieldset>
                 <div class="buttons">

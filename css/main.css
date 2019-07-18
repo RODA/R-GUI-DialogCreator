@@ -177,3 +177,11 @@ body {
 #properties .buttons{
     text-align: center;
 }
+
+#elconditions {
+    width: 235px;
+    resize: none;
+    height: 75px;
+    border: 1px solid #e6e5e5;
+    padding: 2px 5px;
+}
