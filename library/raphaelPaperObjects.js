@@ -302,9 +302,35 @@ var raphaelPaperObjects = {
         raphaelPaperObjects.objList[obj.name] = separator;
         console.log(separator.conditions);
 
-        raphaelPaperObjects.events.on('iSpeak', function(data){
-            console.log(data);
-            
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            // console.log(data);
+
+            let cToCheck = data.name + ':' + data.status;
+
+            // is the element that speak affecting me?
+            if(separator.conditions.hasOwnProperty('elements')) {
+                let response = [];
+                for( let condition in separator.conditions) {
+                    console.log(separator.conditions);
+                    // skip elements list
+                    if(condition == 'elements'){ continue; }
+                    
+                    console.log(separator.conditions[condition]);
+                    let exec = true;
+                    for ( let e in separator.conditions[condition]){
+                        if(separator.conditions[condition][e].includes(cToCheck)){
+                            exec = true;
+                        }else{
+                            exec = false;
+                        }
+                    }
+                    response.push({ method: condition, is: exec });
+                    console.log(response);
+                    
+                }
+                separator.makeVisible();
+            }
         });
     },
     // radio
@@ -689,7 +715,7 @@ var raphaelPaperObjects = {
     },
 
     // Conditions =================================================================
-    conditionsParser(str)
+    conditionsParser: function(str)
     {
         let response = {};
         
@@ -707,20 +733,56 @@ var raphaelPaperObjects = {
         // if conditions is empty there is a problem with the string
         if(conditions.length == 0) { return Object.assign({}, response); }
 
+        //console.log(conditions);
+        
         for( let i=0; i < conditions.length; i++) 
-        {
+        {            
             let one = conditions[i].split('=');
-
+            
             // check for valid propertie
             if(! raphaelPaperObjects.conditions.includes(one[0])){ continue; }
+            
+            // geting the & conditions
+            let a = one[1].split('&');
+            let b = {};
+            let respondTo = [];
+            
+            if(a.length == 1) { // we do not have & conditions                
+                // checking for |
+                b.condition1 = a[0].split('|');
+                // getting elements name
+                b.condition1.forEach((element) => {
+                    let el = element.split(':')[0];
+                    if(!respondTo.includes(el)) {
+                        respondTo.push(el);
+                    }
+                });
+            } else if(a.length > 1){
+                for(let i = 0; i < a.length; i++){ // we have & conditions
+                    // checking for |
+                    b['condition' + (i + 1)] = a[i].split('|');
+                    // getting element name
+                    b['condition' + (i + 1)].forEach((element) => {
+                        let el = element.split(':')[0];
+                        if(!respondTo.includes(el)) {
+                            respondTo.push(el);
+                        }
+                    });
+                }
+            }
 
             // propertie = conditions
-        
-            response[one[0]] = one[1];
+            response[one[0]] = b;
+            response.elements = respondTo;
         }
 
         return Object.assign({}, response);
+    },
+    conditionsChecker: function()
+    {
+
     }
+
 };  
 
 module.exports = raphaelPaperObjects;
