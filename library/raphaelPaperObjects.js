@@ -64,12 +64,54 @@ var raphaelPaperObjects = {
                 this.select.call(this.paper, obj, ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5'], new EventEmitter());
                 break;
         }
+        // console.log(raphaelPaperObjects.events.listeners('iSpeak'));
+    },
+    // ask an element
+    askElement: function(name, property)
+    {
+        let resp;
+        switch(property){
+            case 'isEnabled':
+                resp = raphaelPaperObjects.objList[name].enabled;    
+                break;
+            case 'isNotEnabled':
+                resp = ! raphaelPaperObjects.objList[name].enabled;    
+                break;
+            case 'isVisible':
+                resp = raphaelPaperObjects.objList[name].visible;    
+                break;
+            case 'isNotVisible':
+                resp = ! raphaelPaperObjects.objList[name].visible;    
+                break;
+            case 'isChecked':
+                resp = raphaelPaperObjects.objList[name].checked;    
+                break;
+            case 'isNotChecked':
+                resp = ! raphaelPaperObjects.objList[name].checked;    
+                break;
+            case 'isSelected':
+                resp = raphaelPaperObjects.objList[name].selected;    
+                break;
+            case 'isNotSelected':
+                resp = ! raphaelPaperObjects.objList[name].selected;    
+                break;
+        }
+        return resp;
     },
 
     // Elements =================================================================
     // checkbox
     checkBox: function(obj) 
     {        
+        // listen for events / changes - must be declared before thee emit events
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            if(data.name != obj.name) {
+                console.log(data.name);   
+                raphaelPaperObjects.conditionsChecker(data, checkBox);
+            }
+        });
+
         // x, y, isChecked, label, pos, dim, fontsize
 
         // checking / making properties
@@ -87,12 +129,19 @@ var raphaelPaperObjects = {
 
         if (helpers.missing(obj.fontsize)) { obj.fontsize = 12; }
         
-        var cb = [];
-        cb.active = true;
-        
-        // an array because the label might be arranged on multiple lines
-        cb.label = new Array(1);
-        
+
+        let checkBox = {
+            name: obj.name,
+            visible: (obj.isVisible == 'true') ? true : false,
+            checked: (obj.isChecked == 'true') ? true : false,
+            enabled: (obj.isEnabled == 'true') ? true : false,
+            element: {},
+            conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
+        };
+
+        var cbElement = {};     
+    
+        // checkbox label - position
         var txtanchor = "start";
         var xpos = parseInt(obj.left);
         var ypos = parseInt(obj.top);
@@ -115,143 +164,142 @@ var raphaelPaperObjects = {
             ypos += 5;
             txtanchor = "middle";
         }
-        
-        cb.label[0] = this.text(xpos, ypos, obj.label)
-            .attr({"text-anchor": txtanchor, "font-size": (obj.fontsize + "px")});
-        
-        cb.box = this.rect(parseInt(obj.left), parseInt(obj.top), obj.dim, obj.dim)
-            .attr({fill: (obj.isChecked === 'true')?"#97bd6c":"#eeeeee","stroke-width": 1.2, stroke: "#a0a0a0"});
-        
-        cb.chk = this.path([
+        // the label
+        cbElement.label = this.text(xpos, ypos, obj.label).attr({"text-anchor": txtanchor, "font-size": (obj.fontsize + "px")});
+        // the box
+        cbElement.box = this.rect(parseInt(obj.left), parseInt(obj.top), obj.dim, obj.dim).attr({fill: (checkBox.checked)?"#97bd6c":"#eeeeee","stroke-width": 1.2, stroke: "#a0a0a0"});
+        // the checked 
+        cbElement.chk = this.path([
             ["M", parseInt(obj.left) + 0.2*obj.dim, parseInt(obj.top) + 0.3*obj.dim],
             ["l", 0.15*obj.dim*2, 0.2*obj.dim*2],
             ["l", 0.3*obj.dim*2, -0.45*obj.dim*2]
         ]).attr({"stroke-width": 2});
         
-            
-        if (obj.isChecked === 'true') {
-            cb.box.attr({fill: "#97bd6c"});
-            cb.chk.show();
-        }
-        else {
-            cb.box.attr({fill: "#eeeeee"});
-            cb.chk.hide();
-        }
-        
-        // obj.isChecked comes as string
-        cb.isChecked = (obj.isChecked == 'true') ? true : false;
-        
-        
+       
         // the cover needs to be drawn last, to cover all other drawings (for click events)
-        cb.cover = this.rect(parseInt(obj.left), parseInt(obj.top), obj.dim, obj.dim)
+        cbElement.cover = this.rect(parseInt(obj.left), parseInt(obj.top), obj.dim, obj.dim)
             .attr({fill: "#fff", opacity: 0, cursor: "pointer"})
             .click(function() {
-                if (cb.active) {
-                    cb.isChecked = !cb.isChecked;
-                    this.isChecked = cb.isChecked;
+                // if the element is enabled
+                if (checkBox.enabled) {
+                    // the element
+                    checkBox.checked = !checkBox.checked;
+                    // the cover
+                    this.checked = checkBox.checked;
                     
-                    if (cb.isChecked) {
-                        cb.box.attr({fill: "#97bd6c"});
-                        cb.chk.show();
+                    if (checkBox.checked) {
+                        // the element is checked
+                        cbElement.box.attr({fill: "#97bd6c"});
+                        cbElement.chk.show();
                         raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isChecked'});
-                    }
-                    else {
-                         cb.box.attr({fill: "#eeeeee"});
-                         cb.chk.hide();
-                         raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotChecked'});
+                    } else {
+                        // the element is unchecked
+                        cbElement.box.attr({fill: "#eeeeee"});
+                        cbElement.chk.hide();
+                        raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotChecked'});
                     }
                 }
             });
         
         // both are useful: for the cover to be able to generically
         // specify if (this.active) {... upon click
-        cb.cover.active = true;
-        
-        cb.activate = function() {
-            cb.active = true;
-            cb.cover.active = true;
-            cb.cover.attr({fill: "#000", opacity: 0, cursor: "pointer"});
+        cbElement.cover.checked = true;
+
+        checkBox.element = cbElement;
+
+        // Properties
+        // ===============================================================================
+        // checkbox is enabled
+        checkBox.isEnabled = function() {
+            checkBox.enabled = true;
+            checkBox.element.cover.active = true;
+            checkBox.element.cover.attr({fill: "#000", opacity: 0, cursor: "pointer"});
+            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isEnabled'});
         };
-            
-        cb.deactivate = function() {
-            cb.active = false;
-            cb.cover.active = false;
-            cb.cover.attr({fill: "#000", opacity: 0.2, cursor: "default"});
+        // checkbox is not enabled
+        checkBox.isNotEnabled = function() {
+            checkBox.enabled = false;
+            checkBox.element.cover.active = false;
+            checkBox.element.cover.attr({fill: "#000", opacity: 0.2, cursor: "default"});
+            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotEnabled'});
         };
         
-        cb.uncheck = function() {
-            cb.isChecked = false;
-            cb.box.attr({fill: "#eeeeee"});
-            cb.chk.hide();
-            cb.cover.isChecked = false;
-            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotChecked'});
-        };
-        
-          
-        cb.check = function() {
-            cb.isChecked = true;
-            cb.box.attr({fill: "#97bd6c"});
-            cb.chk.show();
-            cb.cover.isChecked = true;
+        // checkbox is checked
+        checkBox.isChecked = function() {
+            checkBox.checked = true;
+            checkBox.element.box.attr({fill: "#97bd6c"});
+            checkBox.element.chk.show();
+            checkBox.element.cover.checked = true;
             raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isChecked'});
         };
         
-        cb.refresh = function(x) {
-            if (x) {
-                cb.check();
-            }
-            else {
-                cb.uncheck();
-            }
+        // checkbox is not checked
+        checkBox.isNotChecked = function() {
+            checkBox.checked = false;
+            checkBox.element.box.attr({fill: "#eeeeee"});
+            checkBox.element.chk.hide();
+            checkBox.element.cover.checked = false;
+            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotChecked'});
         };
         
-        cb.hideIt = function() {
-            cb.cover.hide();
-            cb.box.hide();
-            cb.chk.hide();
-            for (var i = 0; i < cb.label.length; i++) {
-                cb.label[i].hide();
-            }
-        };
-        
-        cb.showIt = function() {
-            cb.cover.show();
-            cb.box.show();
+        // checkbox is visible
+        checkBox.isVisible = function() {
+            checkBox.element.cover.show();
+            checkBox.element.box.show();
             
-            if (cb.isChecked) {
-                cb.chk.show();
+            if (checkBox.checked) {
+                checkBox.element.chk.show();
+            } else {
+                checkBox.element.chk.hide();
             }
-            else {
-                cb.chk.hide();
-            }
-            
-            for (var i = 0; i < cb.label.length; i++) {
-                cb.label[i].show();
-            }
+            checkBox.element.label.show();
+            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isVisible'});
+        };
+
+        // checkbox is not visible
+        checkBox.isNotVisible = function() {
+            checkBox.element.cover.hide();
+            checkBox.element.box.hide();
+            checkBox.element.chk.hide();
+            checkBox.element.label.hide();
+            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotVisible'});
         };
         
-        var cbset = this.set(cb.box, cb.chk, cb.cover);
-        
-        cb.move = function(x, y) {
-            cbset.transform("t" + x + "," + y);
+        // refresh checkbox - TO check if still needed
+        checkBox.refresh = function(x) {
+            if (x) { checkBox.isChecked(); }
+            else { checkBox.isNotChecked(); }
+            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'refresh'});
         };
         
+        // moving the checkbox
+        // var cbset = this.set(cb.box, cb.chk, cb.cover);
+        // cb.move = function(x, y) {
+        //     cbset.transform("t" + x + "," + y);
+        // };
+        
+        // Setting the initial properties
+        // is the element checked ?            
+        if (checkBox.checked) {
+            checkBox.isChecked();
+        } else {
+            checkBox.isNotChecked();
+        }
+        // is the element enabled ?
+        if (checkBox.enabled) {
+            checkBox.isEnabled();
+        } else {
+            checkBox.isNotEnabled();
+        }
+        // is the element visible? 
+        if (checkBox.visible) {
+            checkBox.isVisible();
+        } else {
+            checkBox.isNotVisible();
+        }
 
-        // raphaelPaperObjects.events.on('iSpeak', function(data){
-        //     console.log('clicked: '+data);
-        //     if(data == obj.conditions & !cb.isChecked){
-        //         cb.check();
-        //     }
-        // });
-        // raphaelPaperObjects.events.on('iSpeak', function(data){
-        //     console.log('unClicked: '+data);
-        //     if(data == obj.conditions & cb.isChecked){
-        //         cb.uncheck();
-        //     }
-        // });
-
-
-        // return(cb);
+        // add the element to the main list
+        raphaelPaperObjects.objList[obj.name] = checkBox;
     },
     // label
     label: function(obj)
@@ -262,20 +310,27 @@ var raphaelPaperObjects = {
     // separator
     separator: function(obj)
     {
-        // 
+        // listen for events / changes - must be declared before thee emit events
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            if(obj.name != data.name){
+                console.log(data.name);
+                raphaelPaperObjects.conditionsChecker(data, separator);
+            }
+        });
+
         let separator = {
             name: obj.name,
             visible: (obj.isVisible == 'true') ? true : false,
             element: {},
             conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
-            makeVisible: function() {
-                this.element.show();
-            },
-            makeNotVisible: function() {
-                this.element.hide();
-            },
             isVisible: function() {
-                return this.visible;
+                this.element.show();
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isVisible'});
+            },
+            isNotVisible: function() {
+                this.element.hide();
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotVisible'});
             }
         };
 
@@ -294,44 +349,14 @@ var raphaelPaperObjects = {
         }
 
         // initial status
-        if(!separator.visible){
-            separator.element.hide();
+        if(separator.visible){
+            separator.isVisible();
+        } else {
+            separator.isNotVisible();
         }
 
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = separator;
-        console.log(separator.conditions);
-
-        raphaelPaperObjects.events.on('iSpeak', function(data)
-        {
-            // console.log(data);
-
-            let cToCheck = data.name + ':' + data.status;
-
-            // is the element that speak affecting me?
-            if(separator.conditions.hasOwnProperty('elements')) {
-                let response = [];
-                for( let condition in separator.conditions) {
-                    console.log(separator.conditions);
-                    // skip elements list
-                    if(condition == 'elements'){ continue; }
-                    
-                    console.log(separator.conditions[condition]);
-                    let exec = true;
-                    for ( let e in separator.conditions[condition]){
-                        if(separator.conditions[condition][e].includes(cToCheck)){
-                            exec = true;
-                        }else{
-                            exec = false;
-                        }
-                    }
-                    response.push({ method: condition, is: exec });
-                    console.log(response);
-                    
-                }
-                separator.makeVisible();
-            }
-        });
     },
     // radio
     radio: function(radios, obj) 
@@ -732,12 +757,11 @@ var raphaelPaperObjects = {
 
         // if conditions is empty there is a problem with the string
         if(conditions.length == 0) { return Object.assign({}, response); }
-
-        //console.log(conditions);
         
         for( let i=0; i < conditions.length; i++) 
-        {            
-            let one = conditions[i].split('=');
+        {                        
+            // trim for spaces and newlines
+            let one = conditions[i].trim().split('=');
             
             // check for valid propertie
             if(! raphaelPaperObjects.conditions.includes(one[0])){ continue; }
@@ -775,12 +799,100 @@ var raphaelPaperObjects = {
             response[one[0]] = b;
             response.elements = respondTo;
         }
-
         return Object.assign({}, response);
     },
-    conditionsChecker: function()
+    conditionsChecker: function(data, raphaelObject)
     {
+        let cToCheck = data.name + ':' + data.status;
 
+        // do we have elements? Is the element that speak affecting me?
+        if(raphaelObject.conditions.hasOwnProperty('elements')) 
+        {            
+            let callMethod = [];
+
+            // checking for true methods
+            for( let condition in raphaelObject.conditions) 
+            {
+                // console.log('Logging conditions ---------');
+                // console.log(raphaelObject.conditions);
+                
+                // skip elements list
+                if(condition == 'elements'){ continue; }
+                
+                let search = false;
+                let noEl = 0;
+                // current action/condition is part of the conditions?
+                for ( let e in raphaelObject.conditions[condition]) {
+                    if(raphaelObject.conditions[condition][e].includes(cToCheck)) {
+                        search = true;
+                    } 
+                    //counting conditions in object
+                    noEl++;
+                }
+                    
+                // if we found the condition and is the only one
+                if( search && noEl == 1) 
+                {
+                    callMethod.push({ method: condition, is: true });   
+                    
+                } else 
+                // we found the condition but we have also other conditions    
+                if(search && noEl > 1) 
+                { 
+                    let allConditions = [];
+                    for ( let e in raphaelObject.conditions[condition]) {
+                        
+                        if(raphaelObject.conditions[condition][e].includes(cToCheck)) {
+                            allConditions.push(true);
+                        } else {
+                            // for every condition element
+                            raphaelObject.conditions[condition][e].forEach(function(element)
+                            {
+                                let checkingFor = element.split(':');  
+                             
+                                // do we have the element ?
+                                if(raphaelPaperObjects.objList[checkingFor[0]] != void 0) 
+                                {
+                                    // call the element to check status of property
+                                    allConditions.push(raphaelPaperObjects.askElement(checkingFor[0], checkingFor[1]));
+                                } else {
+                                    // element not found | probably wrong name
+                                    allConditions.push(false);
+                                }
+                            });
+                        }
+                    } 
+                    let b = false;
+                    if(allConditions.length > 0){
+                        b = allConditions.every(function(element){
+                            return element;
+                        });
+                    }
+                    console.log(b);
+                    
+                    // set method
+                    callMethod.push({ method: condition, is: b });
+                } else {
+                    // we have not found the current condition
+                    callMethod.push({ method: condition, is: false });
+                }                    
+            }
+            // console.log(callMethod);
+            
+            // call the methods if we have any
+            if( Array.isArray(callMethod) ){
+                callMethod.forEach(function(element)
+                {
+                    // let methodName = element.method.toLowerCase();
+                    if(element.is && (raphaelObject[element.method] != void 0)) {
+                        // call the method                        
+                        raphaelObject[element.method]();
+                    }
+                    
+                });
+            }
+        }
+        return false;
     }
 
 };  

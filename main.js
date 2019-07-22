@@ -22,7 +22,7 @@ app.on('ready', function()
         },
         minWidth: 1200,
         minHeight: 800,
-        center: true
+        // center: true
     });
     // load html into the window
     mainWindow.loadURL(url.format({

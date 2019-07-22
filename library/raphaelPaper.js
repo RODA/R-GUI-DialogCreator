@@ -174,7 +174,7 @@ var raphaelPaper = {
         
         // add element cover for drag and drop functionelity
         let bbEl = element.getBBox();
-        let cover = this.paper.rect(bbEl.x-5, bbEl.y-5, bbEl.width+10, bbEl.height+10).attr({fill: "#FFF", opacity: 0}).toFront();
+        let cover = this.paper.rect(bbEl.x-5, bbEl.y-5, bbEl.width+10, bbEl.height+10).attr({fill: "#FFF", opacity: 0, cursor: "pointer"}).toFront();
         
         var st = this.paper.set();
         st.push( element, cover );
