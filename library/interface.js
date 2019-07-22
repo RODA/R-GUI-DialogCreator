@@ -66,6 +66,27 @@ $(document).ready(function(){
        raphaelPaper.update(obj);
     });
 
+    // update element on press enter
+    $(document).on('keypress',function(e) {
+        if(e.which == 13) {
+            let aaa = $('#updateElProps').prop('disabled');
+            if(! aaa ) {
+                // get all proprerties
+                let properties = $('#propertiesList [id^="el"]');
+                // save all properties to obj
+                let obj = {};
+                properties.each(function(){
+                    let el = $(this);
+                    if(!el.prop('disabled')){
+                        let key = el.attr('name').substr(2);
+                        obj[key] = el.val();
+                    }
+                });
+                // send obj for update
+                raphaelPaper.updateElement(obj);
+            }
+        }
+    });
     // update an element
     $('#updateElProps').on('click', function(){
         // get all proprerties
