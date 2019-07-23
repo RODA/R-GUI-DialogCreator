@@ -100,6 +100,9 @@ var raphaelPaperElements = {
                 ]).attr({"stroke-width": 2});
             }
 
+            if(data.isEnabled == 'false') {
+                square.attr({fill: "#000", opacity: 0.2});
+            }
 
             let set = paper.set();
             
@@ -121,19 +124,19 @@ var raphaelPaperElements = {
         {    
             // data.left + 7 fix
             let dataLeft = parseInt(data.left)+7;
-            let dataTop = parseInt(data.top)+6;
+            let dataTop = parseInt(data.top)+8;
 
-            let label = paper.text(dataLeft + 15, dataTop + 1, data.label).attr({"text-anchor": "start", "font-size": 12});
+            let label = paper.text(dataLeft + 15, dataTop, data.label).attr({"text-anchor": "start", "font-size": 14});
             
             // the regular gray circles
-            let circle = paper.circle(dataLeft, dataTop, 6.5).attr({fill: "#eeeeee", "stroke": "#a0a0a0", "stroke-width": 1.2});
+            let circle = paper.circle(dataLeft, dataTop, 7).attr({fill: "#eeeeee", "stroke": "#a0a0a0", "stroke-width": 1.2});
 
             let set = paper.set();
             
             if(data.isSelected === 'true')
             {
                 let circle1 = paper.circle(dataLeft, dataTop, 6).attr({fill: "#97bd6c", stroke: "none"});
-                let circle2 = paper.circle(dataLeft, dataTop, 2).attr({fill: "#000000", stroke: "none"});
+                let circle2 = paper.circle(dataLeft, dataTop, 3).attr({fill: "#000000", stroke: "none"});
 
                 set.push( label, circle, circle1, circle2);
             } else {
@@ -213,6 +216,11 @@ var raphaelPaperElements = {
 
             let label = paper.text(dataLeft+10, dataTop + ((Math.round(lBBox.height) / 2) + 5), data.label).attr({"text-anchor": "start", "font-size": 14});
 
+            if(data.isEnabled == 'false') {
+                rect.attr({fill: "#000", opacity: 0.2});
+                label.attr({opacity: 0.2});
+            }
+
             let set = paper.set();
             set.push( label, rect );
             
@@ -270,6 +278,39 @@ var raphaelPaperElements = {
         set.push(rect, downsign);
 
         return set;
+    },
+
+    // Add Input
+    addInput: function(paper, data)
+    {
+        if( this.isObject(data) ) 
+        {    
+            // data to int
+            let dataLeft = parseInt(data.left);
+            let dataTop = parseInt(data.top);
+
+            // check for user input
+            if(data.width < 50) { data.width = 50; }
+            else if(data.width > paper.width - 15) { data.width = paper.width - 30; dataLeft = 15;}
+
+            if(data.height < 50) { data.height = 50; }
+            else if(data.height > paper.height - 15) { data.height = paper.height - 30; dataTop = 15; }
+
+            let rect = paper.rect(dataLeft, dataTop, data.width, 25).attr({fill: "#ffffff", "stroke": "#bbbbbb", "stroke-width": 0.7});
+
+            if(data.value.trim() != '') {
+                let label = paper.text(dataLeft+7, dataTop + 12, data.value).attr({"text-anchor": "start", "font-size": 14});
+                let set = paper.set();
+                set.push( label, rect );
+                return set;
+            } else {
+                return rect;
+            }
+
+
+        } else {
+            return;
+        }
     },
 
     // Make element + cover draggable
