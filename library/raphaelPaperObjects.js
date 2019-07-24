@@ -957,6 +957,8 @@ var raphaelPaperObjects = {
             response[one[0]] = b;
             response.elements = respondTo;
         }
+        console.log(response);
+        
         return Object.assign({}, response);
     },
     conditionsChecker: function(data, raphaelObject)

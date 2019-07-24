@@ -92,7 +92,7 @@ function createPreviewWindow(arg)
         parent: mainWindow,
         resizable: false,
         show: false,
-        modal: true
+        // modal: true
     });
 
     // Open the DevTools.
