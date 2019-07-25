@@ -133,6 +133,11 @@ const container = {
             }
         }
         return false;    
+    },
+    validateConditions : function(data)
+    {
+        // TO DO - parse conditions
+        return true;
     }
 };
 

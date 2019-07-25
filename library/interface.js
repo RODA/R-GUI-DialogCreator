@@ -32,6 +32,12 @@ ipcRenderer.on('previewDialog', (event, args) => {
     }
 
 });
+// verify conditions and respond
+ipcRenderer.on('conditionsCheck', (event, args) => {
+    let valid = raphaelPaper.returnConditionStatus(args);
+    ipcRenderer.send('conditionsValid', valid);
+});
+
 
 $(document).ready(function(){
 
@@ -153,7 +159,7 @@ $(document).ready(function(){
             el.val(props[key]);
         });        
         
-    })
+    });
 
     // new dialog - clear elements prop
     raphaelPaper.paperEvents.on('clearProps', function() {

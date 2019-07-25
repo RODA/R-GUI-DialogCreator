@@ -16,7 +16,7 @@ $(document).ready(function(){
         ipcRenderer.send('conditionsCheck', {'id': id, 'name': name, 'conditions': conditions});
     });
     ipcRenderer.on('conditionsValid', (event, args) => {
-        if(args.valid) {
+        if(args) {
             let window = BrowserWindow.getFocusedWindow();
             window.close();
         } else {

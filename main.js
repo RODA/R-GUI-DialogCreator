@@ -162,8 +162,16 @@ function createConditionswWindow(arg)
     conditionsWindow.setMenu(null);
 }
 // lunch the conditions window
-ipcMain.on('conditionsData', (event, arg) => {
-    createConditionswWindow(arg);
+ipcMain.on('conditionsData', (event, args) => {
+    createConditionswWindow(args);
+}); 
+// send condition for validation to container
+ipcMain.on('conditionsCheck', (event, args) => {
+    mainWindow.webContents.send('conditionsCheck', args);
+}); 
+// send back the response
+ipcMain.on('conditionsValid', (event, args) => {
+    conditionsWindow.webContents.send('conditionsValid', args);
 }); 
 
 
@@ -177,7 +185,7 @@ function saveDataToFile(arg)
             
             console.log('Write Successfully');
         });                     
-    })
+    });
 }
 
 // Create menu template

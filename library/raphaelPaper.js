@@ -82,12 +82,6 @@ var raphaelPaper = {
         // clear props for any selected element 
         raphaelPaper.paperEvents.emit('clearProps');
     },
-    
-    // return a copy of the container for creating the preview dialog
-    returnContainer: function()
-    {    
-        return JSON.stringify(container);
-    },
 
     // add new element on paper
     addElementToPaper: function(type) 
@@ -220,6 +214,17 @@ var raphaelPaper = {
         
         container.elements[parentID] = Object.assign({}, data);        
     }, 
+
+    // return a copy of the container for creating the preview dialog
+    returnContainer: function()
+    {    
+        return JSON.stringify(container);
+    },
+    
+    // ask container to validate an element's conditions
+    returnConditionStatus: function(data){
+        return container.validateConditions(data);
+    },
 };
 
 module.exports = raphaelPaper;
