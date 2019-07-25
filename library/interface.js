@@ -112,7 +112,11 @@ $(document).ready(function(){
 
         clearProps();
     });
-
+    $('#conditions').on('click', function(){
+        let name = $('#elname').val();
+        let id = $('#elparentId').val();
+        ipcRenderer.send('conditionsData', {'name': name, 'id': id});
+    });
     // Paper Events ========================================
     // show element properties
     raphaelPaper.paperEvents.on('getEl', function(element) {

@@ -96,7 +96,7 @@ function createPreviewWindow(arg)
     });
 
     // Open the DevTools.
-    previewWindow.webContents.openDevTools()
+    previewWindow.webContents.openDevTools();
 
     previewWindow.loadURL(url.format({
         pathname: path.join(__dirname, './windows/previewWindow.html'),
@@ -119,6 +119,53 @@ function createPreviewWindow(arg)
 
     previewWindow.setMenu(null);
 }
+// Handle create conditions window
+function createConditionswWindow(arg)
+{   
+    // create window but do not show it - waiting for data
+    // https://stackoverflow.com/questions/51789711/how-to-send-data-between-parent-and-child-window-in-electron
+    conditionsWindow = new BrowserWindow({
+        webPreferences:{
+            nodeIntegration: true
+        },
+        width: 640,
+        height: 400,
+        title: arg.name+' condtitions',
+        autoHideMenuBar: true,
+        parent: mainWindow,
+        resizable: false,
+        show: false,
+    });
+
+    // Open the DevTools.
+    conditionsWindow.webContents.openDevTools();
+
+    conditionsWindow.loadURL(url.format({
+        pathname: path.join(__dirname, './windows/conditionsWindow.html'),
+        protocol: "file:",
+        slashes: true
+    }));
+    // Garbage collection handle
+    conditionsWindow.on('closed', function(){
+        conditionsWindow = null;
+        
+    });
+    // when data is ready show window
+    conditionsWindow.once("show", () => {
+        conditionsWindow.webContents.send('conditionsData', arg);
+    });
+    // when window is ready send data
+    conditionsWindow.once("ready-to-show", ()=>{
+        conditionsWindow.show();
+    });
+    // no menu
+    conditionsWindow.setMenu(null);
+}
+// lunch the conditions window
+ipcMain.on('conditionsData', (event, arg) => {
+    createConditionswWindow(arg);
+}); 
+
 
 function saveDataToFile(arg)
 {

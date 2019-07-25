@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../css/conditions.css">
+    <script src="../plugins/jquery.min.js"></script>
+    <script>window.$ = window.jQuery = require('jquery')</script>
+    <script src="../library/interfaceConditions.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div>Please type here the element's conditions.</div>
+        <div>
+            <input type="hidden" name="id" id="conditionsId">
+            <input type="hidden" name="name" id="conditionsName">
+            <textarea name="conditions" id="conditions" rows="10" cols="50"></textarea>
+        </div>
+        <div>
+            <button id="saveConditions">Save & Close</button>
+        </div>
+        <div>
+            <p id="errors" style="display: none;"><span>The conditions are not valid. Please check and click save again.</span><br/> For more information please consult the documentation</p>
+        </div>
+    </div>
+</body>
+</html>

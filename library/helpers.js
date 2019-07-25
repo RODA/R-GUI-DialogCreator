@@ -16,13 +16,15 @@ var helpers = {
         return(obj === void 0);
     },
     //https://stackoverflow.com/questions/14368596/how-can-i-check-that-two-objects-have-the-same-set-of-property-names
+    // This function ignores the elemnts 'conditions' propertie
     hasSameProps: function( obj1, obj2 ) {
         var obj1Props = Object.keys( obj1 ),
             obj2Props = Object.keys( obj2 );
     
-        if ( obj1Props.length == obj2Props.length ) {
+        if ( obj1Props.length == obj2Props.length + 1 ) {
             return obj1Props.every( function( prop ) {
-              return obj2Props.indexOf( prop ) >= 0;
+                if(prop == 'conditions'){ return true; }
+                return obj2Props.indexOf( prop ) >= 0;
             });
         }
         return false;

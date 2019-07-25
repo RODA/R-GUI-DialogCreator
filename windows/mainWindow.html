@@ -38,7 +38,7 @@
                     </div>
                 </div>
                 <div>
-                    <button id="updateDialogProps" disabled>Update</button>
+                    <button id="updateDialogProps" style="width: 250px;" disabled>Update dialog properties</button>
                 </div>
             </div>
         </div>
@@ -180,14 +180,16 @@
                     <!-- all -->
                     <legend>Conditions</legend>
                     <!-- conditions  -->
-                    <div class="elprop" style="display:none;">
-                        <textarea name="elconditions" id="elconditions"></textarea>
-                    </div>
+                    <label>Conditions</label>
+                    <button style="float: right;" type="button" id="conditions">Add</button>
                 </fieldset>
-                <div class="buttons">
+                <fieldset>
+                    <legend>Actions</legend>
+                    <div style="text-align: right">
                     <button type="button" disabled id="updateElProps">Update</button>
                     <button type="button" disabled id="removeElement">Remove</button>
                 </div>
+                </fieldset>
             </div>
             </div>
     </div>
