@@ -119,6 +119,8 @@ function createPreviewWindow(arg)
 
     previewWindow.setMenu(null);
 }
+
+// =================================================
 // Handle create conditions window
 function createConditionswWindow(arg)
 {   
@@ -173,6 +175,7 @@ ipcMain.on('conditionsCheck', (event, args) => {
 ipcMain.on('conditionsValid', (event, args) => {
     conditionsWindow.webContents.send('conditionsValid', args);
 }); 
+// =================================================
 
 
 function saveDataToFile(arg)

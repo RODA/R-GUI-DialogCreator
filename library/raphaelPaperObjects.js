@@ -19,7 +19,7 @@ var raphaelPaperObjects = {
     conditions: ['isVisible', 'isNotVisible', 'isEnabled', 'isNotEnabled', 'isSelected', 'isNotSelected', 'isChecked', 'isNotChecked'],
     
     makeDialog: function(container) 
-    {   
+    {       
         if (((container.properties === void 0) == false) && helpers.hasSameProps(raphaelPaperSettings.dialog, container.properties)) {
             
             let props = container.properties;
@@ -37,11 +37,17 @@ var raphaelPaperObjects = {
     // TO DO - add input element
     // create an object based on type
     makeObject: function(obj) 
-    {        
+    {
         let elType = obj.type.toLowerCase();
         switch(elType) {
+            case "button": 
+                this.button.call(this.paper, obj);
+                break;
             case "checkbox":
                 this.checkBox.call(this.paper, obj);
+                break;
+            case "input":
+                this.input.call(this.paper, obj);
                 break;
             case "radio": 
                 this.radio.call(this.paper, this.radios, obj);
@@ -55,9 +61,6 @@ var raphaelPaperObjects = {
             case "counter": 
                 this.counter.call(this.paper, obj);
                 break;
-            case "button": 
-                this.button.call(this.paper, obj);
-                break;
             case "container": 
                 this.container.call(this.paper, obj);
                 break;
@@ -65,7 +68,6 @@ var raphaelPaperObjects = {
                 this.select.call(this.paper, obj, ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5'], new EventEmitter());
                 break;
         }
-        // console.log(raphaelPaperObjects.events.listeners('iSpeak'));
     },
     // ask an element
     askElement: function(name, property)
@@ -101,19 +103,111 @@ var raphaelPaperObjects = {
     },
 
     // Elements =================================================================
-    // checkbox
-    checkBox: function(obj) 
-    {        
-        // listen for events / changes - must be declared before thee emit events
-        raphaelPaperObjects.events.on('iSpeak', function(data)
+    // button
+    button: function(obj)
+    {
+        let button = {
+            name: obj.name,
+            visible: (obj.isVisible == 'true') ? true : false,
+            enabled: (obj.isEnabled == 'true') ? true : false,
+            element: {},
+            conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
+            initialize: true,
+        };
+
+        // data to int
+        let dataLeft = parseInt(obj.left);
+        let dataTop = parseInt(obj.top);
+
+        // temporary element to get the button's width
+        let labelT = this.text(dataLeft, dataTop, obj.label).attr({"text-anchor": "middle", "font-size": 14});
+        let lBBox = labelT.getBBox();
+        labelT.remove();
+
+        let elButton = {};
+        elButton.rect = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#f9f9f9", "stroke": "#eeeeee", "stroke-width": 0.7});
+        elButton.txt = this.text(dataLeft+10, dataTop + ((Math.round(lBBox.height) / 2) + 5), obj.label).attr({"text-anchor": "start", "font-size": 14});
+
+        elButton.cover = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#eeeeee", stroke: "none", "fill-opacity": 0, "cursor": "pointer"});
+        elButton.cover.click(function() 
         {
-            if(data.name != obj.name) {
-                raphaelPaperObjects.conditionsChecker(data, checkBox);
+            // TO DO ---------------            
+            if(button.enabled) {
+                alert('clicked');
             }
         });
 
-        // x, y, isChecked, label, pos, dim, fontsize
+        button.element = elButton;
 
+        // listen for events / changes
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            if(obj.name != data.name){
+                raphaelPaperObjects.conditionsChecker(data, button);
+            }
+        });
+        // Properties
+        // ===============================================================================
+        button.show = function(){
+            for( let i in button.element){
+                button.element[i].show();
+            }
+            //  emit event only if already intialized
+            if(!button.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: button.name, status: 'show'});
+            }
+        };
+        button.hide = function(){
+            for( let i in button.element){
+                button.element[i].hide();
+            }
+            //  emit event only if already intialized
+            if(!button.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: button.name, status: 'hide'});
+            }
+        };
+        button.enable = function() {
+            button.enabled = true;
+            button.element.rect.attr({fill: "#f9f9f9", opacity: 1});
+            button.element.txt.attr({opacity: 1});
+            button.element.cover.attr({'cursor': 'pointer'});
+            //  emit event only if already intialized
+            if(!button.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: button.name, status: 'enable'});
+            }
+        };
+        button.disable = function() {
+            button.enabled = false;
+            button.element.rect.attr({fill: "#000", opacity: 0.2});
+            button.element.txt.attr({opacity: 0.2});
+            button.element.cover.attr({'cursor': 'default'});
+            //  emit event only if already intialized
+            if(!button.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: button.name, status: 'disable'});
+            }
+        };
+
+        // initialize
+        if(button.visible) { 
+            button.show();
+        } else {
+            button.hide();
+        }
+        if(button.enabled) {
+            button.enable();
+        } else {
+            button.disable();
+        }        
+        // set to false - we have initialized the element
+        button.initialize = false;
+
+        // add the element to the main list
+        raphaelPaperObjects.objList[obj.name] = button;
+    },
+    // checkbox
+    checkBox: function(obj) 
+    {        
+        // x, y, isChecked, label, pos, dim, fontsize
         // checking / making properties
         if (helpers.missing(obj.top)) { obj.top = 10; }
 
@@ -123,7 +217,7 @@ var raphaelPaperObjects = {
 
         if (helpers.missing(obj.label)) { obj.label = ""; }
 
-        if (helpers.missing(obj.pos)) { obj.pos = 3; }
+        if (helpers.missing(obj.pos)) { obj.pos = 5; }
 
         if (helpers.missing(obj.dim)) { obj.dim = 12; }
 
@@ -150,7 +244,7 @@ var raphaelPaperObjects = {
             ypos += obj.dim / 2;
             txtanchor = "end";
         }
-        else if (obj.pos == 2) { // above
+        else if (obj.pos == 2) { // below
             xpos += obj.dim / 2;
             ypos -= obj.dim;
             txtanchor = "middle";
@@ -159,9 +253,9 @@ var raphaelPaperObjects = {
             xpos += 20;
             ypos += obj.dim / 2;
         }
-        else { // below
+        else { // top
             xpos += obj.dim / 2;
-            ypos += 5;
+            ypos += 27;
             txtanchor = "middle";
         }
         // the label
@@ -206,44 +300,62 @@ var raphaelPaperObjects = {
         cbElement.cover.checked = true;
 
         checkBox.element = cbElement;
-
+        // listen for events / changes
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            if(data.name != obj.name) {
+                raphaelPaperObjects.conditionsChecker(data, checkBox);
+            }
+        });
         // Properties
         // ===============================================================================
         // checkbox is enabled
-        checkBox.isEnabled = function() {
+        checkBox.enable = function() {
             checkBox.enabled = true;
             checkBox.element.cover.active = true;
             checkBox.element.cover.attr({fill: "#000", opacity: 0, cursor: "pointer"});
-            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isEnabled'});
+            //  emit event only if already intialized
+            if(!checkBox.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'enable'});
+            }
         };
         // checkbox is not enabled
-        checkBox.isNotEnabled = function() {
+        checkBox.disable = function() {
             checkBox.enabled = false;
             checkBox.element.cover.active = false;
             checkBox.element.cover.attr({fill: "#000", opacity: 0.2, cursor: "default"});
-            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotEnabled'});
+            //  emit event only if already intialized
+            if(!checkBox.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'disable'});
+            }
         };
         
         // checkbox is checked
-        checkBox.isChecked = function() {
+        checkBox.check = function() {
             checkBox.checked = true;
             checkBox.element.box.attr({fill: "#97bd6c"});
             checkBox.element.chk.show();
             checkBox.element.cover.checked = true;
-            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isChecked'});
+            //  emit event only if already intialized
+            if(!checkBox.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'check'});
+            }
         };
         
         // checkbox is not checked
-        checkBox.isNotChecked = function() {
+        checkBox.uncheck = function() {
             checkBox.checked = false;
             checkBox.element.box.attr({fill: "#eeeeee"});
             checkBox.element.chk.hide();
             checkBox.element.cover.checked = false;
-            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotChecked'});
+            //  emit event only if already intialized
+            if(!checkBox.initialize) {            
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'uncheck'});
+            }
         };
         
         // checkbox is visible
-        checkBox.isVisible = function() {
+        checkBox.show = function() {
             checkBox.element.cover.show();
             checkBox.element.box.show();
             
@@ -253,23 +365,32 @@ var raphaelPaperObjects = {
                 checkBox.element.chk.hide();
             }
             checkBox.element.label.show();
-            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isVisible'});
+            //  emit event only if already intialized
+            if(!checkBox.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'show'});
+            }
         };
 
         // checkbox is not visible
-        checkBox.isNotVisible = function() {
+        checkBox.hide = function() {
             checkBox.element.cover.hide();
             checkBox.element.box.hide();
             checkBox.element.chk.hide();
             checkBox.element.label.hide();
-            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotVisible'});
+            //  emit event only if already intialized
+            if(!checkBox.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'hide'});
+            }
         };
         
         // refresh checkbox - TO check if still needed
         checkBox.refresh = function(x) {
             if (x) { checkBox.isChecked(); }
             else { checkBox.isNotChecked(); }
-            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'refresh'});
+            //  emit event only if already intialized
+            if(!checkBox.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'refresh'});
+            }
         };
         
         // moving the checkbox
@@ -281,26 +402,349 @@ var raphaelPaperObjects = {
         // Setting the initial properties
         // is the element checked ?            
         if (checkBox.checked) {
-            checkBox.isChecked();
+            checkBox.check();
         } else {
-            checkBox.isNotChecked();
+            checkBox.uncheck();
         }
         // is the element enabled ?
         if (checkBox.enabled) {
-            checkBox.isEnabled();
+            checkBox.enable();
         } else {
-            checkBox.isNotEnabled();
+            checkBox.disable();
         }
         // is the element visible? 
         if (checkBox.visible) {
-            checkBox.isVisible();
+            checkBox.show();
         } else {
-            checkBox.isNotVisible();
+            checkBox.hide();
         }
+
+        // set to false - we have initialized the element
+        checkBox.initialize = false;
 
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = checkBox;
     },
+    // container
+    // TO DO --- add data functionality
+    container: function(obj, data)
+    {
+        let container = {
+            name: obj.name,
+            visible: (obj.isVisible == 'true') ? true : false,
+            enabled: (obj.isEnabled == 'true') ? true : false,
+            element: {},
+            conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
+            initialize: true,
+        };
+
+        // data to int
+        let dataLeft = parseInt(obj.left);
+        let dataTop = parseInt(obj.top);
+
+        // check for user input
+        if(obj.width < 50) { obj.width = 50; }
+        else if(obj.width > paper.width - 15) { obj.width = paper.width - 30; dataLeft = 15;}
+
+        if(obj.height < 50) { obj.height = 50; }
+        else if(obj.height > paper.height - 15) { obj.height = paper.height - 30; dataTop = 15; }
+
+        container.element = this.rect(dataLeft, dataTop, obj.width, obj.height).attr({fill: "#FFF", "stroke": "#d6d6d6", "stroke-width": 0.7});
+
+        // listen for events / changes
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            if(obj.name != data.name){
+                raphaelPaperObjects.conditionsChecker(data, button);
+            }
+        });
+        // Properties
+        // ===============================================================================
+        container.show = function(){
+            container.element.show();
+            //  emit event only if already intialized
+            if(!container.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: container.name, status: 'show'});
+            }
+        };
+        container.hide = function(){
+            container.element.hide();
+            //  emit event only if already intialized
+            if(!container.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: container.name, status: 'hide'});
+            }
+        };
+        container.enable = function() {
+            container.enabled = true;
+            container.element.attr({fill: "#fff", opacity: 1});
+            //  emit event only if already intialized
+            if(!container.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: container.name, status: 'enable'});
+            }
+        };
+        container.disable = function() {
+            container.enabled = false;
+            container.element.attr({fill: "#d6d6d6", opacity: 0.2});
+            //  emit event only if already intialized
+            if(!container.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: container.name, status: 'disable'});
+            }
+        };
+
+        // initialize
+        if(container.visible) { 
+            container.show();
+        } else {
+            container.hide();
+        }
+        if(container.enabled) {
+            container.enable();
+        } else {
+            container.disable();
+        }        
+        // set to false - we have initialized the element
+        container.initialize = false;
+
+        // add the element to the main list
+        raphaelPaperObjects.objList[obj.name] = container;     
+
+    },
+    // counter
+    // TO DO --- emit event on value change
+    counter: function(obj) 
+    {
+        let counter = {
+            name: obj.name,
+            visible: (obj.isVisible == 'true') ? true : false,
+            enabled: (obj.isEnabled == 'true') ? true : false,
+            value: parseInt(obj.startval),
+            element: {},
+            conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
+            initialize: true,
+        };
+
+        // obj properties
+        if (helpers.missing(obj.fontsize)) { obj.fontsize = 14; }
+        if (helpers.missing(obj.width)) { obj.width = 20; }
+        
+        let elCounter = {};      
+        
+        // data to int
+        let dataLeft = parseInt(obj.left) + 22;
+        let dataTop = parseInt(obj.top) ;
+        
+        let txtanchor = "middle";
+        
+        elCounter.textvalue = this.text(dataLeft, dataTop, "" + obj.startval)
+            .attr({"text-anchor": txtanchor, "font-size": obj.fontsize + "px"});
+        
+        elCounter.downsign = this.path([
+            ["M", dataLeft - 12 - obj.width / 2, dataTop - 6],
+            ["l", 12, 0],
+            ["l", -6, 12],
+            ["z"]
+        ]).attr({fill: "#eeeeee", "stroke-width": 1.2, stroke: "#a0a0a0"});
+        
+        elCounter.upsign = this.path([
+            ["M", dataLeft + obj.width / 2, dataTop + 6],
+            ["l", 12, 0],
+            ["l", -6, -12],
+            ["z"]
+        ]).attr({fill: "#eeeeee", "stroke-width": 1.2, stroke: "#a0a0a0"});
+        
+        elCounter.down = this.rect((dataLeft - (obj.width / 2)) - 14, dataTop - 7, 15, 15)
+            .attr({fill: "#fff", opacity: 0, stroke: "#000", "stroke-width": 1, cursor: "pointer"})
+            .click(function() {
+                if(counter.enabled) {
+                    if (counter.value > parseInt(obj.startval)) {
+                        counter.value -= 1;
+                        elCounter.textvalue.attr({"text": ("" + counter.value)});
+                        // TO DO  --- emit event ?
+                    }
+                }
+            });
+        
+        elCounter.up = this.rect((dataLeft + (obj.width / 2)) - 2, dataTop - 7, 15, 15)
+            .attr({fill: "#fff", opacity: 0, stroke: "#000", "stroke-width": 1, cursor: "pointer"})
+            .click(function() {
+                if(counter.enabled) {
+                    if (counter.value < parseInt(obj.maxval)) {
+                        counter.value += 1;
+                        elCounter.textvalue.attr({"text": ("" + counter.value)});
+                        // TO DO  --- emit event ?
+                    }
+                }
+            });
+
+        counter.element = elCounter;   
+
+        // listen for events / changes - must be declared before thee emit events
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            if(obj.name != data.name){
+                raphaelPaperObjects.conditionsChecker(data, counter);
+            }
+        }); 
+        // Properties
+        // ===============================================================================
+        counter.show = function() {
+            for (let i in counter.element){
+                counter.element[i].show();
+            }
+            //  emit event only if already intialized
+            if(!counter.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: counter.name, status: 'show'});
+            }
+        };
+        counter.hide = function() {
+            for (let i in counter.element){
+                counter.element[i].hide();
+            }
+            //  emit event only if already intialized
+            if(!counter.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: counter.name, status: 'hide'});
+            }
+        };
+
+        counter.enable = function() {
+            counter.enabled = true;
+            counter.element.textvalue.attr({fill: '#000000'});
+            counter.element.upsign.attr({fill: '#eeeeee', opacity: 1});
+            counter.element.downsign.attr({fill: '#eeeeee', opacity: 1});
+            counter.element.up.attr({'cursor': 'pointer'});
+            counter.element.down.attr({'cursor': 'pointer'});
+            //  emit event only if already intialized
+            if(!counter.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: counter.name, status: 'enable'});
+            }
+        };
+        counter.disable = function() {
+            counter.enabled = false;
+            counter.element.textvalue.attr({fill: '#bbbbbb'});
+            counter.element.upsign.attr({fill: '#000000', opacity: 0.2});
+            counter.element.downsign.attr({fill: '#000000', opacity: 0.2});
+            counter.element.up.attr({'cursor': 'default'});
+            counter.element.down.attr({'cursor': 'default'});
+            //  emit event only if already intialized
+            if(!counter.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: counter.name, status: 'disable'});
+            }
+        };
+                
+        // initial status
+        if(counter.visible) {
+            counter.show();
+        } else {
+            counter.hide();
+        }
+        if(counter.enabled) {
+            counter.enable();
+        } else {
+            counter.disable();
+        }        
+
+        // set to false - we have initialized the element
+        container.initialize = false;
+        // add the element to the main list
+        raphaelPaperObjects.objList[obj.name] = counter;
+    }, 
+    // input
+    // TO DO -- add input capabilities
+    input: function(obj)
+    {
+        let input = {
+            name: obj.name,
+            visible: (obj.isVisible == 'true') ? true : false,
+            enabled: (obj.isEnabled == 'true') ? true : false,
+            element: {},
+            conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
+            initialize: true,
+        };
+
+        // data to int
+        let dataLeft = parseInt(obj.left);
+        let dataTop = parseInt(obj.top);
+
+        let elinput = {};
+        elinput.rect = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#ffffff", "stroke": "#bbbbbb", "stroke-width": 0.7});
+        if(obj.value.trim() != '') {
+            elinput.txt = this.text(dataLeft+7, dataTop + 12, obj.value).attr({"text-anchor": "start", "font-size": 14});
+        }
+
+        elinput.cover = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#eeeeee", stroke: "none", "fill-opacity": 0, "cursor": "text"});
+        elinput.cover.click(function() 
+        {
+            // TO DO ---------------            
+
+        });
+
+        input.element = elinput;
+
+        // listen for events / changes
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            if(obj.name != data.name){
+                raphaelPaperObjects.conditionsChecker(data, input);
+            }
+        });
+        // Properties
+        // ===============================================================================
+        input.show = function(){
+            for( let i in input.element){
+                input.element[i].show();
+            }
+            //  emit event only if already intialized
+            if(!input.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: input.name, status: 'show'});
+            }
+        };
+        input.hide = function(){
+            for( let i in input.element){
+                input.element[i].hide();
+            }
+            //  emit event only if already intialized
+            if(!input.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: input.name, status: 'hide'});
+            }
+        };
+        input.enable = function() {
+            input.enabled = true;
+            // input.element.rect.attr({fill: "#f9f9f9", opacity: 1});
+            // input.element.txt.attr({opacity: 1});
+            // input.element.cover.attr({'cursor': 'pointer'});
+            //  emit event only if already intialized
+            if(!input.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: input.name, status: 'enable'});
+            }
+        };
+        input.disable = function() {
+            input.enabled = false;
+            // input.element.rect.attr({fill: "#000", opacity: 0.2});
+            // input.element.txt.attr({opacity: 0.2});
+            // input.element.cover.attr({'cursor': 'default'});
+            //  emit event only if already intialized
+            if(!input.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: input.name, status: 'disable'});
+            }
+        };
+
+        // initialize
+        if(input.visible) { 
+            input.show();
+        } else {
+            input.hide();
+        }
+        if(input.enabled) {
+            input.enable();
+        } else {
+            input.disable();
+        }        
+        // set to false - we have initialized the element
+        input.initialize = false;
+
+        // add the element to the main list
+        raphaelPaperObjects.objList[obj.name] = input;
+    },       
     // label
     label: function(obj)
     {
@@ -543,233 +987,6 @@ var raphaelPaperObjects = {
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = radio;        
     },
-    // counter
-    // TO DO --- event on value change
-    counter: function(obj) 
-    {
-        // listen for events / changes - must be declared before thee emit events
-        raphaelPaperObjects.events.on('iSpeak', function(data)
-        {
-            if(obj.name != data.name){
-                raphaelPaperObjects.conditionsChecker(data, counter);
-            }
-        });
-
-        let counter = {
-            name: obj.name,
-            visible: (obj.isVisible == 'true') ? true : false,
-            enabled: (obj.isEnabled == 'true') ? true : false,
-            value: parseInt(obj.startval),
-            element: {},
-            conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
-        };
-
-        // obj properties
-        if (helpers.missing(obj.fontsize)) { obj.fontsize = 14; }
-        if (helpers.missing(obj.width)) { obj.width = 20; }
-        
-        let elCounter = {};      
-        
-        // data to int
-        let dataLeft = parseInt(obj.left) + 22;
-        let dataTop = parseInt(obj.top) ;
-        
-        let txtanchor = "middle";
-        
-        elCounter.textvalue = this.text(dataLeft, dataTop, "" + obj.startval)
-            .attr({"text-anchor": txtanchor, "font-size": obj.fontsize + "px"});
-        
-        elCounter.downsign = this.path([
-            ["M", dataLeft - 12 - obj.width / 2, dataTop - 6],
-            ["l", 12, 0],
-            ["l", -6, 12],
-            ["z"]
-        ]).attr({fill: "#eeeeee", "stroke-width": 1.2, stroke: "#a0a0a0"});
-        
-        elCounter.upsign = this.path([
-            ["M", dataLeft + obj.width / 2, dataTop + 6],
-            ["l", 12, 0],
-            ["l", -6, -12],
-            ["z"]
-        ]).attr({fill: "#eeeeee", "stroke-width": 1.2, stroke: "#a0a0a0"});
-        
-        elCounter.down = this.rect((dataLeft - (obj.width / 2)) - 14, dataTop - 7, 15, 15)
-            .attr({fill: "#fff", opacity: 0, stroke: "#000", "stroke-width": 1, cursor: "pointer"})
-            .click(function() {
-                if(counter.enabled) {
-                    if (counter.value > parseInt(obj.startval)) {
-                        counter.value -= 1;
-                        elCounter.textvalue.attr({"text": ("" + counter.value)});
-                    }
-                }
-            });
-        
-        elCounter.up = this.rect((dataLeft + (obj.width / 2)) - 2, dataTop - 7, 15, 15)
-            .attr({fill: "#fff", opacity: 0, stroke: "#000", "stroke-width": 1, cursor: "pointer"})
-            .click(function() {
-                if(counter.enabled) {
-                    if (counter.value < parseInt(obj.maxval)) {
-                        counter.value += 1;
-                        elCounter.textvalue.attr({"text": ("" + counter.value)});
-                    }
-                }
-            });
-
-        counter.element = elCounter;    
-        // Properties
-        // ===============================================================================
-        counter.isVisible = function() {
-            for (let i in counter.element){
-                counter.element[i].show();
-            }
-            raphaelPaperObjects.events.emit('iSpeak', {name: counter.name, status: 'isVisible'});
-        };
-        counter.isNotVisible = function() {
-            for (let i in counter.element){
-                counter.element[i].hide();
-            }
-            raphaelPaperObjects.events.emit('iSpeak', {name: counter.name, status: 'isNotVisible'});
-        };
-
-        counter.isEnabled = function() {
-            counter.enabled = true;
-            counter.element.textvalue.attr({fill: '#000000'});
-            counter.element.upsign.attr({fill: '#eeeeee', opacity: 1});
-            counter.element.downsign.attr({fill: '#eeeeee', opacity: 1});
-            counter.element.up.attr({'cursor': 'pointer'});
-            counter.element.down.attr({'cursor': 'pointer'});
-            raphaelPaperObjects.events.emit('iSpeak', {name: counter.name, status: 'isEnabled'});
-        };
-        counter.isNotEnabled = function() {
-            counter.enabled = false;
-            counter.element.textvalue.attr({fill: '#bbbbbb'});
-            counter.element.upsign.attr({fill: '#000000', opacity: 0.2});
-            counter.element.downsign.attr({fill: '#000000', opacity: 0.2});
-            counter.element.up.attr({'cursor': 'default'});
-            counter.element.down.attr({'cursor': 'default'});
-            raphaelPaperObjects.events.emit('iSpeak', {name: counter.name, status: 'isNotEnabled'});
-        };
-                
-        // initial status
-        if(counter.visible){
-            counter.isVisible();
-        } else {
-            counter.isNotVisible();
-        }
-        if(counter.enabled){
-            counter.isEnabled();
-        } else {
-            counter.isNotEnabled();
-        }        
-
-        // add the element to the main list
-        raphaelPaperObjects.objList[obj.name] = counter;
-    },
-    // button
-    // TO DO --- click event ??? do we need this
-    button: function(obj)
-    {
-        // listen for events / changes - must be declared before thee emit events
-        raphaelPaperObjects.events.on('iSpeak', function(data)
-        {
-            if(obj.name != data.name){
-                raphaelPaperObjects.conditionsChecker(data, button);
-            }
-        });
-
-        let button = {
-            name: obj.name,
-            visible: (obj.isVisible == 'true') ? true : false,
-            enabled: (obj.isEnabled == 'true') ? true : false,
-            element: {},
-            conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
-        };
-
-        // data to int
-        let dataLeft = parseInt(obj.left);
-        let dataTop = parseInt(obj.top);
-
-        // temporary element to get the button's width
-        let labelT = this.text(dataLeft, dataTop, obj.label).attr({"text-anchor": "middle", "font-size": 14});
-        let lBBox = labelT.getBBox();
-        labelT.remove();
-
-        let elButton = {};
-        elButton.rect = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#f9f9f9", "stroke": "#eeeeee", "stroke-width": 0.7});
-        elButton.txt = this.text(dataLeft+10, dataTop + ((Math.round(lBBox.height) / 2) + 5), obj.label).attr({"text-anchor": "start", "font-size": 14});
-
-        elButton.cover = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#eeeeee", stroke: "none", "fill-opacity": 0, "cursor": "pointer"});
-        elButton.cover.click(function() 
-        {
-            // TO DO ---------------            
-            if(button.enabled) {
-                alert('clicked');
-            }
-        });
-
-        button.element = elButton;
-        
-        // Properties
-        // ===============================================================================
-        button.isVisible = function(){
-            for( let i in button.element){
-                button.element[i].show();
-            }
-            raphaelPaperObjects.events.emit('iSpeak', {name: button.name, status: 'isVisible'});
-        };
-        button.isNotVisible = function(){
-            for( let i in button.element){
-                button.element[i].hide();
-            }
-            raphaelPaperObjects.events.emit('iSpeak', {name: button.name, status: 'isNotVisible'});
-        };
-        button.isEnabled = function() {
-            button.enabled = true;
-            button.element.rect.attr({fill: "#f9f9f9", opacity: 1});
-            button.element.txt.attr({opacity: 1});
-            button.element.cover.attr({'cursor': 'pointer'});
-            raphaelPaperObjects.events.emit('iSpeak', {name: button.name, status: 'isEnabled'});
-        };
-        button.isNotEnabled = function() {
-            button.enabled = false;
-            button.element.rect.attr({fill: "#000", opacity: 0.2});
-            button.element.txt.attr({opacity: 0.2});
-            button.element.cover.attr({'cursor': 'default'});
-            raphaelPaperObjects.events.emit('iSpeak', {name: button.name, status: 'isNotEnabled'});
-        }
-
-        // initial status
-        if(button.visible){
-            button.isVisible();
-        } else {
-            button.isNotVisible();
-        }
-        if(button.enabled){
-            button.isEnabled();
-        } else {
-            button.isNotEnabled();
-        }        
-
-        // add the element to the main list
-        raphaelPaperObjects.objList[obj.name] = button;
-    },
-    // container
-    container: function(obj)
-    {
-        // data to int
-        let dataLeft = parseInt(obj.left);
-        let dataTop = parseInt(obj.top);
-
-        // check for user input
-        if(obj.width < 50) { obj.width = 50; }
-        else if(obj.width > paper.width - 15) { obj.width = paper.width - 30; dataLeft = 15;}
-
-        if(obj.height < 50) { obj.height = 50; }
-        else if(obj.height > paper.height - 15) { obj.height = paper.height - 30; dataTop = 15; }
-
-        this.rect(dataLeft, dataTop, obj.width, obj.height).attr({fill: "#FFF", "stroke": "#d6d6d6", "stroke-width": 0.7});
-
-    },
     // select
     select: function(obj, list, eventMe)
     {
@@ -900,158 +1117,10 @@ var raphaelPaperObjects = {
     // Conditions =================================================================
     conditionsParser: function(str)
     {
-        let response = {};
-        
-        // if no conditions return
-        if(str.length == 0) { return Object.assign({}, response); }
-
-        // to be safe
-        str.trim();
-
-        // geting conditions (Array)
-        let conditions = str.split(';');
-        // remove the last element as is going to be an empty string
-        conditions.pop();
-
-        // if conditions is empty there is a problem with the string
-        if(conditions.length == 0) { return Object.assign({}, response); }
-        
-        for( let i=0; i < conditions.length; i++) 
-        {                        
-            // trim for spaces and newlines
-            let one = conditions[i].trim().split('=');
-            
-            // check for valid propertie
-            if(! raphaelPaperObjects.conditions.includes(one[0])){ continue; }
-            
-            // geting the & conditions
-            let a = one[1].split('&');
-            let b = {};
-            let respondTo = [];
-            
-            if(a.length == 1) { // we do not have & conditions                
-                // checking for |
-                b.condition1 = a[0].split('|');
-                // getting elements name
-                b.condition1.forEach((element) => {
-                    let el = element.split(':')[0];
-                    if(!respondTo.includes(el)) {
-                        respondTo.push(el);
-                    }
-                });
-            } else if(a.length > 1){
-                for(let i = 0; i < a.length; i++){ // we have & conditions
-                    // checking for |
-                    b['condition' + (i + 1)] = a[i].split('|');
-                    // getting element name
-                    b['condition' + (i + 1)].forEach((element) => {
-                        let el = element.split(':')[0];
-                        if(!respondTo.includes(el)) {
-                            respondTo.push(el);
-                        }
-                    });
-                }
-            }
-
-            // propertie = conditions
-            response[one[0]] = b;
-            response.elements = respondTo;
-        }
-        console.log(response);
-        
-        return Object.assign({}, response);
+        return {};
     },
     conditionsChecker: function(data, raphaelObject)
     {
-        let cToCheck = data.name + ':' + data.status;
-
-        // do we have elements? Is the element that speak affecting me?
-        if(raphaelObject.conditions.hasOwnProperty('elements')) 
-        {            
-            let callMethod = [];
-
-            // checking for true methods
-            for( let condition in raphaelObject.conditions) 
-            {
-                // console.log('Logging conditions ---------');
-                // console.log(raphaelObject.conditions);
-                
-                // skip elements list
-                if(condition == 'elements'){ continue; }
-                
-                let search = false;
-                let noEl = 0;
-                // current action/condition is part of the conditions?
-                for ( let e in raphaelObject.conditions[condition]) {
-                    if(raphaelObject.conditions[condition][e].includes(cToCheck)) {
-                        search = true;
-                    } 
-                    //counting conditions in object
-                    noEl++;
-                }
-                    
-                // if we found the condition and is the only one
-                if( search && noEl == 1) 
-                {
-                    callMethod.push({ method: condition, is: true });   
-                    
-                } else 
-                // we found the condition but we have also other conditions    
-                if(search && noEl > 1) 
-                { 
-                    let allConditions = [];
-                    for ( let e in raphaelObject.conditions[condition]) {
-                        
-                        if(raphaelObject.conditions[condition][e].includes(cToCheck)) {
-                            allConditions.push(true);
-                        } else {
-                            // for every condition element
-                            raphaelObject.conditions[condition][e].forEach(function(element)
-                            {
-                                let checkingFor = element.split(':');  
-                             
-                                // do we have the element ?
-                                if(raphaelPaperObjects.objList[checkingFor[0]] != void 0) 
-                                {
-                                    // call the element to check status of property
-                                    allConditions.push(raphaelPaperObjects.askElement(checkingFor[0], checkingFor[1]));
-                                } else {
-                                    // element not found | probably wrong name
-                                    allConditions.push(false);
-                                }
-                            });
-                        }
-                    } 
-                    let b = false;
-                    if(allConditions.length > 0){
-                        b = allConditions.every(function(element){
-                            return element;
-                        });
-                    }
-                    console.log(b);
-                    
-                    // set method
-                    callMethod.push({ method: condition, is: b });
-                } else {
-                    // we have not found the current condition
-                    callMethod.push({ method: condition, is: false });
-                }                    
-            }
-            // console.log(callMethod);
-            
-            // call the methods if we have any
-            if( Array.isArray(callMethod) ){
-                callMethod.forEach(function(element)
-                {
-                    // let methodName = element.method.toLowerCase();
-                    if(element.is && (raphaelObject[element.method] != void 0)) {
-                        // call the method                        
-                        raphaelObject[element.method]();
-                    }
-                    
-                });
-            }
-        }
         return false;
     }
 

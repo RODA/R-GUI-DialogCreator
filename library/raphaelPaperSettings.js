@@ -20,11 +20,11 @@ var raphaelPaperSettings = {
     
     button: { parentId: '', type: 'Button', name: 'button1', label: "My Button", left: '15', top: '15', isVisible: 'true', isEnabled: 'true', elementIds: [], conditions: ''},
     
-    container: { parentId: '', type: 'Container', name: 'container1', objViewClass: 'variable', width: 150, height: 200, left: '15', top: '15', isVisible: 'true', elementIds: [], conditions: ''},
+    container: { parentId: '', type: 'Container', name: 'container1', objViewClass: 'variable', width: 150, height: 200, left: '15', top: '15', isVisible: 'true', isEnabled: 'true', elementIds: [], conditions: ''},
     
-    select: { parentId: '', type: 'Select', name: 'select1', 'width': 120, label: "My Select", left: '15', top: '15', isVisible: 'true', elementIds: [], conditions: ''},
+    select: { parentId: '', type: 'Select', name: 'select1', 'width': 120, label: "My Select", left: '15', top: '15', isVisible: 'true', isEnabled: 'true', elementIds: [], conditions: ''},
     
-    input: { parentId: '', type: 'Input', name: 'input1', 'width': 120, left: '15', top: '15', isVisible: 'true', value: '', elementIds: [], conditions: ''},
+    input: { parentId: '', type: 'Input', name: 'input1', 'width': 120, left: '15', top: '15', isVisible: 'true', isEnabled: 'true', value: '', elementIds: [], conditions: ''},
 
     
 

@@ -121,7 +121,7 @@ var raphaelPaper = {
         data.elementIds = [];
         
         // checking if we have all properties
-        if( helpers.hasSameProps( this.settings[data.type.toLowerCase()], data )){
+        if( helpers.hasProps( this.settings[data.type.toLowerCase()], data )){
             
             // checking for duplicate names - add to HTML constrain only chars and numbers
             if(data.hasOwnProperty('name')) {
