@@ -9,6 +9,7 @@
 #conditions{
     width: 99%;
     height: 190px;
+    resize: none;
 }
 #saveConditions:focus{
     outline: none;
@@ -34,4 +35,7 @@
 #errors span{
     color:red;
     font-weight: 600;
+}
+#errors {
+    margin-bottom: 0px;
 }

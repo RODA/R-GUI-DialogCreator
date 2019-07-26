@@ -118,11 +118,14 @@ $(document).ready(function(){
 
         clearProps();
     });
+
+    // adding / removing an elements conditions
     $('#conditions').on('click', function(){
-        let name = $('#elname').val();
         let id = $('#elparentId').val();
-        ipcRenderer.send('conditionsData', {'name': name, 'id': id});
+        let element = raphaelPaper.getElementFromContainer(id);
+        ipcRenderer.send('conditionsData', {'id': id, 'name': element.name, 'conditions': element.conditions});
     });
+    
     // Paper Events ========================================
     // show element properties
     raphaelPaper.paperEvents.on('getEl', function(element) {

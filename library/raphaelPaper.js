@@ -225,6 +225,10 @@ var raphaelPaper = {
     returnConditionStatus: function(data){
         return container.validateConditions(data);
     },
+    // getElementFromContainer
+    getElementFromContainer: function(id){
+        return container.getElement(id);
+    }
 };
 
 module.exports = raphaelPaper;

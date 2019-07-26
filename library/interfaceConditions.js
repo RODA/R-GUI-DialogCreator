@@ -5,6 +5,7 @@ $(document).ready(function(){
     ipcRenderer.on('conditionsData', (event, args) => {
         $('#conditionsId').val(args.id);
         $('#conditionsName').val(args.name);
+        $('#conditions').val(args.conditions);
     });
 
     $('#saveConditions').on('click', function(){

@@ -2,12 +2,14 @@ const container = {
 
     properties: {}, 
     elements: {},
+    dialogRun:{},
 
     // paper properties: name, title, width, height
     initialize: function(obj) 
     {
         this.properties = Object.assign({},obj);
         this.elements = {};
+        this.dialogRun = {};
     },
     
     // update paper props
@@ -31,6 +33,8 @@ const container = {
     // return an element by ID
     getElement: function(elId)
     {
+        console.log(this.elements);
+        
         return this.elements[elId];
     },
 
@@ -134,10 +138,24 @@ const container = {
         }
         return false;    
     },
+    // validate conditions and add them to the element
     validateConditions : function(data)
     {
-        // TO DO - parse conditions
-        return true;
+        // we received the data
+        if(data.id !== void 0 & data.conditions != void 0 & data.name != void 0)
+        {
+            // let's check if we have the element
+            if(this.elements[data.id] !== void 0){
+                // TO DO - parse conditions before adding them
+                let isOK = true;
+                if(isOK) {
+                    this.elements[data.id].conditions = data.conditions;
+                    // data saved - return true
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 };
 

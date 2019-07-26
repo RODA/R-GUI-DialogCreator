@@ -129,7 +129,7 @@ function createConditionswWindow(arg)
             nodeIntegration: true
         },
         width: 640,
-        height: 400,
+        height: 380,
         title: arg.name+' condtitions',
         autoHideMenuBar: true,
         parent: mainWindow,

@@ -155,7 +155,7 @@ var raphaelPaperElements = {
         if( this.isObject(data) ) 
         {    
             // data to int
-            let dataLeft = parseInt(data.left) + 22;
+            let dataLeft = parseInt(data.left) + 24;
             let dataTop = parseInt(data.top) + 8;
 
             var txtanchor = "middle";
