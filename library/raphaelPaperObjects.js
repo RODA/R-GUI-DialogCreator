@@ -654,6 +654,7 @@ var raphaelPaperObjects = {
     {
         let input = {
             name: obj.name,
+            value: obj.value,
             visible: (obj.isVisible == 'true') ? true : false,
             enabled: (obj.isEnabled == 'true') ? true : false,
             element: {},
@@ -748,70 +749,67 @@ var raphaelPaperObjects = {
     // label
     label: function(obj)
     {
-        // listen for events / changes - must be declared before thee emit events
-        raphaelPaperObjects.events.on('iSpeak', function(data)
-        {
-            if(obj.name != data.name){
-                raphaelPaperObjects.conditionsChecker(data, label);
-            }
-        });
-
         let label = {
             name: obj.name,
             visible: (obj.isVisible == 'true') ? true : false,
             element: {},
             conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
+            initialize: true,
         };
 
         // TO DO check if properties exists - we need this for import/open dialogs
-        label.element = this.text(obj.left, obj.top, obj.text).attr({fill: '#000', "font-size": obj.fontSize, 'text-anchor': 'start'});
+        label.element = this.text(obj.left, obj.top, obj.text).attr({'fill': '#000000', "font-size": obj.fontSize, 'text-anchor': 'start'});
      
+        // listen for events / changes
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            console.log(data);
+            
+            if(obj.name != data.name){
+                raphaelPaperObjects.conditionsChecker(data, label);
+            }
+        });
         // Properties
         // ===============================================================================
-        label.isVisible = function() {
+        label.show = function() {
             this.element.show();
-            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isVisible'});
+            //  emit event only if already intialized
+            if(!label.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'show'});
+            }
         };
-        label.isNotVisible = function() {
+        label.hide = function() {
             this.element.hide();
-            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotVisible'});
+            //  emit event only if already intialized
+            if(!label.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'hide'});
+            }
         };
 
         // initial status
         if(label.visible){
-            label.isVisible();
+            label.show();
         } else {
-            label.isNotVisible();
+            label.hide();
         }
 
+        // set to false - we have initialized the element
+        label.initialize = false;
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = label;
     },
     // separator
     separator: function(obj)
     {
-        // listen for events / changes - must be declared before thee emit events
-        raphaelPaperObjects.events.on('iSpeak', function(data)
-        {
-            if(obj.name != data.name){
-                console.log(data.name);
-                raphaelPaperObjects.conditionsChecker(data, separator);
-            }
-        });
+        // return if the received object is not corect;
+        if(!helpers.hasSameProps(raphaelPaperSettings[obj.type], obj)) { return false; }
 
         let separator = {
             name: obj.name,
             visible: (obj.isVisible == 'true') ? true : false,
             element: {},
             conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
-            isVisible: function() {
-                this.element.show();
-                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isVisible'});
-            },
-            isNotVisible: function() {
-                this.element.hide();
-                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotVisible'});
-            }
+            initialize: true,
         };
 
         // TO DO check if properties exists - we need this for import/open dialogs
@@ -828,28 +826,45 @@ var raphaelPaperObjects = {
             separator.element = this.path("M" + obj.left + " " + obj.top + "L" + obj.left + " " + v).attr({stroke: "#ccc"});
         }
 
+        // listen for events / changes
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            if(obj.name != data.name){
+                raphaelPaperObjects.conditionsChecker(data, separator);
+            }
+        });
+        // Properties
+        // ===============================================================================
+        separator.show = function() {
+            this.element.show();
+            //  emit event only if already intialized
+            if(!separator.initialize) {            
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'show'});
+            }
+        };
+        separator.hide = function() {
+            this.element.hide();
+            //  emit event only if already intialized
+            if(!separator.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'hide'});
+            }
+        };
+
         // initial status
         if(separator.visible){
-            separator.isVisible();
+            separator.show();
         } else {
-            separator.isNotVisible();
+            separator.hide();
         }
 
+        // set to false - we have initialized the element
+        separator.initialize = false;
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = separator;
     },
     // radio
     radio: function(radios, obj) 
     {
-        // listen for events / changes - must be declared before thee emit events
-        raphaelPaperObjects.events.on('iSpeak', function(data)
-        {
-            if(obj.name != data.name){
-                console.log(data.name);
-                raphaelPaperObjects.conditionsChecker(data, radio);
-            }
-        });
-
         let radio = {
             name: obj.name,
             group: obj.radioGroup,
@@ -858,6 +873,7 @@ var raphaelPaperObjects = {
             selected: (obj.isSelected == 'true') ? true : false,
             element: {},
             conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
+            initialize: true,
         };
         
         if (helpers.missing(obj.size)) { obj.size = 7; }
@@ -917,20 +933,26 @@ var raphaelPaperObjects = {
                 {           
                     if(index == indexEl){
                         element.show();
-                        raphaelPaperObjects.events.emit('clicked', element[0].data('elementName'));
+                        // element[0].data('elementName')
+                        raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'select'});
                     }else{
                         element.hide();
-                        raphaelPaperObjects.events.emit('unClicked', element[0].data('elementName'));
+                        raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'deselect'});
                     }
                 });
             }
         });
 
-
-
+        // listen for events / changes
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            if(obj.name != data.name){
+                raphaelPaperObjects.conditionsChecker(data, radio);
+            }
+        });
         // Properties
         // ===============================================================================
-        radio.isVisible = function() {
+        radio.show = function() {
             radios[radio.group].fill.forEach(function(element, index) {                                       
                 if(index == radio.index) {
                     element.show();
@@ -938,52 +960,72 @@ var raphaelPaperObjects = {
                     element.hide();
                 }
             });
-            raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'isVisible'});
+            //  emit event only if already intialized
+            if(!radio.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'show'});
+            }
         };
-        radio.isNotVisible = function() {
+        radio.hide = function() {
             radios[radio.group].fill.forEach(function(element, index) {                                       
                 if(index == radio.index){
                     element.hide();
                 }
             });
-            raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'isNotVisible'});
+            //  emit event only if already intialized
+            if(!radio.initialize) {            
+                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'hide'});
+            }
         };
 
-        radio.isEnabled = function() {
+        radio.enable = function() {
             radio.enabled = true;
+            //  emit event only if already intialized
+            if(!radio.initialize) {            
+                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'enable'});
+            }
         };
-        radio.isNotEnabled = function() {
+        radio.disable = function() {
             radio.enabled = false;
-
+            //  emit event only if already intialized
+            if(!radio.initialize) {            
+                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'disable'});
+            }
         };
 
-        radio.isSelected = function() {
+        radio.select = function() {
             radios[radio.group].fill[radio.index].show();
-            raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'isSelected'});
+            //  emit event only if already intialized
+            if(!radio.initialize) {            
+                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'select'});
+            }
         };
-        radio.isNotSelected = function() {
+        radio.deselect = function() {
             radios[radio.group].fill[radio.index].hide();
-            raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'isNotSelected'});
+            //  emit event only if already intialized
+            if(!radio.initialize) {            
+                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'deselect'});
+            }
         };
-
 
         // initial status
         if(radio.visible){
-            radio.isVisible();
+            radio.show();
         } else {
-            radio.isNotVisible();
+            radio.hide();
         }
         if(radio.enabled){
-            radio.isEnabled();
+            radio.enable();
         } else {
-            radio.isNotEnabled();
+            radio.disable();
         }        
         if(radio.selected){
-            radio.isSelected();
+            radio.select();
         } else {
-            radio.isNotSelected();
+            radio.deselect();
         }        
 
+        // set to false - we have initialized the element
+        radio.initialize = false;
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = radio;        
     },
