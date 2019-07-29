@@ -32,9 +32,7 @@ const container = {
 
     // return an element by ID
     getElement: function(elId)
-    {
-        console.log(this.elements);
-        
+    {       
         return this.elements[elId];
     },
 

@@ -4,7 +4,7 @@
 var textbox = {
     value: 1,
 
-}
+};
 
 var checkbox = {
     checked: true,
@@ -13,7 +13,7 @@ var checkbox = {
     check: function() { this.checked = true; },
     uncheck: function() { this.checked = false; },
 
-}
+};
 
 
 // var str = 'check if textbox1 == 4 & eee | ( checkbox1 isChecked | checkbox2 !isChecked) | checkbox3 isVisible; check if textbox1 = 4 & ( checkbox1 isChecked | checkbox2 !isChecked) | checkbox3 isVisible';
@@ -184,7 +184,7 @@ function getPositions(str)
 function logicOperatorParser(str)
 {
 
-    let response = {}
+    let response = {};
     let a = str.split('&');
     if(a.length == 1) {
         a = str.split('|');
@@ -196,7 +196,7 @@ function logicOperatorParser(str)
     for(let i = 0; i < a.length; i ++){
         response.push(a[i].split('|'));
     }
-    return res
+    return res;
 }
 
 // ===========================

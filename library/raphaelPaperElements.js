@@ -80,16 +80,13 @@ var raphaelPaperElements = {
             var txtanchor = "start";
             var xpos = parseInt(data.left);
             var ypos = dataTop;
-            var dim = 12;
-            
-            // console.log(data);
-            
+            var dim = 12;            
 
             // label is to the right
             xpos += 20;
             ypos += dim / 2;
             let label = paper.text(xpos, ypos, data.label).attr({"text-anchor": txtanchor, "font-size": "12px"});
-            let square = paper.rect(parseInt(data.left), dataTop, dim, dim).attr({fill: (data.isChecked === 'true') ? "#97bd6c" : "#eeeeee","stroke-width": 1.2, stroke: "#a0a0a0"});
+            let square = paper.rect(parseInt(data.left), dataTop, dim, dim).attr({fill: (data.isChecked === 'true') ? "#97bd6c" : "#eeeeee","stroke-width": 1, stroke: "#a0a0a0"});
             let checked;
 
             if(data.isChecked === 'true'){
@@ -101,7 +98,7 @@ var raphaelPaperElements = {
             }
 
             if(data.isEnabled == 'false') {
-                square.attr({fill: "#000", opacity: 0.2});
+                square.attr({fill: "#aaaaaa", 'stroke': '#666666'});
             }
 
             let set = paper.set();
@@ -132,6 +129,12 @@ var raphaelPaperElements = {
             let circle = paper.circle(dataLeft, dataTop, 7).attr({fill: "#eeeeee", "stroke": "#a0a0a0", "stroke-width": 1.2});
 
             let set = paper.set();
+            
+            if(data.isEnabled === 'false')
+            {
+                circle.attr({fill: "#6c757d", "stroke": "#a0a0a0", "stroke-width": 1.2});
+                label.attr({fill: '#6c757d'});
+            }
             
             if(data.isSelected === 'true')
             {
@@ -167,7 +170,6 @@ var raphaelPaperElements = {
             let textvalue = paper.text(dataLeft, dataTop, "" + data.startval)
                 .attr({"text-anchor": txtanchor, "font-size": "14px"});
             
-            
             let downsign = paper.path([
                 ["M", dataLeft - 12 - parseInt(data.width) / 2, dataTop - 5],
                 ["l", 12, 0],
@@ -188,6 +190,12 @@ var raphaelPaperElements = {
             // let up = paper.rect(dataLeft + 8, dataTop - 8, 15, 15)
             //     .attr({fill: "#fff", opacity: 0, stroke: "#000", "stroke-width": 1, cursor: "pointer"});
 
+            if(data.isEnabled == 'false') {
+                textvalue.attr({fill: '#bbbbbb'});
+                upsign.attr({fill: '#000000', opacity: 0.2});
+                downsign.attr({fill: '#000000', opacity: 0.2});
+            }
+            
             let set = paper.set();
             
             set.push( textvalue, downsign, upsign);
@@ -246,8 +254,12 @@ var raphaelPaperElements = {
             if(data.height < 50) { data.height = 50; }
             else if(data.height > paper.height - 15) { data.height = paper.height - 30; dataTop = 15; }
 
-            return paper.rect(dataLeft, dataTop, data.width, data.height).attr({fill: "#FFF", "stroke": "#d6d6d6", "stroke-width": 0.7});
+            let rect = paper.rect(dataLeft, dataTop, data.width, data.height).attr({fill: "#ffffff", "stroke": "#d6d6d6", "stroke-width": 1});
 
+            if(data.isEnabled == 'false'){
+                rect.attr({fill: "#eeeeee"});
+            }
+            return rect;
         } else {
             return;
         }
@@ -273,6 +285,11 @@ var raphaelPaperElements = {
             ["z"]
         ]).attr({fill: "#000000", "stroke-width": 0});
 
+        // if select is disable
+        if(data.isEnabled == 'false'){
+            rect.attr({fill: "#000", opacity: 0.2});
+            downsign.attr({opacity:0.5});
+        }
 
         let set = paper.set();
         set.push(rect, downsign);

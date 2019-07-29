@@ -120,8 +120,11 @@ var raphaelPaper = {
         // reset/add data elementIts
         data.elementIds = [];
         
+        // if element does not have conditions add them
+        if(data.conditions == void 0) { data.conditions = ''; }
+
         // checking if we have all properties
-        if( helpers.hasProps( this.settings[data.type.toLowerCase()], data )){
+        if( helpers.hasSameProps( this.settings[data.type.toLowerCase()], data )){
             
             // checking for duplicate names - add to HTML constrain only chars and numbers
             if(data.hasOwnProperty('name')) {

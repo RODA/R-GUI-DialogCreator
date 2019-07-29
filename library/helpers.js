@@ -28,20 +28,7 @@ var helpers = {
         }
         return false;
     },
-    // This function ignores the elemnts 'conditions' propertie
-    hasProps: function( obj1, obj2 ) {
-        var obj1Props = Object.keys( obj1 ),
-            obj2Props = Object.keys( obj2 );
-    
-        if ( obj1Props.length == obj2Props.length + 1 ) {
-            return obj1Props.every( function( prop ) {
-                if(prop == 'conditions'){ return true; }
-                return obj2Props.indexOf( prop ) >= 0;
-            });
-        }
-        return false;
-    },
-    
+        
     rep: function(rule, times) {
         var result = new Array(times);
         for (var i = 0; i < times; i++) {

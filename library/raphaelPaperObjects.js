@@ -53,10 +53,10 @@ var raphaelPaperObjects = {
                 this.radio.call(this.paper, this.radios, obj);
                 break;
             case "label": 
-                this.label.call(this.paper, obj);
+                this.label.call(this.paper, obj, elType);
                 break;
             case "separator": 
-                this.separator.call(this.paper, obj);
+                this.separator.call(this.paper, obj, elType);
                 break;
             case "counter": 
                 this.counter.call(this.paper, obj);
@@ -65,7 +65,7 @@ var raphaelPaperObjects = {
                 this.container.call(this.paper, obj);
                 break;
             case "select": 
-                this.select.call(this.paper, obj, ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5'], new EventEmitter());
+                this.select.call(this.paper, obj, elType, new EventEmitter(), ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5']);
                 break;
         }
     },
@@ -217,7 +217,7 @@ var raphaelPaperObjects = {
 
         if (helpers.missing(obj.label)) { obj.label = ""; }
 
-        if (helpers.missing(obj.pos)) { obj.pos = 5; }
+        if (helpers.missing(obj.pos)) { obj.pos = 3; }
 
         if (helpers.missing(obj.dim)) { obj.dim = 12; }
 
@@ -261,7 +261,7 @@ var raphaelPaperObjects = {
         // the label
         cbElement.label = this.text(xpos, ypos, obj.label).attr({"text-anchor": txtanchor, "font-size": (obj.fontsize + "px")});
         // the box
-        cbElement.box = this.rect(parseInt(obj.left), parseInt(obj.top), obj.dim, obj.dim).attr({fill: (checkBox.checked)?"#97bd6c":"#eeeeee","stroke-width": 1.2, stroke: "#a0a0a0"});
+        cbElement.box = this.rect(parseInt(obj.left), parseInt(obj.top), obj.dim, obj.dim).attr({fill: (checkBox.checked)?"#97bd6c":"#eeeeee","stroke-width": 1, stroke: "#a0a0a0"});
         // the checked 
         cbElement.chk = this.path([
             ["M", parseInt(obj.left) + 0.2*obj.dim, parseInt(obj.top) + 0.3*obj.dim],
@@ -313,7 +313,8 @@ var raphaelPaperObjects = {
         checkBox.enable = function() {
             checkBox.enabled = true;
             checkBox.element.cover.active = true;
-            checkBox.element.cover.attr({fill: "#000", opacity: 0, cursor: "pointer"});
+            checkBox.element.cover.attr({cursor: "pointer"});
+            cbElement.box.attr({fill: "#eeeeee", 'stroke': '#a0a0a0'});
             //  emit event only if already intialized
             if(!checkBox.initialize) {
                 raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'enable'});
@@ -323,7 +324,8 @@ var raphaelPaperObjects = {
         checkBox.disable = function() {
             checkBox.enabled = false;
             checkBox.element.cover.active = false;
-            checkBox.element.cover.attr({fill: "#000", opacity: 0.2, cursor: "default"});
+            checkBox.element.cover.attr({cursor: "default"});
+            cbElement.box.attr({fill: "#aaaaaa", 'stroke': '#666666'});
             //  emit event only if already intialized
             if(!checkBox.initialize) {
                 raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'disable'});
@@ -449,7 +451,7 @@ var raphaelPaperObjects = {
         if(obj.height < 50) { obj.height = 50; }
         else if(obj.height > paper.height - 15) { obj.height = paper.height - 30; dataTop = 15; }
 
-        container.element = this.rect(dataLeft, dataTop, obj.width, obj.height).attr({fill: "#FFF", "stroke": "#d6d6d6", "stroke-width": 0.7});
+        container.element = this.rect(dataLeft, dataTop, obj.width, obj.height).attr({fill: "#ffffff", "stroke": "#d6d6d6", "stroke-width": 1});
 
         // listen for events / changes
         raphaelPaperObjects.events.on('iSpeak', function(data)
@@ -476,7 +478,7 @@ var raphaelPaperObjects = {
         };
         container.enable = function() {
             container.enabled = true;
-            container.element.attr({fill: "#fff", opacity: 1});
+            container.element.attr({fill: "#fff"});
             //  emit event only if already intialized
             if(!container.initialize) {
                 raphaelPaperObjects.events.emit('iSpeak', {name: container.name, status: 'enable'});
@@ -484,7 +486,7 @@ var raphaelPaperObjects = {
         };
         container.disable = function() {
             container.enabled = false;
-            container.element.attr({fill: "#d6d6d6", opacity: 0.2});
+            container.element.attr({fill: "#eeeeee"});
             //  emit event only if already intialized
             if(!container.initialize) {
                 raphaelPaperObjects.events.emit('iSpeak', {name: container.name, status: 'disable'});
@@ -644,7 +646,7 @@ var raphaelPaperObjects = {
         }        
 
         // set to false - we have initialized the element
-        container.initialize = false;
+        counter.initialize = false;
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = counter;
     }, 
@@ -747,8 +749,11 @@ var raphaelPaperObjects = {
         raphaelPaperObjects.objList[obj.name] = input;
     },       
     // label
-    label: function(obj)
+    label: function(obj, type)
     {
+        // return if the received object is not corect;
+        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+
         let label = {
             name: obj.name,
             visible: (obj.isVisible == 'true') ? true : false,
@@ -798,11 +803,416 @@ var raphaelPaperObjects = {
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = label;
     },
-    // separator
-    separator: function(obj)
+    // radio
+    radio: function(radios, obj) 
+    {
+        let radio = {
+            name: obj.name,
+            group: obj.radioGroup,
+            visible: (obj.isVisible == 'true') ? true : false,
+            enabled: (obj.isEnabled == 'true') ? true : false,
+            selected: (obj.isSelected == 'true') ? true : false,
+            element: {},
+            conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
+            initialize: true,
+        };
+        
+        if (helpers.missing(obj.size)) { obj.size = 7; }
+        if (helpers.missing(obj.vertspace)) { obj.vertspace = 25; }
+         // horizontal matrix
+        // if (helpers.missing(obj.horspace)) { obj.horspace = helpers.rep(0, obj.labels.length); }
+        // if (helpers.missing(obj.lbspace)) { obj.lbspace = 14; }
+        if (helpers.missing(obj.fontsize)) { obj.fontsize = 14; }
+        
+        // initializing the radioGroup
+        if(radios[obj.radioGroup] == void 0){
+            radios[obj.radioGroup] = {};
+        }
+    
+        // data
+        let dataLeft = parseInt(obj.left);
+        let dataTop = parseInt(obj.top);
+
+        if(!Array.isArray(radios[obj.radioGroup].label)){ radios[obj.radioGroup].label = []; }
+        if(!Array.isArray(radios[obj.radioGroup].cover)){ radios[obj.radioGroup].cover = []; }
+        if(!Array.isArray(radios[obj.radioGroup].circle)){ radios[obj.radioGroup].circle = []; }
+        if(!Array.isArray(radios[obj.radioGroup].fill)){ radios[obj.radioGroup].fill = []; }
+    
+        // making / geting last index of the group
+        var indexEl = 0;
+        if(radios[obj.radioGroup].label.length > 2) {
+            indexEl = radios[obj.radioGroup].label.length - 1;
+        } else {
+            indexEl = radios[obj.radioGroup].label.length;
+        }
+        // saving the index
+        radio.index = indexEl;
+
+        let cColor = obj.isEnabled == 'true' ? "#eeeeee" : "#6c757d";
+        let tColor = obj.isEnabled == 'true' ? "#000000" : "#6c757d";
+        radios[obj.radioGroup].label[indexEl] = this.text(dataLeft + 15, dataTop, obj.label).attr({"text-anchor": "start", "font-size": obj.fontsize+"px", fill:tColor});
+        radios[obj.radioGroup].circle[indexEl] = this.circle(dataLeft, dataTop, obj.size).attr({fill: cColor, "stroke": "#a0a0a0", "stroke-width": 1.2});
+    
+        // selected - initial hide
+        radios[obj.radioGroup].fill[indexEl] = this.set();
+        // the interior green circle
+        radios[obj.radioGroup].fill[indexEl].push(this.circle(dataLeft, dataTop, obj.size - 0.5).attr({fill: "#97bd6c", stroke: "none"}));
+        // the interior black smaller circle
+        radios[obj.radioGroup].fill[indexEl].push(this.circle(dataLeft, dataTop, obj.size - 4.5).attr({fill: "#000000", stroke: "none"}));
+        // add iD
+        // set data to the first element of the set | as of 2.1 "set" cannot have data
+        radios[obj.radioGroup].fill[indexEl][0].data('elementName', obj.name);
+        radios[obj.radioGroup].fill[indexEl].hide();
+
+
+        radios[obj.radioGroup].cover[indexEl] =  this.circle(dataLeft, dataTop, obj.size + 2).attr({fill: "#eeeeee", stroke: "none", "fill-opacity": 0, "cursor": "pointer"});
+        radios[obj.radioGroup].cover[indexEl].i = indexEl;
+        radios[obj.radioGroup].cover[indexEl].click(function() 
+        {
+            if(radio.enabled) {
+                radios[obj.radioGroup].fill.forEach(function(element, index) 
+                {           
+                    //element[0].data('elementName') - is the current element name
+                    if(index == indexEl) {
+                        element.show();
+                        raphaelPaperObjects.events.emit('iSpeak', {name: element[0].data('elementName'), status: 'select'});
+                    } else {
+                        element.hide();
+                        raphaelPaperObjects.events.emit('iSpeak', {name: element[0].data('elementName'), status: 'deselect'});
+                    }
+                });
+            }
+        });
+
+        // listen for events / changes
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            if(obj.name != data.name){
+                raphaelPaperObjects.conditionsChecker(data, radio);
+            }
+        });
+        // Properties
+        // ===============================================================================
+        radio.show = function() {
+            radios[radio.group].label[radio.index].show();
+            radios[radio.group].circle[radio.index].show();
+            radios[radio.group].fill[radio.index].show();
+            //  emit event only if already intialized
+            if(!radio.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'show'});
+            }
+        };
+        radio.hide = function() {
+            radios[radio.group].label[radio.index].hide();
+            radios[radio.group].circle[radio.index].hide();
+            radios[radio.group].fill[radio.index].hide();
+            //  emit event only if already intialized
+            if(!radio.initialize) {            
+                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'hide'});
+            }
+        };
+
+        radio.enable = function() {
+            radio.enabled = true;
+            radios[obj.radioGroup].cover[radio.index].attr({'cursor': 'pointer'});
+            //  emit event only if already intialized
+            if(!radio.initialize) {            
+                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'enable'});
+            }
+        };
+        radio.disable = function() {
+            radio.enabled = false;
+            radios[obj.radioGroup].cover[radio.index].attr({'cursor': 'default'});
+            //  emit event only if already intialized
+            if(!radio.initialize) {            
+                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'disable'});
+            }
+        };
+
+        radio.select = function() {
+            radios[radio.group].fill[radio.index].show();
+            //  emit event only if already intialized
+            if(!radio.initialize) {            
+                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'select'});
+            }
+        };
+        radio.deselect = function() {
+            radios[radio.group].fill[radio.index].hide();
+            //  emit event only if already intialized
+            if(!radio.initialize) {            
+                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'deselect'});
+            }
+        };
+
+        // initial status
+        if(radio.visible) {
+            radio.show();
+        } else {
+            radio.hide();
+        }
+        if(radio.enabled) {
+            radio.enable();
+        } else {
+            radio.disable();
+        }        
+        if(radio.selected) {
+            radio.select();
+        } else {
+            radio.deselect();
+        }        
+
+        // set to false - we have initialized the element
+        radio.initialize = false;
+        // add the element to the main list
+        raphaelPaperObjects.objList[obj.name] = radio;        
+    },
+    // select
+    select: function(obj, type, eventMe, list)
     {
         // return if the received object is not corect;
-        if(!helpers.hasSameProps(raphaelPaperSettings[obj.type], obj)) { return false; }
+        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+
+        let select = {
+            name: obj.name,
+            visible: (obj.isVisible == 'true') ? true : false,
+            enabled: (obj.isEnabled == 'true') ? true : false,
+            selected: {},
+            value: '',
+            element: {},
+            conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
+            initialize: true,
+        };
+
+        // data to int
+        let dataLeft = parseInt(obj.left);
+        let dataTop = parseInt(obj.top);
+        // not widther than 350
+        obj.width = (obj.width > 350) ? 350 : obj.width;
+        let dataWidth = parseInt(obj.width);
+
+        let div = document.createElement("div");
+        div.style.position = "absolute";
+        div.style.top = dataTop + 'px';
+        div.style.left = dataLeft + 'px';
+        // div.style.backgroundColor = '#FF0000';
+        div.style.width = (dataWidth + 10) + 'px';
+        div.style.height = '32px';
+
+        // initialy paper is small - allow ather elements to be clickable
+        let newPaper = Raphael(div, dataWidth + 10, 32);
+
+        let p = document.getElementById('paper');
+        p.appendChild(div);
+
+        select.element.rect = newPaper.rect(5, 5, dataWidth, 25).attr({fill: "#FFFFFF", "stroke": "#333333", "stroke-width": 0.2});  
+        
+        // show / hide selected    
+        // ===============================================================================
+        eventMe.on('selected', function(data) {
+            // check if we have an element | if yes remove it
+            if(typeof select.selected.remove === "function") {
+                select.selected.remove();                
+            }
+            select.selected = newPaper.text(13, 18, data).attr({"text-anchor": "start",fill: "#333333", "font-size": "14px"});
+            select.value = data;
+            // etmit event - obj value change
+            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'select'});
+        });
+        eventMe.on('deSelected', function(data) {
+            select.selected.remove();
+            select.value = '';
+            // etmit event - obj value change
+            raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'deselect'});
+        });
+
+        // Open / close element list
+        // ===============================================================================
+        select.element.downsign = newPaper.path([
+            ["M", dataWidth - 10 , 13 ],
+            ["l", 8, 0],
+            ["l", -4, 8],
+            ["z"]
+        ]).attr({fill: "#333333", "stroke-width": 0});
+        select.element.upsign = newPaper.path([
+            ["M", dataWidth - 10 , 21 ],
+            ["l", 8, 0],
+            ["l", -4, -8],
+            ["z"]
+        ]).attr({fill: "#333333", "stroke-width": 0}).hide();
+        
+        select.element.showList = newPaper.rect(8 , 8, dataWidth - 6, 19).attr({fill: "#FF0000", "opacity": 0, "cursor": "pointer"});        
+        select.element.showList.click(function() {
+            if(select.enabled) {
+                if(listSet[0].data('visible')) {
+                    hideSelectables();
+                    // resize div and paper
+                    div.style.height = '32px';
+                    newPaper.setSize((dataWidth + 10), 30);
+                } else {
+                    showSelectables();
+                    // resize div and paper
+                    div.style.height = ((list.length * 25) + 43) + 'px';
+                    newPaper.setSize(dataWidth + 10, ((list.length * 25) + 43));
+                }
+            }
+        });
+
+        // Element list
+        // ===============================================================================
+        let selectElements = newPaper.rect(5, 30, dataWidth, list.length * 25).attr({fill: "#FFFFFF", "stroke": "#333333", "stroke-width": 0.2}); 
+        selectElements.hide();
+        selectElements.data('visible', 0);
+        selectElements.toFront();   
+
+        let listSet = this.set();
+        listSet.push(selectElements);
+
+        let position = 40;
+        let txt = [];
+        let cover = [];
+
+        // on click element
+        let elClicked = function() { 
+            let isOn = this.data('clicked');
+            for(let j = 0; j < cover.length; j++) {
+                cover[j].attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
+                txt[j].attr({"fill": "#333333"});
+            }
+            
+            if(!isOn) {
+                this.attr({"fill": "blue", "opacity": 0.5}).data('clicked', 1);
+                eventMe.emit('selected', this.data('elName'));
+            } else {
+                this.attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
+                eventMe.emit('deSelected', this.data('elName'));
+            }
+        };
+        // on element over
+        let elIn = function() { 
+            if(!this.data('clicked')){
+                this.attr({"opacity": 0.5}); 
+            }
+        };
+        // on element out
+        let elOut = function() { 
+            if(!this.data('clicked')){
+                this.attr({"opacity": 0}); 
+            }                                             
+        };
+        
+        // populate the list
+        for(let i = 0; i < list.length; i++) {
+            txt[i] = newPaper.text(10, position+3, list[i]).attr({"text-anchor": "start", "font-size": 14, fill: '#333333'}).hide();
+            // save the name of the
+            cover[i] = newPaper.rect(5 , position-10, dataWidth, 25).attr({fill: "#eeeeee", "opacity": 0, "cursor": "pointer", stroke: 0})
+                            .hide()
+                            .data('clicked', 0)
+                            .data('elName', list[i])
+                            .click( elClicked )
+                            .hover( elIn, elOut );
+            listSet.push( txt[i], cover[i] );
+            position += 25;
+        } 
+
+        // listen for events / changes
+        // ===============================================================================
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            if(obj.name != data.name){
+                raphaelPaperObjects.conditionsChecker(data, select);
+            }            
+        });
+
+        // Properties
+        // ===============================================================================
+        let hideSelectables = function(){
+            // hide element list
+            listSet.hide();
+            listSet[0].data('visible', 0);
+            select.element.downsign.show();
+            select.element.upsign.hide();
+        };
+        let showSelectables = function(){
+            // show element list
+            listSet.show();
+            listSet[0].data('visible', 1);
+            select.element.downsign.hide();
+            select.element.upsign.show();
+        };
+
+        select.show = function(){
+            for( let i in select.element) {                
+                select.element[i].show();
+            }
+            // check if we have anythig selected and hide-it
+            if(typeof select.selected.remove === "function") {
+                select.selected.show();
+            }
+            hideSelectables();
+            //  emit event only if already intialized
+            if(!select.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: select.name, status: 'show'});
+            }
+        };
+        select.hide = function(){
+            for( let i in select.element){
+                select.element[i].hide();
+            }
+            // check if we have anythig selected and hide-it
+            if(typeof select.selected.remove === "function") {
+                select.selected.hide();
+            }
+            hideSelectables();
+            // override hideSelectables
+            select.element.downsign.hide();
+            //  emit event only if already intialized
+            if(!select.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: select.name, status: 'hide'});
+            }
+        };
+        select.enable = function() {
+            select.enabled = true;
+            select.element.rect.attr({fill: "#FFFFFF", opacity: 1});
+            select.element.downsign.attr({opacity:1});
+            select.element.showList.attr({'cursor': 'pointer'});
+            //  emit event only if already intialized
+            if(!select.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: select.name, status: 'enable'});
+            }
+        };
+        select.disable = function() {
+            select.enabled = false;
+            select.element.rect.attr({fill: "#000", opacity: 0.2});
+            select.element.downsign.attr({opacity:0.5});
+            select.element.showList.attr({'cursor': 'default'});
+            //  emit event only if already intialized
+            if(!select.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: select.name, status: 'disable'});
+            }
+        };
+
+        // initialize
+        if(select.visible) { 
+            select.show();
+        } else {
+            select.hide();
+        }
+        if(select.enabled) {
+            select.enable();
+        } else {
+            select.disable();
+        }  
+
+        // set to false - we have initialized the element
+        select.initialize = false;
+        // add the element to the main list
+        raphaelPaperObjects.objList[obj.name] = select;
+    },
+    // separator
+    separator: function(obj, type)
+    {
+        // return if the received object is not corect;
+        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
 
         let separator = {
             name: obj.name,
@@ -861,299 +1271,6 @@ var raphaelPaperObjects = {
         separator.initialize = false;
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = separator;
-    },
-    // radio
-    radio: function(radios, obj) 
-    {
-        let radio = {
-            name: obj.name,
-            group: obj.radioGroup,
-            visible: (obj.isVisible == 'true') ? true : false,
-            enabled: (obj.isEnabled == 'true') ? true : false,
-            selected: (obj.isSelected == 'true') ? true : false,
-            element: {},
-            conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
-            initialize: true,
-        };
-        
-        if (helpers.missing(obj.size)) { obj.size = 7; }
-        if (helpers.missing(obj.vertspace)) { obj.vertspace = 25; }
-         // horizontal matrix
-        // if (helpers.missing(obj.horspace)) { obj.horspace = helpers.rep(0, obj.labels.length); }
-        // if (helpers.missing(obj.lbspace)) { obj.lbspace = 14; }
-        if (helpers.missing(obj.fontsize)) { obj.fontsize = 14; }
-        
-        // initializing the radioGroup
-        if(radios[obj.radioGroup] == void 0){
-            radios[obj.radioGroup] = {};
-        }
-    
-        // data
-        let dataLeft = parseInt(obj.left);
-        let dataTop = parseInt(obj.top);
-
-        if(!Array.isArray(radios[obj.radioGroup].label)){ radios[obj.radioGroup].label = []; }
-        if(!Array.isArray(radios[obj.radioGroup].cover)){ radios[obj.radioGroup].cover = []; }
-        if(!Array.isArray(radios[obj.radioGroup].circle)){ radios[obj.radioGroup].circle = []; }
-        if(!Array.isArray(radios[obj.radioGroup].fill)){ radios[obj.radioGroup].fill = []; }
-    
-        // making / geting last index of the group
-        var indexEl = 0;
-        if(radios[obj.radioGroup].label.length > 2) {
-            indexEl = radios[obj.radioGroup].label.length - 1;
-        } else {
-            indexEl = radios[obj.radioGroup].label.length;
-        }
-        // saving the index
-        radio.index = indexEl;
-
-        let cColor = obj.isEnabled == 'true' ? "#eeeeee" : "#6c757d";
-        let tColor = obj.isEnabled == 'true' ? "#000000" : "#6c757d";
-        radios[obj.radioGroup].label[indexEl] = this.text(dataLeft + 15, dataTop, obj.label).attr({"text-anchor": "start", "font-size": obj.fontsize+"px", fill:tColor});
-        radios[obj.radioGroup].circle[indexEl] = this.circle(dataLeft, dataTop, obj.size).attr({fill: cColor, "stroke": "#a0a0a0", "stroke-width": 1.2});
-        
-        // selected - initial hide
-        radios[obj.radioGroup].fill[indexEl] = this.set();
-        // the interior green circle
-        radios[obj.radioGroup].fill[indexEl].push(this.circle(dataLeft, dataTop, obj.size - 0.5).attr({fill: "#97bd6c", stroke: "none"}));
-        // the interior black smaller circle
-        radios[obj.radioGroup].fill[indexEl].push(this.circle(dataLeft, dataTop, obj.size - 4.5).attr({fill: "#000000", stroke: "none"}));
-        // add iD
-        // set data to the fisrt element of the set | as of 2.1 set cannot have data
-        radios[obj.radioGroup].fill[indexEl][0].data('elementName', obj.name);
-        radios[obj.radioGroup].fill[indexEl].hide();
-
-
-        radios[obj.radioGroup].cover[indexEl] =  this.circle(dataLeft, dataTop, obj.size + 2).attr({fill: "#eeeeee", stroke: "none", "fill-opacity": 0, "cursor": "pointer"});
-        radios[obj.radioGroup].cover[indexEl].i = indexEl;
-        radios[obj.radioGroup].cover[indexEl].click(function() 
-        {
-            if(radio.enabled) {
-                radios[obj.radioGroup].fill.forEach(function(element, index) 
-                {           
-                    if(index == indexEl){
-                        element.show();
-                        // element[0].data('elementName')
-                        raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'select'});
-                    }else{
-                        element.hide();
-                        raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'deselect'});
-                    }
-                });
-            }
-        });
-
-        // listen for events / changes
-        raphaelPaperObjects.events.on('iSpeak', function(data)
-        {
-            if(obj.name != data.name){
-                raphaelPaperObjects.conditionsChecker(data, radio);
-            }
-        });
-        // Properties
-        // ===============================================================================
-        radio.show = function() {
-            radios[radio.group].fill.forEach(function(element, index) {                                       
-                if(index == radio.index) {
-                    element.show();
-                } else {
-                    element.hide();
-                }
-            });
-            //  emit event only if already intialized
-            if(!radio.initialize) {
-                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'show'});
-            }
-        };
-        radio.hide = function() {
-            radios[radio.group].fill.forEach(function(element, index) {                                       
-                if(index == radio.index){
-                    element.hide();
-                }
-            });
-            //  emit event only if already intialized
-            if(!radio.initialize) {            
-                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'hide'});
-            }
-        };
-
-        radio.enable = function() {
-            radio.enabled = true;
-            //  emit event only if already intialized
-            if(!radio.initialize) {            
-                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'enable'});
-            }
-        };
-        radio.disable = function() {
-            radio.enabled = false;
-            //  emit event only if already intialized
-            if(!radio.initialize) {            
-                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'disable'});
-            }
-        };
-
-        radio.select = function() {
-            radios[radio.group].fill[radio.index].show();
-            //  emit event only if already intialized
-            if(!radio.initialize) {            
-                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'select'});
-            }
-        };
-        radio.deselect = function() {
-            radios[radio.group].fill[radio.index].hide();
-            //  emit event only if already intialized
-            if(!radio.initialize) {            
-                raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'deselect'});
-            }
-        };
-
-        // initial status
-        if(radio.visible){
-            radio.show();
-        } else {
-            radio.hide();
-        }
-        if(radio.enabled){
-            radio.enable();
-        } else {
-            radio.disable();
-        }        
-        if(radio.selected){
-            radio.select();
-        } else {
-            radio.deselect();
-        }        
-
-        // set to false - we have initialized the element
-        radio.initialize = false;
-        // add the element to the main list
-        raphaelPaperObjects.objList[obj.name] = radio;        
-    },
-    // select
-    select: function(obj, list, eventMe)
-    {
-        // TO DO - resize paper and DIV based on show and hide
-
-        // data to int
-        let dataLeft = parseInt(obj.left);
-        let dataTop = parseInt(obj.top);
-        // not widther than 350
-        obj.width = (obj.width > 350) ? 350 : obj.width;
-        let dataWidth = parseInt(obj.width);
-
-        let div = document.createElement("div");
-        div.style.position = "absolute";
-        div.style.top = dataTop + 'px';
-        div.style.left = dataLeft + 'px';
-        // div.style.backgroundColor = '#FF0000';
-        div.style.width = (dataWidth + 10) + 'px';
-        div.style.height = '32px';
-
-        // initialy paper is small - allow ather elements to be clickable
-        let newPaper = Raphael(div, dataWidth + 10, 32);
-
-        let p = document.getElementById('paper');
-        p.appendChild(div);
-
-        let rect = newPaper.rect(5, 5, dataWidth, 25).attr({fill: "#FFFFFF", "stroke": "#333333", "stroke-width": 0.2});  
-        
-        // show show something is selected
-        let selected = newPaper.text(13, 18, 'Selected').attr({"text-anchor": "start",fill: "#333333", "font-size": "14px"}).hide();      
-        eventMe.on('selected', function() {
-            selected.show();
-        });
-        eventMe.on('deSelected', function() {
-            selected.hide();
-        });
-
-        let downsign = newPaper.path([
-            ["M", dataWidth - 10 , 13 ],
-            ["l", 8, 0],
-            ["l", -4, 8],
-            ["z"]
-        ]).attr({fill: "#333333", "stroke-width": 0});
-        let upsign = newPaper.path([
-            ["M", dataWidth - 10 , 21 ],
-            ["l", 8, 0],
-            ["l", -4, -8],
-            ["z"]
-        ]).attr({fill: "#333333", "stroke-width": 0}).hide();
-        
-        let showList = newPaper.rect(8 , 8, dataWidth - 6, 19).attr({fill: "#FF0000", "opacity": 0, "cursor": "pointer"});        
-
-        showList.click(function(){
-            if(listSet[0].data('visible')) {
-                listSet.hide();
-                listSet[0].data('visible', 0);
-                downsign.show();
-                upsign.hide();
-                // resize div and paper
-                div.style.height = '32px';
-                newPaper.setSize((dataWidth + 10), 30);
-            } else {
-                listSet.show();
-                listSet[0].data('visible', 1);
-                downsign.hide();
-                upsign.show();
-                // resize div and paper
-                div.style.height = ((list.length * 25) + 43) + 'px';
-                newPaper.setSize(dataWidth + 10, ((list.length * 25) + 43));
-            }
-        });
-
-        // Element list =====================================================
-        let selectElements = newPaper.rect(5, 30, dataWidth, list.length * 25).attr({fill: "#FFFFFF", "stroke": "#333333", "stroke-width": 0.2}); 
-        selectElements.hide();
-        selectElements.data('visible', 0);
-        selectElements.toFront();   
-
-        let listSet = this.set();
-        listSet.push(selectElements);
-
-        let position = 40;
-        let txt = [];
-        let cover = [];
-
-        // on click element
-        let elClicked = function() { 
-            let isOn = this.data('clicked');
-            for(let j = 0; j < cover.length; j++) {
-                cover[j].attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
-                txt[j].attr({"fill": "#333333"});
-            }
-            
-            if(!isOn) {
-                this.attr({"fill": "blue", "opacity": 0.5});   
-                this.data('clicked', 1);
-                eventMe.emit('selected');
-            } else {
-                eventMe.emit('deSelected');
-                this.attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
-            }
-        };
-        // on element over
-        let elIn = function() { 
-            if(!this.data('clicked')){
-                this.attr({"opacity": 0.5}); 
-            }
-        };
-        // on element out
-        let elOut = function() { 
-            if(!this.data('clicked')){
-                this.attr({"opacity": 0}); 
-            }                                             
-        };
-        
-        for(let i = 0; i < list.length; i++) {
-            txt[i] = newPaper.text(10, position+3, list[i]).attr({"text-anchor": "start", "font-size": 14, fill: '#333333'}).hide();
-            cover[i] = newPaper.rect(5 , position-10, dataWidth, 25).attr({fill: "#eeeeee", "opacity": 0, "cursor": "pointer", stroke: 0})
-                            .hide()
-                            .data('clicked', 0)
-                            .click( elClicked )
-                            .hover( elIn, elOut );
-            listSet.push( txt[i], cover[i] );
-            position += 25;
-        }        
     },
 
     // Conditions =================================================================

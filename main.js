@@ -140,7 +140,7 @@ function createConditionswWindow(arg)
     });
 
     // Open the DevTools.
-    conditionsWindow.webContents.openDevTools();
+    // conditionsWindow.webContents.openDevTools();
 
     conditionsWindow.loadURL(url.format({
         pathname: path.join(__dirname, './windows/conditionsWindow.html'),
