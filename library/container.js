@@ -2,14 +2,14 @@ const container = {
 
     properties: {}, 
     elements: {},
-    syntax: {},
+    syntax: '',
 
     // paper properties: name, title, width, height
     initialize: function(obj) 
     {
         this.properties = Object.assign({},obj);
         this.elements = {};
-        this.syntax = {};
+        this.syntax = '';
     },
     
     // update paper props

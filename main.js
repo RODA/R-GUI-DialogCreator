@@ -197,7 +197,7 @@ function createSyntaxwWindow(arg)
     });
 
     // Open the DevTools.
-    syntaxWindow.webContents.openDevTools();
+    // syntaxWindow.webContents.openDevTools();
 
     syntaxWindow.loadURL(url.format({
         pathname: path.join(__dirname, './windows/syntaxWindow.html'),

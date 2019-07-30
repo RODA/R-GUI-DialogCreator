@@ -2,7 +2,7 @@ const { ipcRenderer } = require('electron');
 const { BrowserWindow } = require('electron').remote;
 
 $(document).ready(function(){
-    ipcRenderer.on('elementsList', (event, args) => {
+    ipcRenderer.on('elementsList', (event, args) => {        
         $('#syntax').val(args.syntax);
 
         if(args.elements.length > 0){
