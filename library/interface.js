@@ -3,12 +3,10 @@ const { ipcRenderer } = require('electron');
 const { dialog } = require('electron').remote;
 // get current window for making dialogs modals
 const mainWindow = require('electron').remote.getCurrentWindow();
-
 const raphaelPaper = require("../library/raphaelPaper");
 
 // new window clicked
 ipcRenderer.on('newWindow', (event, args) => {
-    
     if(raphaelPaper.paperExists === true) {
         let confirm = dialog.showMessageBox(mainWindow, {type: "question", message: "Are you sure?", title: "Create new dialog", buttons: ["No", "Yes"]});
         if(confirm){
@@ -19,6 +17,7 @@ ipcRenderer.on('newWindow', (event, args) => {
         raphaelPaper.make();
     }
     document.getElementById('updateDialogProps').disabled = false;
+    document.getElementById('dialogSyntax').disabled = false;
 });
 
 // send data to preview window
@@ -30,12 +29,18 @@ ipcRenderer.on('previewDialog', (event, args) => {
         dialog.showMessageBox(mainWindow, {type: "info", message: "Please create a new dialog first.", title: "No dialog", buttons: ["OK"]});
         ipcRenderer.send('containerData', false);
     }
-
 });
-// verify conditions and respond
+
+// verify element's conditions and respond
 ipcRenderer.on('conditionsCheck', (event, args) => {
-    let valid = raphaelPaper.returnConditionStatus(args);
+    let valid = raphaelPaper.getConditionStatus(args);
     ipcRenderer.send('conditionsValid', valid);
+});
+
+// save syntax data
+ipcRenderer.on('saveDialogSyntax', (event, args) => {
+    let valid = raphaelPaper.saveDialogSyntax(args);
+    ipcRenderer.send('syntaxSaved', valid);
 });
 
 
@@ -70,6 +75,11 @@ $(document).ready(function(){
         });  
 
        raphaelPaper.update(obj);
+    });
+    // add dialog syntax
+    $('#dialogSyntax').on('click', function() {
+        let list = raphaelPaper.getElementForSyntax();
+        ipcRenderer.send('startSyntaxWindow', list);
     });
 
     // update element on press enter

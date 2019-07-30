@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 //// TO DO check if properties exists - we need this for import/open dialogs 
-
+// numer of max elements (events) - to decide on it
+require('events').EventEmitter.prototype._maxListeners = 35;
 const EventEmitter = require('events');
 const raphaelPaperSettings = require('./raphaelPaperSettings');
 const helpers = require("./helpers");
@@ -457,7 +458,7 @@ var raphaelPaperObjects = {
         raphaelPaperObjects.events.on('iSpeak', function(data)
         {
             if(obj.name != data.name){
-                raphaelPaperObjects.conditionsChecker(data, button);
+                raphaelPaperObjects.conditionsChecker(data, container);
             }
         });
         // Properties

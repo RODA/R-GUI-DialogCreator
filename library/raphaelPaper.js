@@ -225,12 +225,23 @@ var raphaelPaper = {
     },
     
     // ask container to validate an element's conditions
-    returnConditionStatus: function(data){
+    getConditionStatus: function(data){
         return container.validateConditions(data);
     },
     // getElementFromContainer
     getElementFromContainer: function(id){
         return container.getElement(id);
+    },
+
+    // ======================================================
+    // get elements for dialog syntax
+    getElementForSyntax: function() {
+        return container.elementsForSyntax();
+    },
+    // save the dialog syntax
+    saveDialogSyntax: function(data)
+    {
+        return container.saveSyntax(data);
     }
 };
 

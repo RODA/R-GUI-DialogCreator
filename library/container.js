@@ -2,14 +2,14 @@ const container = {
 
     properties: {}, 
     elements: {},
-    dialogRun:{},
+    syntax: {},
 
     // paper properties: name, title, width, height
     initialize: function(obj) 
     {
         this.properties = Object.assign({},obj);
         this.elements = {};
-        this.dialogRun = {};
+        this.syntax = {};
     },
     
     // update paper props
@@ -22,6 +22,8 @@ const container = {
                 this.properties[prop] = obj[prop];
             }
         }
+        console.log(this.syntax);
+        
     },
 
     // element properties
@@ -154,6 +156,29 @@ const container = {
             }
         }
         return false;
+    },
+
+    // get all the elements for the dialog syntaf
+    elementsForSyntax: function()
+    {
+        console.log(this.elements);
+        
+        let noElements = Object.keys(this.elements);
+        let response = { syntax: this.syntax, elements: []};
+    
+        if(noElements.length == 0){ return response; }
+
+        for(let i in this.elements){
+            if(this.elements[i].type != 'Label' && this.elements[i].type != 'Separator'){
+                response.elements.push({name: this.elements[i].name, type: this.elements[i].type});
+            }
+        }
+        return response;
+    },
+    // save dialog syntax
+    saveSyntax: function(data){
+        this.syntax = data;
+        return true;
     }
 };
 

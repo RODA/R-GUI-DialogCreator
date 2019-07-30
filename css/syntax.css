@@ -1,0 +1,77 @@
+.container{
+    display: flex;
+    flex-direction: column;
+}
+.container div{
+    align-items: stretch;
+    margin: 5px 0px;
+}
+#syntax{
+    width: 99%;
+    height: 150px;
+    resize: none;
+    overflow-y: scroll;
+}
+#syntax:focus{
+    outline: none;
+}
+#saveSyntax:focus{
+    outline: none;
+}  
+#saveSyntax{
+    margin-top: 0px;
+    width: 140px;
+    height: 25px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    border-top: 2px solid #eaeaea;
+    border-left:2px solid #eaeaea;
+    border-bottom: 2px solid #BBB;
+    border-right: 2px solid #BBB;
+}
+#saveSyntax:active{
+    border-left:2px solid #BBB;
+    border-top: 2px solid #BBB;
+    border-right:2px solid #d6d6d6;
+    border-bottom: 2px solid #d6d6d6;
+    transition: all;
+}
+#elementListHeader{
+    margin: 0px;
+    padding-bottom: 5px;
+    width: 99%;
+}
+#elementsListTable{
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: 1px solid #ccc;
+}
+#elementsListTable th, #elementsListTable tbody td{
+    padding: 5px 7px;
+    width: 365px;
+    font-weight: 400;
+}
+#elementsListTable thead th:first-child{
+    border-right: 1px solid #aaa;
+}
+#elementsListTable tbody{
+    display: block;
+    width: 100%;
+    overflow: auto;
+    height: 250px;
+}
+#elementsListTable thead tr{
+    display: block;
+}
+#elementsListTable thead{
+    background-color: #eee;
+    border-bottom: 1px solid #ccc;
+}
+#elementsListTable tbody tr{
+    cursor: pointer;
+}
+#elementsListTable tbody tr:hover{
+    background-color: #fbfbfb;
+}

@@ -177,6 +177,62 @@ ipcMain.on('conditionsValid', (event, args) => {
 }); 
 // =================================================
 
+// =================================================
+// Handle create syntax window
+function createSyntaxwWindow(arg)
+{   
+    // create window but do not show it - waiting for data
+    // https://stackoverflow.com/questions/51789711/how-to-send-data-between-parent-and-child-window-in-electron
+    syntaxWindow = new BrowserWindow({
+        webPreferences:{
+            nodeIntegration: true
+        },
+        width: 800,
+        height: 600,
+        title: 'Dialog\'s syntax',
+        autoHideMenuBar: true,
+        parent: mainWindow,
+        resizable: false,
+        show: false,
+    });
+
+    // Open the DevTools.
+    syntaxWindow.webContents.openDevTools();
+
+    syntaxWindow.loadURL(url.format({
+        pathname: path.join(__dirname, './windows/syntaxWindow.html'),
+        protocol: "file:",
+        slashes: true
+    }));
+    // Garbage collection handle
+    syntaxWindow.on('closed', function(){
+        syntaxWindow = null;
+        
+    });
+    // when data is ready show window
+    syntaxWindow.once("show", () => {
+        syntaxWindow.webContents.send('elementsList', arg);
+    });
+    // when window is ready send data
+    syntaxWindow.once("ready-to-show", ()=>{
+        syntaxWindow.show();
+    });
+    // no menu
+    syntaxWindow.setMenu(null);
+}
+// lunch the conditions window
+ipcMain.on('startSyntaxWindow', (event, args) => {
+    createSyntaxwWindow(args);
+}); 
+// send syntax to container
+ipcMain.on('saveDialogSyntax', (event, args) => {
+    mainWindow.webContents.send('saveDialogSyntax', args);
+}); 
+// send back the response
+ipcMain.on('syntaxSaved', (event, args) => {
+    syntaxWindow.webContents.send('syntaxSaved', args);
+}); 
+// =================================================
 
 function saveDataToFile(arg)
 {
