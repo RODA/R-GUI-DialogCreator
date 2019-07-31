@@ -17,8 +17,8 @@ var checkbox = {
 
 
 // var str = 'check if textbox1 == 4 & eee | ( checkbox1 isChecked | checkbox2 !isChecked) | checkbox3 isVisible; check if textbox1 = 4 & ( checkbox1 isChecked | checkbox2 !isChecked) | checkbox3 isVisible';
-var str = 'check if textbox1 == 4 & (eee |  checkbox1 isChecked | checkbox2 !isChecked) & checkbox3 isVisible;';
-// var str = 'A if B if C;';
+// var str = 'check if (A == 4) & (B | C  == checked | D != checked) | (E == visible);';
+var str = 'check if (A <= 5 & G | J & (D | I)) | (B | C) | D & (H >= 8);';
 
 var operands = ['!', '==', '!=', '>=', '<='];
 var logicals = ['&', '|'];
@@ -47,40 +47,52 @@ function parseConditions(str)
         
         
         obj = recursionParser(ifC[1].trim()); 
+        console.log(obj);
+        
         if(obj === void 0){ 
             return { error: true, result: {}}; 
         }
         result[ifC[0].trim()] = obj; 
     }
     
+    return(result);
     // console.log(conditions);
 }
 
 
 console.log(parseConditions(str));
 
+
+// check if (A == 4) & (B |  C isChecked | D !isChecked) | (E isVisible)
 function recursionParser(condition) 
 {
-    let response = {};
-    let p1 = condition.match(/\(+/g);
-    let p2 = condition.match(/\)+/g);
-
+    let response = [];
+    let p1 = condition.match(/\(/g);
+    let p2 = condition.match(/\)/g);
+    
     let positions = [];
     if(p1 !== null & p2 !== null) {
-        if(p1.length == p2.length){
+        if (p1.length == p2.length){
             positions = getPositions(condition);
+        }
+        else {
+            return(false)
         }
     } 
 
     // parsing
     let substrings = [];
     // substrings.push(condition.substring(0, positions[0][0]));
-    if(positions.length > 0){
-        for(let i=0; i < positions.length + 1; i++) {
-            if( i == 0){
-                substrings.push(condition.substring(i, positions[i][0]).trim());
+    if (positions.length > 0){
+        for (let i=0; i < positions.length + 1; i++) {
+            if (i == 0){
+                if (positions[i][0] > 0) {
+                    substrings.push(condition.substring(0, positions[i][0] - 1));
+                }
+                substrings.push(condition.substring(positions[i][0], positions[i][1] + 1));
             } else if ( i < positions.length) {
                 substrings.push(condition.substring(positions[i - 1][1] + 1, positions[i][0]).trim());
+                substrings.push(condition.substring(positions[i][0], positions[i][1] + 1).trim());
             } else {
                 substrings.push(condition.substring(positions[i - 1][1] + 1, condition.length).trim());
             }
@@ -88,69 +100,41 @@ function recursionParser(condition)
     } else {
         substrings[0] = condition.trim();
     }
-
-    let p = 0;
-    let indexp = 0;
-    let indexs = 0;
-    
-    for (let counter = 0; counter < substrings.length + positions.length; counter++) {
-        if (counter == 0) {
-            if (substrings.length > 1) {
-                let op = substrings[indexs].slice(-1);
-                // if wrong operand
-                if(!operands.includes(op)){ return false; }
-            }
-
-            substrings[indexs] = substrings[indexs].slice(0, -1).trim();
-            response[p] = logicOperatorParser(substrings[indexs]);
-            p++;
-            indexs++;
-
-            if (substrings.length > 1) {
-                response[p] = op;
-                p++;
-            }
+    // console.log(substrings);
+    for (let i = 0; i < substrings.length; i++) {
+        if (substrings[i][0] == "(") {
+            // facem recursie pe substringul respectiv fara parantezele externe
+            response.push(recursionParser(substrings[i].substring(1, substrings[i].length - 1)));
         }
         else {
-            if (counter % 2 == 1) {
-                response[p] = recursionParser(condition.substring(positions[indexp][0] + 1, positions[indexp][1]).trim());
-                p++;
-                indexp++;
-            }
-            else {
-                // de verificat daca ultimul substring este ""
-                // verificam operatorul logic cu care incepe urmatorul substring
-                // response[p] = acel operator
-                // scoatem din substring operatorul
-                // p++;
+            if (substrings[i] != "") {
+                
+                let bla = logicOperatorParser(substrings[i]);
+                console.log(bla);
+                let res;
+                let verif = false;
+                for (let j = 0; j < bla.length; j++) {
+                    console.log(bla[j]);
+                    if (res !== void 0) {
+                        res = operandsParser(bla[j]);
+                        if (Array.isArray(res)) {
+                            verif = true;
+                        }
+                    }
+                }
 
-                // verificam operatorul logic cu care se termina urmatorul substring
-                // (in afara de situatia in care nu trebuie sa se mai termine cu nimic pentru ca este ultimul substring)
-                // stocam acel operator si il scoatem din substring
-
-                // aplicam recursivitatea cu substringul, pracic ce este intre paranteze
-                response[p] = logicOperatorParser(substrings[indexs]);
-                p++;
-
-                // daca se aplica situatia
-                // response[p] = acel operator
-                // p++;
-
-                indexs++;
+                if (verif) {
+                    response.push(bla);
+                }
+                else {
+                    response.push(res);
+                }
             }
         }
     }
-    
-    
-    
 
-
-
-
-    // console.log(op);
-    console.log(substrings);
-    
-    
+    console.log(1);
+    return(response);
 }
 
 function getPositions(str)
@@ -183,39 +167,67 @@ function getPositions(str)
 
 function logicOperatorParser(str)
 {
-
-    let response = {};
+    // (A <= 5 & G | J & (D | I)) | (B | C) | D & (H >= 8);
+    let response = [];
     let a = str.split('&');
     if(a.length == 1) {
-        a = str.split('|');
-        for(let i=0; i< a.length; i++){
-
+        bla = str.split('|');
+        for (let i=0; i < bla.length; i++){
+            response.push(bla[i]);
+            if (i < bla.length - 1) {
+                response.push("|");
+            }
+        }
+    }
+    else {
+        for(let i = 0; i < a.length; i ++){
+            let bla = a[i].split('|');
+            for (let j = 0; j < bla.length; j++) {
+                response.push(bla[j].trim());
+                if (j < bla.length - 1) {
+                    response.push("|");
+                }
+            }
+            if (i < a.length - 1) {
+                response.push("&");
+            }
         }
     }
 
-    for(let i = 0; i < a.length; i ++){
-        response.push(a[i].split('|'));
+    if (response[0] == "") {
+        response.shift();
     }
-    return res;
+
+    if (response[response.length - 1] == "") {
+        response.pop();
+    }
+
+    return response;
 }
 
 // ===========================
+// console.log(operandsParser("A <= 5"));
+
 function operandsParser(str)
 {
     let counter = 0;
-    let operandFound = ' ';
-    for(let i=0; i< operands; i++){
-        if(str.indexOf(operands[i]) >= 0){
+    let operandFound = '';
+    for (let i=0; i < operands.length; i++){
+        if (str.indexOf(operands[i]) >= 0){
            counter++;
            operandFound = operands[i];
         }
     }
 
-    if( counter > 1 ) { 
+    if ( counter > 1 ) { 
         return void 0; 
+    }
+
+    if (counter == 0) {
+        return str;
     }
 
     let a = str.split(operandFound);
 
-    return [a[0], operandFound, a[1]];
+    return [a[0].trim(), operandFound, a[1].trim()];
 }
