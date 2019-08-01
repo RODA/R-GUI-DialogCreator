@@ -151,7 +151,8 @@ const container = {
                 // TO DO - parse conditions before adding them
                 let isOK = conditions.parseConditions(data.conditions);
                 
-                console.log(isOK);
+                // console.log(JSON.stringify(isOK));
+                // console.log(isOK);
                 
                 if(!isOK.error) {
                     this.elements[data.id].conditions = data.conditions;

@@ -1,18 +1,21 @@
 const conditions = {
     // operands
-    operands: ['!', '==', '!=', '>=', '<='],
+    operands: ['==', '!=', '>=', '<='],
     //logicals: ['&', '|'],
     elements: [],
 
     // entry point
     parseConditions: function(str)
     {
+        // clear array every type
+        this.elements.length = 0;
+
         let conditions = str.split(';');
         // remove empty trailing condition
         if(conditions[conditions.length - 1] == '') {
             conditions.pop();
         }
-    
+        
         // no conditions or error
         if(conditions.length == 0) { return { error: true, result: {}}; }
     
@@ -33,7 +36,7 @@ const conditions = {
             result[ifC[0].trim()] = obj; 
         }
 
-        return { error: false, result: result, elements: this.elements };
+        return { error: false, result: result, elements: this.elements.slice() };
     },
 
     // parse the right side of the if statement
@@ -170,20 +173,25 @@ const conditions = {
     // parse by operands
     operandsParser: function(str)
     {
+        str = str.trim();
         let counter = 0;
         let operandFound = '';
         for (let i=0; i < this.operands.length; i++){
-            if (str.indexOf(this.operands[i]) >= 0){
-            counter++;
-            operandFound = this.operands[i];
+            if (str.includes(this.operands[i])) {
+                counter++;
+                operandFound = this.operands[i];
             }
         }
-
+        console.log(operandFound);
+        console.log(str);
+        console.log(str.includes(operandFound));
+        console.log(counter);
+        
         // we have an error -> there should be only one operand
         if ( counter > 1 ) { return void 0; }
 
         // nothing found, return the string
-        if (counter == 0) { return str; }
+        if (counter === 0) { return str; }
 
         let a = str.split(operandFound);
 
