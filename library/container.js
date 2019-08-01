@@ -1,3 +1,5 @@
+const conditions = require("./conditions");
+
 const container = {
 
     properties: {}, 
@@ -140,15 +142,18 @@ const container = {
     },
     // validate conditions and add them to the element
     validateConditions : function(data)
-    {
+    {        
         // we received the data
         if(data.id !== void 0 & data.conditions != void 0 & data.name != void 0)
         {
             // let's check if we have the element
             if(this.elements[data.id] !== void 0){
                 // TO DO - parse conditions before adding them
-                let isOK = true;
-                if(isOK) {
+                let isOK = conditions.parseConditions(data.conditions);
+                
+                console.log(isOK);
+                
+                if(!isOK.error) {
                     this.elements[data.id].conditions = data.conditions;
                     // data saved - return true
                     return true;
@@ -160,9 +165,7 @@ const container = {
 
     // get all the elements for the dialog syntaf
     elementsForSyntax: function()
-    {
-        console.log(this.elements);
-        
+    {        
         let noElements = Object.keys(this.elements);
         let response = { syntax: this.syntax, elements: []};
     

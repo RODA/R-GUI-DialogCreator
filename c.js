@@ -16,9 +16,10 @@ var checkbox = {
 };
 
 
-// var str = 'check if textbox1 == 4 & eee | ( checkbox1 isChecked | checkbox2 !isChecked) | checkbox3 isVisible; check if textbox1 = 4 & ( checkbox1 isChecked | checkbox2 !isChecked) | checkbox3 isVisible';
+// var str = 'check if textbox1 == 4 & eee | ( checkbox1 == check | checkbox2 != check) | checkbox3 == visible; check if textbox1 = 4 & ( checkbox1 isChecked | checkbox2 !isChecked) | checkbox3 isVisible';
+var str = 'check if textbox1 == 4 & eee | ( checkbox1 >= check | checkbox2 != check) | checkbox3 == visible; show if textbox1 == 4 & eee | ( checkbox1 >= check | checkbox2 != check) | checkbox3 == visible;';
 // var str = 'check if (A == 4) & (B | C  == checked | D != checked) | (E == visible);';
-var str = 'check if (A <= 5 & G | J & (D | I)) | (B | C) | D & (H >= 8);';
+// var str = 'check if (A <= 5 & G | J & (D | I)) | (B | C) | D & (H >= 8);';
 
 var operands = ['!', '==', '!=', '>=', '<='];
 var logicals = ['&', '|'];
@@ -109,31 +110,20 @@ function recursionParser(condition)
         else {
             if (substrings[i] != "") {
                 
-                let bla = logicOperatorParser(substrings[i]);
-                console.log(bla);
-                let res;
-                let verif = false;
-                for (let j = 0; j < bla.length; j++) {
-                    console.log(bla[j]);
-                    if (res !== void 0) {
-                        res = operandsParser(bla[j]);
-                        if (Array.isArray(res)) {
-                            verif = true;
-                        }
+                let conditionByLogical = logicOperatorParser(substrings[i]);
+                let cPush = [];
+                for (let j = 0; j < conditionByLogical.length; j++) {
+                    res = operandsParser(conditionByLogical[j]);
+                    if (Array.isArray(res)) {
+                        cPush.push(res);
+                    }else{
+                        cPush.push(conditionByLogical[j]);
                     }
                 }
-
-                if (verif) {
-                    response.push(bla);
-                }
-                else {
-                    response.push(res);
-                }
+                response.push(cPush);
             }
         }
     }
-
-    console.log(1);
     return(response);
 }
 
