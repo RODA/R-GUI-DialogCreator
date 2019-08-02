@@ -103,6 +103,17 @@ const conditions = {
         return response;
     },
 
+
+    checkConditions: function(weHave, element)
+    {
+        // geting only the conditions | skiping elements
+        let conditions = element.conditions.conditions;
+        console.log(weHave);
+        console.log(conditions);
+
+        
+    },
+
     // Helpers 
     // =======================================
     // get the position of the () in the string
@@ -182,10 +193,6 @@ const conditions = {
                 operandFound = this.operands[i];
             }
         }
-        console.log(operandFound);
-        console.log(str);
-        console.log(str.includes(operandFound));
-        console.log(counter);
         
         // we have an error -> there should be only one operand
         if ( counter > 1 ) { return void 0; }

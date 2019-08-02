@@ -5,6 +5,7 @@ require('events').EventEmitter.prototype._maxListeners = 35;
 const EventEmitter = require('events');
 const raphaelPaperSettings = require('./raphaelPaperSettings');
 const helpers = require("./helpers");
+const conditions = require('./conditions');
 
 var raphaelPaperObjects = {
     
@@ -232,6 +233,7 @@ var raphaelPaperObjects = {
             enabled: (obj.isEnabled == 'true') ? true : false,
             element: {},
             conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
+            initialize: true,
         };
 
         var cbElement = {};     
@@ -1277,11 +1279,19 @@ var raphaelPaperObjects = {
     // Conditions =================================================================
     conditionsParser: function(str)
     {
-        return {};
+        let isOK = conditions.parseConditions(str);
+                        
+        if(!isOK.error) {
+            return {conditions: isOK.result, elements: isOK.elements};
+        }
+        return {conditions: [], elements: []};
     },
-    conditionsChecker: function(data, raphaelObject)
+    conditionsChecker: function(data, element)
     {
-        return false;
+        // check condition only if the element that "speak" is affecting us
+        if(element.conditions.elements.includes(data.name)){
+            conditions.checkConditions(data, element);
+        }
     }
 
 };  
