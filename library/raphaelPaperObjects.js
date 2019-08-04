@@ -72,37 +72,37 @@ var raphaelPaperObjects = {
         }
     },
     // ask an element
-    askElement: function(name, property)
-    {
-        let resp;
-        switch(property){
-            case 'isEnabled':
-                resp = raphaelPaperObjects.objList[name].enabled;    
-                break;
-            case 'isNotEnabled':
-                resp = ! raphaelPaperObjects.objList[name].enabled;    
-                break;
-            case 'isVisible':
-                resp = raphaelPaperObjects.objList[name].visible;    
-                break;
-            case 'isNotVisible':
-                resp = ! raphaelPaperObjects.objList[name].visible;    
-                break;
-            case 'isChecked':
-                resp = raphaelPaperObjects.objList[name].checked;    
-                break;
-            case 'isNotChecked':
-                resp = ! raphaelPaperObjects.objList[name].checked;    
-                break;
-            case 'isSelected':
-                resp = raphaelPaperObjects.objList[name].selected;    
-                break;
-            case 'isNotSelected':
-                resp = ! raphaelPaperObjects.objList[name].selected;    
-                break;
-        }
-        return resp;
-    },
+    // askElement: function(name, property)
+    // {
+    //     let resp;
+    //     switch(property){
+    //         case 'isEnabled':
+    //             resp = raphaelPaperObjects.objList[name].enabled;    
+    //             break;
+    //         case 'isNotEnabled':
+    //             resp = ! raphaelPaperObjects.objList[name].enabled;    
+    //             break;
+    //         case 'isVisible':
+    //             resp = raphaelPaperObjects.objList[name].visible;    
+    //             break;
+    //         case 'isNotVisible':
+    //             resp = ! raphaelPaperObjects.objList[name].visible;    
+    //             break;
+    //         case 'isChecked':
+    //             resp = raphaelPaperObjects.objList[name].checked;    
+    //             break;
+    //         case 'isNotChecked':
+    //             resp = ! raphaelPaperObjects.objList[name].checked;    
+    //             break;
+    //         case 'isSelected':
+    //             resp = raphaelPaperObjects.objList[name].selected;    
+    //             break;
+    //         case 'isNotSelected':
+    //             resp = ! raphaelPaperObjects.objList[name].selected;    
+    //             break;
+    //     }
+    //     return resp;
+    // },
 
     // Elements =================================================================
     // button
@@ -288,12 +288,12 @@ var raphaelPaperObjects = {
                         // the element is checked
                         cbElement.box.attr({fill: "#97bd6c"});
                         cbElement.chk.show();
-                        raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isChecked'});
+                        raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'check'});
                     } else {
                         // the element is unchecked
                         cbElement.box.attr({fill: "#eeeeee"});
                         cbElement.chk.hide();
-                        raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'isNotChecked'});
+                        raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'uncheck'});
                     }
                 }
             });
@@ -665,6 +665,7 @@ var raphaelPaperObjects = {
             element: {},
             conditions: raphaelPaperObjects.conditionsParser(obj.conditions),
             initialize: true,
+            paper: this,
         };
 
         // data to int
@@ -673,9 +674,7 @@ var raphaelPaperObjects = {
 
         let elinput = {};
         elinput.rect = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#ffffff", "stroke": "#bbbbbb", "stroke-width": 0.7});
-        if(obj.value.trim() != '') {
-            elinput.txt = this.text(dataLeft+7, dataTop + 12, obj.value).attr({"text-anchor": "start", "font-size": 14});
-        }
+
 
         elinput.cover = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#eeeeee", stroke: "none", "fill-opacity": 0, "cursor": "text"});
         elinput.cover.click(function() 
@@ -695,7 +694,19 @@ var raphaelPaperObjects = {
         });
         // Properties
         // ===============================================================================
-        input.show = function(){
+        input.value = function(val) 
+        {    
+            // remove previous element 
+            if(typeof input.element.txt === 'object' && typeof input.element.txt.remove === "function") {
+                input.element.txt.remove();                
+            }
+            input.element.txt = input.paper.text(dataLeft+7, dataTop + 12, val).attr({"text-anchor": "start", "font-size": 14});
+            if(!input.initialize) {
+                raphaelPaperObjects.events.emit('iSpeak', {name: input.name, status: 'value'});
+            }
+        };
+        input.show = function()
+        {
             for( let i in input.element){
                 input.element[i].show();
             }
@@ -744,7 +755,11 @@ var raphaelPaperObjects = {
             input.enable();
         } else {
             input.disable();
-        }        
+        } 
+        if(obj.value.trim() != '') {
+            input.value.call(this, obj.value);
+        }       
+        
         // set to false - we have initialized the element
         input.initialize = false;
 
@@ -807,6 +822,7 @@ var raphaelPaperObjects = {
         raphaelPaperObjects.objList[obj.name] = label;
     },
     // radio
+    // TO DO  ---- check methods
     radio: function(radios, obj) 
     {
         let radio = {
@@ -933,6 +949,7 @@ var raphaelPaperObjects = {
         };
 
         radio.select = function() {
+            radio.selected = true;
             radios[radio.group].fill[radio.index].show();
             //  emit event only if already intialized
             if(!radio.initialize) {            
@@ -940,6 +957,7 @@ var raphaelPaperObjects = {
             }
         };
         radio.deselect = function() {
+            radio.selected = false;
             radios[radio.group].fill[radio.index].hide();
             //  emit event only if already intialized
             if(!radio.initialize) {            
@@ -1287,10 +1305,10 @@ var raphaelPaperObjects = {
         return {conditions: [], elements: []};
     },
     conditionsChecker: function(data, element)
-    {
+    {        
         // check condition only if the element that "speak" is affecting us
         if(element.conditions.elements.includes(data.name)){
-            conditions.checkConditions(data, element);
+            conditions.checkConditions(data, element, raphaelPaperObjects.objList);
         }
     }
 

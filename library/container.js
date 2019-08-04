@@ -142,7 +142,12 @@ const container = {
     },
     // validate conditions and add them to the element
     validateConditions : function(data)
-    {        
+    {    
+        // if empty string -  remove conditions and save
+        if(data.conditions === ''){
+            this.elements[data.id].conditions = '';
+            return true;
+        }    
         // we received the data
         if(data.id !== void 0 & data.conditions != void 0 & data.name != void 0)
         {
@@ -161,6 +166,7 @@ const container = {
                 }
             }
         }
+        // error
         return false;
     },
 

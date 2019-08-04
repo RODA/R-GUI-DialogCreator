@@ -37,6 +37,26 @@ var helpers = {
         return(result);
     },
 
+    // remove single or double external quotes "text"
+    removeExternalQuotes(str)
+    {
+        let newStr = str;
+        if((str[0] == "'" || str[0] == '"') && (str[str.length-1] == "'" || str[str.length-1] == '"')) {
+            newStr = str.substring(1, str.length-1);
+        }
+        return newStr;
+    },
+
+    // return and array depth
+    getArrayDepth: function(arr) {
+        if (Array.isArray(arr)){
+            return 1 + Math.max(...arr.map(t => this.getArrayDepth(t)));
+        } else {
+            return 0;
+        }
+      }
+      
+
 };
 
 module.exports = helpers;

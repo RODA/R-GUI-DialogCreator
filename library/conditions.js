@@ -1,8 +1,11 @@
+const helpers = require("./helpers");
 const conditions = {
     // operands
     operands: ['==', '!=', '>=', '<='],
     //logicals: ['&', '|'],
     elements: [],
+
+    availableProperties: ['selected', 'checked', 'visible', 'enabled'],
 
     // entry point
     parseConditions: function(str)
@@ -52,7 +55,7 @@ const conditions = {
                 positions = this.getPositions(condition);
             }
             else {
-                return(false)
+                return false;
             }
         } 
 
@@ -104,14 +107,62 @@ const conditions = {
     },
 
 
-    checkConditions: function(weHave, element)
+    checkConditions: function(weHave, element, list)
     {
         // geting only the conditions | skiping elements
         let conditions = element.conditions.conditions;
-        console.log(weHave);
-        console.log(conditions);
 
+        // methods to apply
+        methods = Object.keys(conditions);
+        for(let i in methods){
+            let mtd = methods[i];
+            let respArray = this.conditionCheckRecursion(conditions[mtd], list);
+            
+            let depth = helpers.getArrayDepth(respArray);
+            
+            console.log(respArray.flat(depth).join(' '));
+            isOK = this.textConditionTest(respArray.flat(depth).join(' '));
+            console.log(isOK);
+                        
+            // conditions are meet, try to apply 'method'
+            if(isOK) {
+                let asg = mtd.split('=');
+                let mtdIs = asg[0].trim();
+                let valueIs = (asg[1] != void 0) ? helpers.removeExternalQuotes(asg[1].trim()) : true;
+                
+                // check if valid method
+                if ( typeof list[element.name][mtdIs] === 'function') 
+                {
+                    list[element.name][mtdIs](valueIs);
+                }
+            }
+        }        
+    },
+
+    //
+    conditionCheckRecursion: function(conditions, list)
+    {        
+        // console.log(conditions);
         
+        let response = [];
+        for(let i = 0; i < conditions.length; i++) {
+            if(Array.isArray(conditions[i])) {
+                let r = false;
+                conditions[i].forEach(function(element) {
+                    if(Array.isArray(element)){
+                        r = true;
+                    }
+                });
+                if(r) {
+                    response.push(this.conditionCheckRecursion(conditions[i], list));
+                } else {
+                    response.push(this.validateCondition(conditions[i], list));
+                }
+            } else {
+                response.push(conditions[i]);
+            }  
+        }
+        return response;    
     },
 
     // Helpers 
@@ -210,6 +261,68 @@ const conditions = {
 
         return [element, operandFound, a[1].trim()];
     },
+
+    // validate a condition
+    validateCondition: function(condition, list)
+    {
+        // a condition mist have exactly 3 elements | name, operand, property(value)
+        if(condition.length != 3){
+            return false;
+        }
+        let res = false;
+        let name = condition[0]; 
+        let operand = condition[1]; 
+        let propertyOrValue = condition[2]; 
+
+        if(this.availableProperties.includes(propertyOrValue))
+        {    
+            // check if element and property exists
+            if(list[name] === void 0 && list[name][propertyOrValue] === void 0){
+                return false;
+            }
+
+            switch (operand) {
+                case '==':
+                    res = list[name][propertyOrValue];
+                    break;
+                case '!=':
+                    res = !list[name][propertyOrValue];
+                    break;
+            }
+        } else {
+            
+            // check if element and value exists
+            if(lista[name].value === void 0){
+                return false;
+            }
+            switch (operand) {
+                case '==':
+                    res = (list[name].value == propertyOrValue);
+                    break;
+                case '!=':
+                    res = (list[name].value != propertyOrValue);
+                    break;
+                case '>=':
+                    res = (list[name].value >= propertyOrValue) ? true : false;
+                    break;
+                case '>=':
+                    res = (list[name].value <= propertyOrValue) ? true : false;
+                    break;
+            }
+        }        
+        // in case of wrong values
+        if(res) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
+    // text condition test
+    textConditionTest: function(txt)
+    {
+        return Function('"use strict";return (' + txt + ')')();
+    }
 };
 
 module.exports = conditions;
