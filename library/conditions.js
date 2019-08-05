@@ -120,9 +120,9 @@ const conditions = {
             
             let depth = helpers.getArrayDepth(respArray);
             
-            console.log(respArray.flat(depth).join(' '));
+            // console.log(respArray.flat(depth).join(' '));
             isOK = this.textConditionTest(respArray.flat(depth).join(' '));
-            console.log(isOK);
+            // console.log(isOK);
                         
             // conditions are meet, try to apply 'method'
             if(isOK) {
@@ -276,6 +276,10 @@ const conditions = {
 
         if(this.availableProperties.includes(propertyOrValue))
         {    
+            // console.log(name);
+            // console.log(propertyOrValue);
+            // console.log(list[name][propertyOrValue]);
+            
             // check if element and property exists
             if(list[name] === void 0 && list[name][propertyOrValue] === void 0){
                 return false;
@@ -309,7 +313,7 @@ const conditions = {
                     res = (list[name].value <= propertyOrValue) ? true : false;
                     break;
             }
-        }        
+        }                
         // in case of wrong values
         if(res) {
             return true;
