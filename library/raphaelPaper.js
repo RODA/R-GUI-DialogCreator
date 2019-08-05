@@ -114,6 +114,10 @@ var raphaelPaper = {
     // update element on paper
     updateElement: function(data)
     {                
+        // we need the old conditions if exists
+        let oldEl = container.getElement(data.parentId);
+        let oldConditions = (oldEl !== void 0) ? oldEl.conditions : '';
+        
         // remove the element first
         this.removeElement(data.parentId);
 
@@ -122,6 +126,7 @@ var raphaelPaper = {
         
         // if element does not have conditions add them
         if(data.conditions == void 0) { data.conditions = ''; }
+        if(oldConditions !== ''){ data.conditions = oldConditions; }
 
         // checking if we have all properties
         if( helpers.hasSameProps( this.settings[data.type.toLowerCase()], data )){
@@ -194,7 +199,7 @@ var raphaelPaper = {
     }, 
 
     // add element & data to container
-    addToContainer: function(parentID, element,  data)
+    addToContainer: function(parentID, element, data)
     {
         data.parentId = parentID;
 
@@ -213,7 +218,6 @@ var raphaelPaper = {
         if(isDataOK.error){
             dialog.showMessageBox(mainWindow, {type: "error", message: isDataOK.message, title: "Error", buttons: ["OK"]});
         }
-        
         
         container.elements[parentID] = Object.assign({}, data);        
     }, 

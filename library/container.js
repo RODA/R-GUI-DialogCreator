@@ -23,9 +23,7 @@ const container = {
             if(this.properties[prop]) {
                 this.properties[prop] = obj[prop];
             }
-        }
-        console.log(this.syntax);
-        
+        }       
     },
 
     // element properties
