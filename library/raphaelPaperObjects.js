@@ -675,11 +675,14 @@ var raphaelPaperObjects = {
         let elinput = {};
         elinput.rect = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#ffffff", "stroke": "#bbbbbb", "stroke-width": 0.7});
 
-
         elinput.cover = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#eeeeee", stroke: "none", "fill-opacity": 0, "cursor": "text"});
         elinput.cover.click(function() 
         {
-            // TO DO ---------------            
+            if(input.enabled) {
+                raphaelPaperObjects.customInput(obj.width - 10, 19, dataLeft+24, dataTop+1, input.value, input.paper).then((result) => {
+                    input.setValue(result);                    
+                });
+            }
 
         });
 
@@ -694,13 +697,14 @@ var raphaelPaperObjects = {
         });
         // Properties
         // ===============================================================================
-        input.value = function(val) 
+        input.setValue = function(val) 
         {    
             // remove previous element 
             if(typeof input.element.txt === 'object' && typeof input.element.txt.remove === "function") {
                 input.element.txt.remove();                
             }
             input.element.txt = input.paper.text(dataLeft+7, dataTop + 12, val).attr({"text-anchor": "start", "font-size": 14});
+            input.value = val;
             if(!input.initialize) {
                 raphaelPaperObjects.events.emit('iSpeak', {name: input.name, status: 'value'});
             }
@@ -757,7 +761,7 @@ var raphaelPaperObjects = {
             input.disable();
         } 
         if(obj.value.trim() != '') {
-            input.value.call(this, obj.value);
+            input.setValue.call(this, obj.value);
         }       
         
         // set to false - we have initialized the element
@@ -1303,7 +1307,33 @@ var raphaelPaperObjects = {
         if(element.conditions.elements.includes(data.name)){
             conditions.checkConditions(data, element, raphaelPaperObjects.objList);
         }
-    }
+    },
+
+    customInput: function(width, height, x, y, oldValue, paper) 
+    {    
+        return new Promise((resolve, reject) => {
+            let container = paper.canvas.parentNode;
+            let styles = "position: absolute; width: "+ (width) +"px; height: "+ (height) +"px; left: "+ x +"px; top: "+ y +"px; border: none; font-size: 14px; font-weight: 400; background: #ffffff; z-index:9000;";
+            
+            let input = document.createElement("input");
+
+            input.setAttribute("style", styles);
+            input.setAttribute("id", "inputEdit");
+            input.value = oldValue;
+            container.appendChild(input);
+            input.focus();
+
+            input.addEventListener('keyup', (event) => {
+                if(event.keyCode === 27 || event.keyCode === 13) {
+                    input.blur();
+                }
+            });
+            input.addEventListener('blur', (event) => {
+                input.parentNode.removeChild(input);            
+                resolve(input.value);
+            });            
+        });
+    },
 
 };  
 

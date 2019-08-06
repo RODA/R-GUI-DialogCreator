@@ -221,3 +221,48 @@ function operandsParser(str)
 
     return [a[0].trim(), operandFound, a[1].trim()];
 }
+
+
+
+const customInput = function(width, height, x, y, oldValue, paper) 
+{    
+    let container = paper.canvas.parentNode;
+    let styles = "position: absolute; width: "+ (width) +"px; height: "+ (height) +"px; left: "+ x +"px; top: "+ y +"px; border: none; font-size: 14px; font-weight: 400; background: none; opacity: 0";
+    
+    let input = document.createElement("input");
+    let newValue;
+
+    input.addEventListener('focus', startEditing);
+    input.addEventListener('keyup', _handleKeyDown);
+    input.addEventListener('blur', stopEditing);
+
+    input.focus();
+
+    function _handleKeyDown(event){
+        var tmp               = document.createElement("span");
+        var text              = this.input.value;
+        tmp.setAttribute('style', this.input.style.cssText);
+        tmp.style.height      = null;
+        tmp.style.width       = null;
+        tmp.style.visibility  = 'hidden';
+        tmp.innerHTML         = text.split('\n').join('<br />');
+
+        this.input.parentNode.appendChild(tmp);
+
+        this.input.style.width = tmp.offsetWidth + "px";
+        this.input.style.height = tmp.offsetHeight + "px";
+
+        tmp.parentNode.removeChild(tmp);
+    }
+    function startEditing(event) {
+        input.setAttribute("style", styles);
+        input.value = oldValue;
+        container.appendChild(input);
+    }
+    function stopEditing(event) {
+        newValue  = input.value;
+        input.parentNode.removeChild(input);
+    }
+
+    return newValue;
+};

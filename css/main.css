@@ -164,7 +164,7 @@ body {
 #updateElProps:disabled, #removeElement:disabled, #updateDialogProps:disabled, #dialogSyntax:disabled{
     color:#aaa;
 }
-#updateElProps:focus, #removeElement:focus, #updateDialogProps:focus, #conditions:focus, #dialogSyntax:focus{
+#updateElProps:focus, #removeElement:focus, #updateDialogProps:focus, #conditions:focus, #dialogSyntax:focus, #inputEdit:focus{
     outline: none;
 }
 #properties .buttons{
