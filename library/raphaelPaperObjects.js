@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-//// TO DO check if properties exists - we need this for import/open dialogs 
 // numer of max elements (events) - to decide on it
 require('events').EventEmitter.prototype._maxListeners = 35;
 const EventEmitter = require('events');
+
 const raphaelPaperSettings = require('./raphaelPaperSettings');
 const helpers = require("./helpers");
 const conditions = require('./conditions');
@@ -43,25 +43,25 @@ var raphaelPaperObjects = {
         let elType = obj.type.toLowerCase();
         switch(elType) {
             case "button": 
-                this.button.call(this.paper, obj);
+                this.button.call(this.paper, obj, elType);
                 break;
             case "checkbox":
-                this.checkBox.call(this.paper, obj);
+                this.checkBox.call(this.paper, obj, elType);
                 break;
             case "container": 
-                this.container.call(this.paper, obj);
+                this.container.call(this.paper, obj, elType, []);
                 break;
             case "counter": 
-                this.counter.call(this.paper, obj);
+                this.counter.call(this.paper, obj, elType);
                 break;
             case "input":
-                this.input.call(this.paper, obj);
+                this.input.call(this.paper, obj, elType);
                 break;
             case "label": 
                 this.label.call(this.paper, obj, elType);
                 break;
             case "radio": 
-                this.radio.call(this.paper, this.radios, obj);
+                this.radio.call(this.paper, this.radios, obj, elType);
                 break;
             case "select": 
                 this.select.call(this.paper, obj, elType, new EventEmitter(), ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5']);
@@ -76,8 +76,11 @@ var raphaelPaperObjects = {
     // =================================================================
     
     // the button element
-    button: function(obj)
+    button: function(obj, type)
     {
+        // return if the received object is not corect;
+        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+
         let button = {
             name: obj.name,
             visible: (obj.isVisible == 'true') ? true : false,
@@ -176,8 +179,11 @@ var raphaelPaperObjects = {
     },
 
     // the checkbox element
-    checkBox: function(obj) 
+    checkBox: function(obj, type) 
     {        
+        // return if the received object is not corect;
+        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+
         // x, y, isChecked, label, pos, dim, fontsize
         // checking / making properties
         if (helpers.missing(obj.top)) { obj.top = 10; }
@@ -186,7 +192,7 @@ var raphaelPaperObjects = {
         if (helpers.missing(obj.label)) { obj.label = ""; }
         if (helpers.missing(obj.pos)) { obj.pos = 3; }
         if (helpers.missing(obj.dim)) { obj.dim = 12; }
-        if (helpers.missing(obj.fontsize)) { obj.fontsize = 12; }
+        if (helpers.missing(obj.fontsize)) { obj.fontsize = 14; }
         
         let checkBox = {
             name: obj.name,
@@ -224,7 +230,7 @@ var raphaelPaperObjects = {
             txtanchor = "middle";
         }
         // the label
-        cbElement.label = this.text(xpos, ypos, obj.label).attr({"text-anchor": txtanchor, "font-size": (obj.fontsize + "px")});
+        cbElement.label = this.text(xpos, ypos, obj.label).attr({"text-anchor": txtanchor, "font-size": (obj.fontsize + "px"), "cursor": "default"});
         // the box
         cbElement.box = this.rect(parseInt(obj.left), parseInt(obj.top), obj.dim, obj.dim).attr({fill: (checkBox.checked)?"#97bd6c":"#eeeeee","stroke-width": 1, stroke: "#a0a0a0"});
         // the checked 
@@ -369,8 +375,11 @@ var raphaelPaperObjects = {
 
     // the container element
     // TO DO --- add data functionality
-    container: function(obj, data)
+    container: function(obj, type, data)
     {
+        // return if the received object is not corect;
+        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+
         let container = {
             name: obj.name,
             visible: (obj.isVisible == 'true') ? true : false,
@@ -454,8 +463,11 @@ var raphaelPaperObjects = {
     },
 
     // the counter element
-    counter: function(obj) 
+    counter: function(obj, type) 
     {
+        // return if the received object is not corect;
+        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+
         let counter = {
             name: obj.name,
             visible: (obj.isVisible == 'true') ? true : false,
@@ -596,8 +608,11 @@ var raphaelPaperObjects = {
     }, 
 
     // the input element
-    input: function(obj)
+    input: function(obj, type)
     {
+        // return if the received object is not corect;
+        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+
         let input = {
             name: obj.name,
             value: obj.value,
@@ -728,7 +743,8 @@ var raphaelPaperObjects = {
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = input;
     },       
-    // label
+   
+    // the label element
     label: function(obj, type)
     {
         // return if the received object is not corect;
@@ -742,8 +758,7 @@ var raphaelPaperObjects = {
             initialize: true,
         };
 
-        // TO DO check if properties exists - we need this for import/open dialogs
-        label.element = this.text(obj.left, obj.top, obj.text).attr({'fill': '#000000', "font-size": obj.fontSize, 'text-anchor': 'start'});
+        label.element = this.text(obj.left, obj.top, obj.text).attr({'fill': '#000000', "font-size": obj.fontSize, 'text-anchor': 'start', "cursor": "default"});
      
         // listen for events / changes
         raphaelPaperObjects.events.on('iSpeak', function(data)
@@ -754,8 +769,8 @@ var raphaelPaperObjects = {
                 raphaelPaperObjects.conditionsChecker(data, label);
             }
         });
-        // Properties
-        // ===============================================================================
+        
+        // the lable's methods
         label.show = function() {
             this.element.show();
             //  emit event only if already intialized
@@ -780,12 +795,17 @@ var raphaelPaperObjects = {
 
         // set to false - we have initialized the element
         label.initialize = false;
+
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = label;
     },
-    // radio
-    radio: function(radios, obj) 
+
+    // the radio element
+    radio: function(radios, obj, type) 
     {
+        // return if the received object is not corect;
+        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+
         let radio = {
             name: obj.name,
             group: obj.radioGroup,
@@ -802,10 +822,8 @@ var raphaelPaperObjects = {
 
         if (helpers.missing(obj.size)) { obj.size = 7; }
         if (helpers.missing(obj.vertspace)) { obj.vertspace = 25; }
-         // horizontal matrix
-        // if (helpers.missing(obj.horspace)) { obj.horspace = helpers.rep(0, obj.labels.length); }
-        // if (helpers.missing(obj.lbspace)) { obj.lbspace = 14; }
         if (helpers.missing(obj.fontsize)) { obj.fontsize = 14; }
+        
         // data
         let dataLeft = parseInt(obj.left);
         let dataTop = parseInt(obj.top);
@@ -820,7 +838,7 @@ var raphaelPaperObjects = {
         // drawing the radio and label
         let cColor = (obj.isEnabled == 'true') ? "#eeeeee" : "#6c757d";
         let tColor = (obj.isEnabled == 'true') ? "#000000" : "#6c757d";
-        me.label = this.text(dataLeft + 15, dataTop, obj.label).attr({"text-anchor": "start", "font-size": obj.fontsize+"px", fill:tColor});
+        me.label = this.text(dataLeft + 15, dataTop, obj.label).attr({"text-anchor": "start", "font-size": obj.fontsize+"px", fill:tColor, "cursor":"default"});
         me.circle = this.circle(dataLeft, dataTop, obj.size).attr({fill: cColor, "stroke": "#a0a0a0", "stroke-width": 1.2});
     
         // selected - initial hide - new Raphael SET
@@ -832,7 +850,6 @@ var raphaelPaperObjects = {
         // add iD / name
         me.name = obj.name;
         me.fill.hide();
-
 
         me.cover =  this.circle(dataLeft, dataTop, obj.size + 2).attr({fill: "#eeeeee", stroke: "none", "fill-opacity": 0, "cursor": "pointer"});
         me.cover.click(function() 
@@ -861,8 +878,8 @@ var raphaelPaperObjects = {
                 raphaelPaperObjects.conditionsChecker(data, radio);
             }
         });
-        // Properties
-        // ===============================================================================
+        
+        // the radio's methods
         radio.show = function() {
             me.label.show();
             me.circle.show();
@@ -884,7 +901,6 @@ var raphaelPaperObjects = {
                 raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'hide'});
             }
         };
-
         radio.enable = function() {
             radio.enabled = true;
             me.cover.attr({'cursor': 'pointer'});
@@ -901,7 +917,6 @@ var raphaelPaperObjects = {
                 raphaelPaperObjects.events.emit('iSpeak', {name: radio.name, status: 'disable'});
             }
         };
-
         radio.select = function() {
             radio.selected = true;
             me.fill.show();
@@ -938,9 +953,10 @@ var raphaelPaperObjects = {
 
         // set to false - we have initialized the element
         radio.initialize = false;
-      
     },
-    // select
+
+    // the select element
+    // TO DO - open element at the bottom of the window
     select: function(obj, type, eventMe, list)
     {
         // return if the received object is not corect;
@@ -960,6 +976,7 @@ var raphaelPaperObjects = {
         // data to int
         let dataLeft = parseInt(obj.left);
         let dataTop = parseInt(obj.top);
+        
         // not widther than 350
         obj.width = (obj.width > 350) ? 350 : obj.width;
         let dataWidth = parseInt(obj.width);
@@ -1031,7 +1048,7 @@ var raphaelPaperObjects = {
             }
         });
 
-        // Element list
+        // The select's element list
         // ===============================================================================
         let selectElements = newPaper.rect(5, 30, dataWidth, list.length * 25).attr({fill: "#FFFFFF", "stroke": "#333333", "stroke-width": 0.2}); 
         selectElements.hide();
@@ -1089,7 +1106,6 @@ var raphaelPaperObjects = {
         } 
 
         // listen for events / changes
-        // ===============================================================================
         raphaelPaperObjects.events.on('iSpeak', function(data)
         {
             if(obj.name != data.name){
@@ -1097,8 +1113,7 @@ var raphaelPaperObjects = {
             }            
         });
 
-        // Properties
-        // ===============================================================================
+        // the select's methods
         let hideSelectables = function(){
             // hide element list
             listSet.hide();
@@ -1181,10 +1196,12 @@ var raphaelPaperObjects = {
 
         // set to false - we have initialized the element
         select.initialize = false;
+
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = select;
     },
-    // separator
+
+    // the separator element
     separator: function(obj, type)
     {
         // return if the received object is not corect;
@@ -1198,15 +1215,13 @@ var raphaelPaperObjects = {
             initialize: true,
         };
 
-        // TO DO check if properties exists - we need this for import/open dialogs
-        if(obj.direction == 'x') {
-            
+        if(obj.direction == 'x') 
+        {    
             if(obj.length < 10 || obj.length > this.width - 20){ obj.length = 300; }
             let v = parseInt(obj.length) + parseInt(obj.left);
             separator.element = this.path("M" + obj.left + " " + obj.top + "L"+ v +" " + obj.top).attr({stroke: "#ccc"});
-        } 
-        else if(obj.direction == 'y') {
-
+        } else if(obj.direction == 'y') 
+        {
             if(obj.length < 10 || obj.length > this.height - 20){ obj.length = 300; }
             let v = parseInt(obj.length) + parseInt(obj.top);
             separator.element = this.path("M" + obj.left + " " + obj.top + "L" + obj.left + " " + v).attr({stroke: "#ccc"});
@@ -1219,8 +1234,8 @@ var raphaelPaperObjects = {
                 raphaelPaperObjects.conditionsChecker(data, separator);
             }
         });
-        // Properties
-        // ===============================================================================
+        
+        // the separator's methods
         separator.show = function() {
             this.element.show();
             //  emit event only if already intialized
@@ -1245,6 +1260,7 @@ var raphaelPaperObjects = {
 
         // set to false - we have initialized the element
         separator.initialize = false;
+        
         // add the element to the main list
         raphaelPaperObjects.objList[obj.name] = separator;
     },
@@ -1267,6 +1283,8 @@ var raphaelPaperObjects = {
         }
     },
 
+    // Helper Functions ===========================================================
+    // enable input editing
     customInput: function(width, height, x, y, oldValue, paper) 
     {    
         return new Promise((resolve, reject) => {
@@ -1292,7 +1310,7 @@ var raphaelPaperObjects = {
             });            
         });
     },
-
+    // retun a text's width
     getTextDim: function(text, fSize) 
     {
         if(fSize === null) {
@@ -1317,7 +1335,6 @@ var raphaelPaperObjects = {
         }
         return text;
     }
-
 };  
 
 module.exports = raphaelPaperObjects;

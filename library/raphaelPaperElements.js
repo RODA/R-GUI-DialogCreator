@@ -85,7 +85,7 @@ var raphaelPaperElements = {
             // label is to the right
             xpos += 20;
             ypos += dim / 2;
-            let label = paper.text(xpos, ypos, data.label).attr({"text-anchor": txtanchor, "font-size": "12px"});
+            let label = paper.text(xpos, ypos, data.label).attr({"text-anchor": txtanchor, "font-size": "14px"});
             let square = paper.rect(parseInt(data.left), dataTop, dim, dim).attr({fill: (data.isChecked === 'true') ? "#97bd6c" : "#eeeeee","stroke-width": 1, stroke: "#a0a0a0"});
             let checked;
 

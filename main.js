@@ -86,7 +86,7 @@ function createPreviewWindow(arg)
 
         // added extra space for title bar and scrollbars
         width: parseInt(dialogData.properties.width) + 40,
-        height: parseInt(dialogData.properties.height) + 45,
+        height: parseInt(dialogData.properties.height) + 185,
         title: dialogData.properties.title,
         autoHideMenuBar: true,
         parent: mainWindow,

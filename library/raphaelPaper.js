@@ -172,7 +172,11 @@ var raphaelPaper = {
         let elId = helpers.makeid();
         
         // add to container
-        this.addToContainer(elId, element, data);
+       let containerResp = container.addElement(elId, element, data);
+        // check if we have errors | if true show message
+        if(containerResp.error){
+            dialog.showMessageBox(mainWindow, {type: "error", message: containerResp.message, title: "Error", buttons: ["OK"]});
+        }
         
         // add element cover for drag and drop functionelity
         let bbEl = element.getBBox();
@@ -199,28 +203,28 @@ var raphaelPaper = {
     }, 
 
     // add element & data to container
-    addToContainer: function(parentID, element, data)
-    {
-        data.parentId = parentID;
+    // addToContainer: function(parentID, element, data)
+    // {
+    //     data.parentId = parentID;
 
-        if(element.type == 'set') {
-            element.forEach( (element) => {
-                data.elementIds.push(element.id);
-            });
-        } else {
-            data.elementIds.push(element.id);
-        }
+    //     if(element.type == 'set') {
+    //         element.forEach( (element) => {
+    //             data.elementIds.push(element.id);
+    //         });
+    //     } else {
+    //         data.elementIds.push(element.id);
+    //     }
 
-        // we are modifying the data object here
-        let isDataOK = container.prepareData(data);
+    //     // we are modifying the data object here
+    //     let isDataOK = container.prepareData(data);
         
-        // check if we have errors | if true show message
-        if(isDataOK.error){
-            dialog.showMessageBox(mainWindow, {type: "error", message: isDataOK.message, title: "Error", buttons: ["OK"]});
-        }
+    //     // check if we have errors | if true show message
+    //     if(isDataOK.error){
+    //         dialog.showMessageBox(mainWindow, {type: "error", message: isDataOK.message, title: "Error", buttons: ["OK"]});
+    //     }
         
-        container.elements[parentID] = Object.assign({}, data);        
-    }, 
+    //     container.elements[parentID] = Object.assign({}, data);        
+    // }, 
 
     // return a copy of the container for creating the preview dialog
     returnContainer: function()

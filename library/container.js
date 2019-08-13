@@ -5,16 +5,19 @@ const container = {
     properties: {}, 
     elements: {},
     syntax: '',
+    syntaxElements: [],
 
-    // paper properties: name, title, width, height
+    // Dialog =======================================
+    // dialog properties: name, title, width, height
     initialize: function(obj) 
     {
         this.properties = Object.assign({},obj);
         this.elements = {};
         this.syntax = '';
+        this.syntaxElements = [];
     },
     
-    // update paper props
+    // update dialog props
     updateProperties: function(obj)
     {
         // for new props please define in initialization raphaelPaper.js : make
@@ -26,23 +29,44 @@ const container = {
         }       
     },
 
-    // element properties
-    addElement: function(obj) 
+    // Elements ======================================
+    // add/save an element
+    addElement: function(parentID, element, data) 
     {
-        this.elements.push(obj);
-    },
+        data.parentId = parentID;
 
+        if(element.type == 'set') {
+            element.forEach( (element) => {
+                data.elementIds.push(element.id);
+            });
+        } else {
+            data.elementIds.push(element.id);
+        }
+
+        // we are modifying the data object here
+        let isDataOK = this.prepareData(data);
+        
+        // check if we have errors | if true show message
+        if(isDataOK.error){
+            return isDataOK;
+        }
+        // add/save element
+        this.elements[parentID] = Object.assign({}, data);     
+        // everythig is okay
+        return {error: false, message: ''};   
+    },
+    // remove element from container
+    removeElement: function(elID)
+    {
+        delete this.elements[elID];
+    },
     // return an element by ID
     getElement: function(elId)
     {       
         return this.elements[elId];
     },
 
-    // remove element from container
-    removeElement: function(elID)
-    {
-        delete this.elements[elID];
-    },
+
 
     // clean / make element data
     prepareData: function(data)
@@ -168,6 +192,7 @@ const container = {
         return false;
     },
 
+    // Syntax ======================================
     // get all the elements for the dialog syntaf
     elementsForSyntax: function()
     {        
