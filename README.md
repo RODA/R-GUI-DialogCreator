@@ -5,9 +5,13 @@ A R Software GUI in Electron JS
 
 ## Conditions
 
+All elements have the show and hide methods.
+
+Other methids are: check, uncheck, select, deselect, value, enable, disable.
+
 All elements can have conditions based on one of the properties: 
 
-- isVisible & isNotVisible, 
+- isVisible & isNotVisible,          
 - isEnabled & isNotEnabled, 
 - isSelected & isNotSelected, 
 - isChecked & isNotChecked.
@@ -20,8 +24,8 @@ All conditions must end with a semicolumn ;
 
 We have:
 
-1. | (pipe / or) for condition1|condition1 - when one of the conditions is true
-2. & (and) for condition1&condition1 - when both of the conditions are true
+1. | (pipe / or) for condition1|condition2 - when one of the conditions is true
+2. & (and) for condition1&condition2 - when both of the conditions are true
 
 ### Condition writing example
 
