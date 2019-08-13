@@ -617,7 +617,7 @@ var raphaelPaperObjects = {
         let elinput = {};
         elinput.rect = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#ffffff", "stroke": "#bbbbbb", "stroke-width": 0.7});
 
-        elinput.cover = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#eeeeee", stroke: "none", "fill-opacity": 0, "cursor": "text"});
+        elinput.cover = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#eeeeee", stroke: "none", "opacity": 0, "cursor": "text"});
         elinput.cover.click(function() 
         {
             if(input.enabled) {
@@ -625,7 +625,7 @@ var raphaelPaperObjects = {
                     input.setValue(result);                    
                 });
             }
-        });
+        }); 
 
         input.element = elinput;
 
@@ -636,8 +636,8 @@ var raphaelPaperObjects = {
                 raphaelPaperObjects.conditionsChecker(data, input);
             }
         });
-        // Properties
-        // ===============================================================================
+
+        // the input's methods
         input.setValue = function(val) 
         {    
             // remove previous element 
@@ -645,14 +645,18 @@ var raphaelPaperObjects = {
                 input.element.txt.remove();                
             }
             // check if the new text is bigger then the input an trim if so
-            let newValDim = raphaelPaperObjects.getTextDim(input.paper, val, null);
-            console.log(newValDim);
-            console.log(input.width);
-            console.log(val.substring(0, input.width - 5));
-            console.log(val.length);
+            let newValDim = raphaelPaperObjects.getTextDim(val, null);
             
-            let newText = (newValDim.width < input.width) ? val :  val.substring(0, input.width - 5) + '...';
+            let newText = (newValDim.width < input.width) ? val :  raphaelPaperObjects.limitTextOnWidth(val, input.width) + '...';
             input.element.txt = input.paper.text(dataLeft+7, dataTop + 12, newText).attr({"text-anchor": "start", "font-size": 14});
+            // make it editable
+            input.element.txt.click(function(){
+                if(input.enabled) {
+                    raphaelPaperObjects.customInput(obj.width - 10, 19, dataLeft+24, dataTop+1, input.value, input.paper).then((result) => {
+                        input.setValue(result);                    
+                    });
+                }
+            });
             // save full new value
             input.value = val;
             if(!input.initialize) {
@@ -680,19 +684,23 @@ var raphaelPaperObjects = {
         };
         input.enable = function() {
             input.enabled = true;
-            // input.element.rect.attr({fill: "#f9f9f9", opacity: 1});
-            // input.element.txt.attr({opacity: 1});
-            // input.element.cover.attr({'cursor': 'pointer'});
+            input.element.rect.attr({fill: "#ffffff"});
+            if(typeof input.element.txt === 'object'){
+                input.element.txt.attr({"fill-opacity" : 1, "cursor": "text"});
+            }
+            input.element.cover.attr({"cursor": "text"});
             //  emit event only if already intialized
             if(!input.initialize) {
                 raphaelPaperObjects.events.emit('iSpeak', {name: input.name, status: 'enable'});
             }
         };
-        input.disable = function() {
+        input.disable = function() {            
             input.enabled = false;
-            // input.element.rect.attr({fill: "#000", opacity: 0.2});
-            // input.element.txt.attr({opacity: 0.2});
-            // input.element.cover.attr({'cursor': 'default'});
+            input.element.rect.attr({fill: "#BBB"});
+            if(typeof input.element.txt === 'object'){
+                input.element.txt.attr({"fill-opacity" : 0.5, "cursor": "pointer"});
+            }
+            input.element.cover.attr({"cursor": "pointer"});
             //  emit event only if already intialized
             if(!input.initialize) {
                 raphaelPaperObjects.events.emit('iSpeak', {name: input.name, status: 'disable'});
@@ -700,6 +708,9 @@ var raphaelPaperObjects = {
         };
 
         // initialize
+        if(obj.value.trim() != '') {
+            input.setValue.call(this, obj.value);
+        }       
         if(input.visible) { 
             input.show();
         } else {
@@ -710,9 +721,6 @@ var raphaelPaperObjects = {
         } else {
             input.disable();
         } 
-        if(obj.value.trim() != '') {
-            input.setValue.call(this, obj.value);
-        }       
         
         // set to false - we have initialized the element
         input.initialize = false;
@@ -1285,17 +1293,29 @@ var raphaelPaperObjects = {
         });
     },
 
-    getTextDim: function(paper, text, fSize) 
+    getTextDim: function(text, fSize) 
     {
         if(fSize === null) {
             fSize = 14;
         }
         // temporary element to get the button's width
-        let labelT = paper.text(0, 0, text).attr({"text-anchor": "middle", "font-size": fSize});
+        let labelT = raphaelPaperObjects.paper.text(50, 50, text).attr({"text-anchor": "start", "font-size": fSize});
         let lBBox = labelT.getBBox();
         labelT.remove();   
 
         return {width: lBBox.width, height: lBBox.height};
+    },
+    // limit a text to a fix width
+    limitTextOnWidth(text, width)
+    {
+        let textDim =  this.getTextDim(text, null);
+        
+        while(textDim.width > (width - 13))
+        {
+            text = text.substring(0, text.length - 5);
+            textDim = this.getTextDim(text, null);           
+        }
+        return text;
     }
 
 };  
