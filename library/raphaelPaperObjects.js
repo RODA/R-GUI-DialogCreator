@@ -54,7 +54,7 @@ var raphaelPaperObjects = {
                 this.checkBox.call(this.paper, obj, elType);
                 break;
             case "container": 
-                this.container.call(this.paper, obj, elType, []);
+                this.container.call(this.paper, obj, elType, ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', 'Item 6']);
                 break;
             case "counter": 
                 this.counter.call(this.paper, obj, elType);
@@ -69,7 +69,7 @@ var raphaelPaperObjects = {
                 this.radio.call(this.paper, this.radios, obj, elType);
                 break;
             case "select": 
-                this.select.call(this.paper, obj, elType, new EventEmitter(), ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5']);
+                this.select.call(this.paper, obj, elType, new EventEmitter(), ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', 'Item 6']);
                 break;
             case "separator": 
                 this.separator.call(this.paper, obj, elType);
@@ -100,7 +100,7 @@ var raphaelPaperObjects = {
         let dataTop = parseInt(obj.top);
 
         // get the button's width
-        let lBBox = raphaelPaperObjects.getTextDim(this, obj.label, 14)
+        let lBBox = raphaelPaperObjects.getTextDim(this, obj.label, 14);
 
         let elButton = {};
         elButton.rect = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#f9f9f9", "stroke": "#eeeeee", "stroke-width": 0.7});
@@ -380,7 +380,7 @@ var raphaelPaperObjects = {
 
     // the container element
     // TODO --- add data functionality
-    container: function(obj, type, data)
+    container: function(obj, type, list)
     {
         // return if the received object is not corect;
         if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
@@ -405,7 +405,98 @@ var raphaelPaperObjects = {
         if(obj.height < 50) { obj.height = 50; }
         else if(obj.height > paper.height - 15) { obj.height = paper.height - 30; dataTop = 15; }
 
-        container.element = this.rect(dataLeft, dataTop, obj.width, obj.height).attr({fill: "#ffffff", "stroke": "#d6d6d6", "stroke-width": 1});
+        // container.element = this.rect(dataLeft, dataTop, obj.width, ).attr({fill: "#ffffff", "stroke": "#d6d6d6", "stroke-width": 1});
+
+        let div = document.createElement("div");
+        div.style.position = "absolute";
+        div.style.top = dataTop + 'px';
+        div.style.left = dataLeft + 'px';
+        // div.style.backgroundColor = '#FF0000';
+        div.style.width = ( obj.width + 10) + 'px';
+        div.style.height = obj.height;
+
+        // initialy paper is small - allow ather elements to be clickable
+        let newPaper = Raphael(div, obj.width + 10, obj.height);
+
+        let p = document.getElementById('paper');
+        p.appendChild(div);
+
+        // container.element.rect = newPaper.rect(5, 5, obj.width, 25).attr({fill: "#ffffff", "stroke": "#d6d6d6", "stroke-width": 1});
+        
+        // show / hide selected    
+        // ===============================================================================
+        // eventMe.on('selected', function(data) {
+        //     // check if we have an element | if yes remove it
+        //     if(typeof select.selected.remove === "function") {
+        //         select.selected.remove();                
+        //     }
+        //     select.selected = newPaper.text(13, 18, data).attr({"text-anchor": "start",fill: "#333333", "font-size": "14px"});
+        //     select.value = data;
+        //     // etmit event - obj value change
+        //     raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'select'});
+        // });
+        // eventMe.on('deSelected', function(data) {
+        //     select.selected.remove();
+        //     select.value = '';
+        //     // etmit event - obj value change
+        //     raphaelPaperObjects.events.emit('iSpeak', {name: obj.name, status: 'deselect'});
+        // });
+
+       
+
+        // The select's element list
+        // ===============================================================================
+        let selectElements = newPaper.rect(0, 0, obj.width, obj.height).attr({fill: "#FFFFFF", "stroke": "#333333", "stroke-width": 0.2}); 
+        selectElements.toFront();   
+
+        let listSet = this.set();
+        listSet.push(selectElements);
+
+        let position = 15;
+        let txt = [];
+        let cover = [];
+
+        // on click element
+        let elClicked = function() { 
+            let isOn = this.data('clicked');
+            for(let j = 0; j < cover.length; j++) {
+                cover[j].attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
+                txt[j].attr({"fill": "#333333"});
+            }
+            
+            if(!isOn) {
+                this.attr({"fill": "blue", "opacity": 0.5}).data('clicked', 1);
+                eventMe.emit('selected', this.data('elName'));
+            } else {
+                this.attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
+                eventMe.emit('deSelected', this.data('elName'));
+            }
+        };
+        // // on element over
+        // let elIn = function() { 
+        //     if(!this.data('clicked')){
+        //         this.attr({"opacity": 0.5}); 
+        //     }
+        // };
+        // // on element out
+        // let elOut = function() { 
+        //     if(!this.data('clicked')){
+        //         this.attr({"opacity": 0}); 
+        //     }                                             
+        // };
+        
+        // populate the list
+        for(let i = 0; i < list.length; i++) {
+            txt[i] = newPaper.text(10, position+3, list[i]).attr({"text-anchor": "start", "font-size": 14, fill: '#333333'});
+            // save the name of the
+            cover[i] = newPaper.rect(5 , position-10, obj.width - 10, 25).attr({fill: "#eeeeee", "opacity": 0, "cursor": "pointer", stroke: 0})
+                            .data('clicked', 0)
+                            .data('elName', list[i])
+                            .click( elClicked );
+                            // .hover( elIn, elOut );
+            listSet.push( txt[i], cover[i] );
+            position += 25;
+        } 
 
         // listen for events / changes
         raphaelPaperObjects.events.on('iSpeak', function(data)
@@ -417,14 +508,14 @@ var raphaelPaperObjects = {
 
         // the container's properties
         container.show = function(){
-            container.element.show();
+            // container.element.show();
             //  emit event only if already intialized
             if(!container.initialize) {
                 raphaelPaperObjects.events.emit('iSpeak', {name: container.name, status: 'show'});
             }
         };
         container.hide = function(){
-            container.element.hide();
+            // container.element.hide();
             //  emit event only if already intialized
             if(!container.initialize) {
                 raphaelPaperObjects.events.emit('iSpeak', {name: container.name, status: 'hide'});
@@ -432,7 +523,7 @@ var raphaelPaperObjects = {
         };
         container.enable = function() {
             container.enabled = true;
-            container.element.attr({fill: "#fff"});
+            // container.element.attr({fill: "#fff"});
             //  emit event only if already intialized
             if(!container.initialize) {
                 raphaelPaperObjects.events.emit('iSpeak', {name: container.name, status: 'enable'});
@@ -440,7 +531,7 @@ var raphaelPaperObjects = {
         };
         container.disable = function() {
             container.enabled = false;
-            container.element.attr({fill: "#eeeeee"});
+            // container.element.attr({fill: "#eeeeee"});
             //  emit event only if already intialized
             if(!container.initialize) {
                 raphaelPaperObjects.events.emit('iSpeak', {name: container.name, status: 'disable'});
