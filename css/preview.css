@@ -1,0 +1,25 @@
+html, body, .container {
+    height: 100%;
+}
+
+body {
+    padding: 0px;
+    margin: 0px;
+    font: caption;
+}
+
+.container{
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
+}
+
+#paper, #syntax {
+    flex-grow: 1;
+    text-align: center;
+}
+
+#command {
+    padding: 0px 30px;
+    text-align: left;
+}

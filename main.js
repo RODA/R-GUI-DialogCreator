@@ -179,7 +179,7 @@ ipcMain.on('conditionsValid', (event, args) => {
 
 // =================================================
 // Handle create syntax window
-function createSyntaxwWindow(arg)
+function createSyntaxwWindow(args)
 {   
     // create window but do not show it - waiting for data
     // https://stackoverflow.com/questions/51789711/how-to-send-data-between-parent-and-child-window-in-electron
@@ -197,7 +197,7 @@ function createSyntaxwWindow(arg)
     });
 
     // Open the DevTools.
-    // syntaxWindow.webContents.openDevTools();
+    syntaxWindow.webContents.openDevTools();
 
     syntaxWindow.loadURL(url.format({
         pathname: path.join(__dirname, './windows/syntaxWindow.html'),
@@ -211,7 +211,7 @@ function createSyntaxwWindow(arg)
     });
     // when data is ready show window
     syntaxWindow.once("show", () => {
-        syntaxWindow.webContents.send('elementsList', arg);
+        syntaxWindow.webContents.send('elementsList', args);
     });
     // when window is ready send data
     syntaxWindow.once("ready-to-show", ()=>{
@@ -221,11 +221,11 @@ function createSyntaxwWindow(arg)
     syntaxWindow.setMenu(null);
 }
 // lunch the conditions window
-ipcMain.on('startSyntaxWindow', (event, args) => {
+ipcMain.on('startSyntaxWindow', (event, args) => {   
     createSyntaxwWindow(args);
 }); 
 // send syntax to container
-ipcMain.on('saveDialogSyntax', (event, args) => {
+ipcMain.on('saveDialogSyntax', (event, args) => {   
     mainWindow.webContents.send('saveDialogSyntax', args);
 }); 
 // send back the response

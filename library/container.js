@@ -4,17 +4,21 @@ const container = {
 
     properties: {}, 
     elements: {},
-    syntax: '',
-    syntaxElements: [],
-
+    syntax: {
+        command: '',
+        defaultElements: []
+    },
+ 
     // Dialog =======================================
     // dialog properties: name, title, width, height
     initialize: function(obj) 
     {
         this.properties = Object.assign({},obj);
         this.elements = {};
-        this.syntax = '';
-        this.syntaxElements = [];
+        this.syntax = {
+            command: '',
+            defaultElements: []
+        }
     },
     
     // update dialog props
@@ -29,7 +33,8 @@ const container = {
         }       
     },
 
-    // Elements ======================================
+    // Elements 
+    // ======================================
     // add/save an element
     addElement: function(parentID, element, data) 
     {
@@ -66,8 +71,8 @@ const container = {
         return this.elements[elId];
     },
 
-
-
+    // Elements helper 
+    // ======================================
     // clean / make element data
     prepareData: function(data)
     {
@@ -94,7 +99,16 @@ const container = {
 
         return response;
     },
-
+    // element type container restrinctions
+    elementContainerDataSetExists()
+    {
+        for( let el in this.elements) {            
+            if( this.elements[el].type == 'Container' && this.elements[el].objViewClass == 'dataSet'){
+                return true;
+            }
+        }
+        return false;    
+    },
     // return new element name
     elementNameReturn: function(elName)
     {
@@ -151,17 +165,6 @@ const container = {
         }
         return [];
     },
-
-    // element type restrinctions
-    elementContainerDataSetExists()
-    {
-        for( let el in this.elements) {            
-            if( this.elements[el].type == 'Container' && this.elements[el].objViewClass == 'dataSet'){
-                return true;
-            }
-        }
-        return false;    
-    },
     // validate conditions and add them to the element
     validateConditions : function(data)
     {    
@@ -193,8 +196,8 @@ const container = {
     },
 
     // Syntax ======================================
-    // get all the elements for the dialog syntaf
-    elementsForSyntax: function()
+    // get all the elements for the dialog syntax
+    dataForSyntax: function()
     {        
         let noElements = Object.keys(this.elements);
         let response = { syntax: this.syntax, elements: []};
@@ -208,9 +211,18 @@ const container = {
         }
         return response;
     },
+    
     // save dialog syntax
-    saveSyntax: function(data){
-        this.syntax = data;
+    saveSyntax: function(data)
+    {        
+        // update syntax and elements
+        this.syntax.command = data.command;
+        console.log(data.elements);
+        this.syntax.defaultElements = data.elements;
+        
+        console.log(this);
+        
+
         return true;
     }
 };

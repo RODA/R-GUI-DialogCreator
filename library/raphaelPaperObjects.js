@@ -29,6 +29,11 @@ var raphaelPaperObjects = {
             this.paper.rect(0, 0, props.width, props.height).attr({'fill': '#fdfdfd'});
         }
 
+        // TODO - make syntax work
+        if(container.syntax !== void 0) {
+            this.events.emit('commandUpdate', container.syntax.command);
+        }
+
          // check if we have the Raphael paper and if we have elements to display
         if (this.paper.setSize && container.elements) {
             for (let key in container.elements) {
@@ -374,7 +379,7 @@ var raphaelPaperObjects = {
     },
 
     // the container element
-    // TO DO --- add data functionality
+    // TODO --- add data functionality
     container: function(obj, type, data)
     {
         // return if the received object is not corect;

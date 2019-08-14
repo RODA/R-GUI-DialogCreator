@@ -243,12 +243,14 @@ var raphaelPaper = {
 
     // ======================================================
     // get elements for dialog syntax
-    getElementForSyntax: function() {
-        return container.elementsForSyntax();
+    getDialogSyntax: function() {
+        return container.dataForSyntax();
     },
     // save the dialog syntax
     saveDialogSyntax: function(data)
     {
+        console.log('raphaelPaper');
+        
         return container.saveSyntax(data);
     }
 };

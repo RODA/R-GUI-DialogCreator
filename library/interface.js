@@ -38,7 +38,7 @@ ipcRenderer.on('conditionsCheck', (event, args) => {
 });
 
 // save syntax data
-ipcRenderer.on('saveDialogSyntax', (event, args) => {
+ipcRenderer.on('saveDialogSyntax', (event, args) => {    
     let valid = raphaelPaper.saveDialogSyntax(args);
     ipcRenderer.send('syntaxSaved', valid);
 });
@@ -78,8 +78,7 @@ $(document).ready(function(){
     });
     // add dialog syntax
     $('#dialogSyntax').on('click', function() {
-        let list = raphaelPaper.getElementForSyntax();
-        ipcRenderer.send('startSyntaxWindow', list);
+        ipcRenderer.send('startSyntaxWindow', raphaelPaper.getDialogSyntax());
     });
 
     // update element on press enter
