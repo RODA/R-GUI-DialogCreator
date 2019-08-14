@@ -1,36 +1,38 @@
 const helpers = require("./helpers");
 const conditions = {
-    // operands
-    operands: ['==', '!=', '>=', '<='],
-    //logicals: ['&', '|'],
+    // operators
+    operators: ['==', '!=', '>=', '<='],
     elements: [],
-
     availableProperties: ['selected', 'checked', 'visible', 'enabled'],
 
-    // entry point
+    // entry point for parsing an element's condition string
     parseConditions: function(str)
     {
-        // clear array every type
+        // clear array every time
+        // who is affecting the element
         this.elements.length = 0;
 
+        // we are spliting the element's condition string by semicolumn (;) to get the actual conditions
         let conditions = str.split(';');
         // remove empty trailing condition
         if(conditions[conditions.length - 1] == '') {
             conditions.pop();
         }
         
-        // no conditions or error
+        // if we do no have conditions or there was an error we exit
         if(conditions.length == 0) { return { error: true, result: {}}; }
     
         let result = {};
     
         for(let i=0; i < conditions.length; i++)
         {
+            // we are spliting the condion in two parts based on if
             let ifC = conditions[i].split('if');
             
             // we have an error - wrong format no | method if conditions |
             if(ifC.length != 2){ return { error: true, result: {}}; }
-                
+            
+            // recursiv parse each condition | ifC[1] is the right side of if
             obj = this.conditionParserRecursion(ifC[1].trim()); 
             
             // there was an error parsing the conditions
@@ -39,6 +41,7 @@ const conditions = {
             result[ifC[0].trim()] = obj; 
         }
 
+        // if there are no errors, return results and a copy of elements
         return { error: false, result: result, elements: this.elements.slice() };
     },
 
@@ -49,12 +52,14 @@ const conditions = {
         let p1 = condition.match(/\(/g);
         let p2 = condition.match(/\)/g);
         
+        // get the position of the first level of parantheses if there are any
         let positions = [];
         if(p1 !== null & p2 !== null) {
             if (p1.length == p2.length){
                 positions = this.getPositions(condition);
             }
             else {
+                // something wrong - probably the parentheses pairs do not match
                 return false;
             }
         } 
@@ -88,11 +93,11 @@ const conditions = {
             }
             else {
                 if (substrings[i] != "") {
-                    
+                    // parse the operand
                     let conditionByLogical = this.logicalsParser(substrings[i]);
                     let cPush = [];
                     for (let j = 0; j < conditionByLogical.length; j++) {
-                        res = this.operandsParser(conditionByLogical[j]);
+                        res = this.operatorsParser(conditionByLogical[j]);
                         if (Array.isArray(res)) {
                             cPush.push(res);
                         }else{
@@ -106,7 +111,10 @@ const conditions = {
         return response;
     },
 
-
+    // entry point for checking an elements conditions
+    // weHave - who triggerd the check, 
+    // element - what conditions we are checking, 
+    // list - contains a referance to all the elements of the dialog
     checkConditions: function(weHave, element, list)
     {
         // geting only the conditions | skiping elements
@@ -116,15 +124,15 @@ const conditions = {
         methods = Object.keys(conditions);
         for(let i in methods){
             let mtd = methods[i];
+            // recursively checking the conditions (left side of if - now an array)
             let respArray = this.conditionCheckRecursion(conditions[mtd], list);
             
+            // get the array's depth for flatening the array
             let depth = helpers.getArrayDepth(respArray);
             
-            // console.log(respArray.flat(depth).join(' '));
             isOK = this.textConditionTest(respArray.flat(depth).join(' '));
-            // console.log(isOK);
                         
-            // conditions are meet, try to apply 'method'
+            // if conditions are meet, try to apply the 'method'
             if(isOK) {
                 let asg = mtd.split('=');
                 let mtdIs = asg[0].trim();
@@ -133,17 +141,17 @@ const conditions = {
                 // check if valid method
                 if ( typeof list[element.name][mtdIs] === 'function') 
                 {
+                    // call the method with the value
                     list[element.name][mtdIs](valueIs);
                 }
             }
         }        
     },
 
-    //
+    // recursiv condition checker
     conditionCheckRecursion: function(conditions, list)
     {        
-        // console.log(conditions);
-        
+        // the condition here is an array with string or array keys
         let response = [];
         for(let i = 0; i < conditions.length; i++) {
             if(Array.isArray(conditions[i])) {
@@ -154,11 +162,14 @@ const conditions = {
                     }
                 });
                 if(r) {
+                    // if the key is an array call ourself
                     response.push(this.conditionCheckRecursion(conditions[i], list));
                 } else {
+                    // validate condition
                     response.push(this.validateCondition(conditions[i], list));
                 }
             } else {
+                // it is an logical perator
                 response.push(conditions[i]);
             }  
         }
@@ -170,19 +181,21 @@ const conditions = {
     // get the position of the () in the string
     getPositions: function(str)
     {    
+        // get the position of the ( in the string
         let regex1 = /\(/gi;
         let result;
         let indices1 = [];     
         while((result = regex1.exec(str))){
             indices1.push(result.index);
         }
-        
+        // get the position of the ) in the string
         let regex2 = /\)/gi;
         let indices2 = [];     
         while((result = regex2.exec(str))){
             indices2.push(result.index);
         }
     
+        // make array of pair parentheses
         let response = [];
         let first = 0;
         for(let i=0; i < indices1.length; i++){
@@ -231,27 +244,27 @@ const conditions = {
 
         return response;
     },
-
-    // parse by operands
-    operandsParser: function(str)
+    // parse by operators
+    // Note - operator with one char -- do we need it?
+    operatorsParser: function(str)
     {
         str = str.trim();
         let counter = 0;
-        let operandFound = '';
-        for (let i=0; i < this.operands.length; i++){
-            if (str.includes(this.operands[i])) {
+        let operatorFound = '';
+        for (let i=0; i < this.operators.length; i++){
+            if (str.includes(this.operators[i])) {
                 counter++;
-                operandFound = this.operands[i];
+                operatorFound = this.operators[i];
             }
         }
         
-        // we have an error -> there should be only one operand
+        // we have an error -> there should be only one operator
         if ( counter > 1 ) { return void 0; }
 
         // nothing found, return the string
         if (counter === 0) { return str; }
 
-        let a = str.split(operandFound);
+        let a = str.split(operatorFound);
 
         let element = a[0].trim();
         // save the element that is affecting us
@@ -259,33 +272,30 @@ const conditions = {
             this.elements.push(element);
         }
 
-        return [element, operandFound, a[1].trim()];
+        return [element, operatorFound, a[1].trim()];
     },
 
     // validate a condition
     validateCondition: function(condition, list)
     {
-        // a condition mist have exactly 3 elements | name, operand, property(value)
+        // a condition mist have exactly 3 elements | name, operator, property(value)
         if(condition.length != 3){
             return false;
         }
+
         let res = false;
         let name = condition[0]; 
-        let operand = condition[1]; 
+        let operator = condition[1]; 
         let propertyOrValue = condition[2]; 
 
+        // is it a valid property?
         if(this.availableProperties.includes(propertyOrValue))
         {    
-            // console.log(name);
-            // console.log(propertyOrValue);
-            // console.log(list[name][propertyOrValue]);
-            
             // check if element and property exists
             if(list[name] === void 0 && list[name][propertyOrValue] === void 0){
                 return false;
             }
-
-            switch (operand) {
+            switch (operator) {
                 case '==':
                     res = list[name][propertyOrValue];
                     break;
@@ -294,12 +304,11 @@ const conditions = {
                     break;
             }
         } else {
-            
             // check if element and value exists
             if(lista[name].value === void 0){
                 return false;
             }
-            switch (operand) {
+            switch (operator) {
                 case '==':
                     res = (list[name].value == propertyOrValue);
                     break;
@@ -321,7 +330,6 @@ const conditions = {
             return false;
         }
     },
-
     // text condition test
     textConditionTest: function(txt)
     {
