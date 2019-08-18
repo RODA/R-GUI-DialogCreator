@@ -54,7 +54,15 @@ var helpers = {
         } else {
             return 0;
         }
-      }
+    },
+
+    // remove item from array
+    removeValueFromArray(arr, value)
+    {
+        return arr.filter(function(element){
+            return element != value;
+        });
+    }
       
 
 };
