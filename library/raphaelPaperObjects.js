@@ -17,6 +17,8 @@ var raphaelPaperObjects = {
     radios: {},
     // main event thread
     events: new EventEmitter(),
+    // command
+    command: '',
     
     // create the main window & Raphael paper
     makeDialog: function(container) 
@@ -29,17 +31,21 @@ var raphaelPaperObjects = {
             this.paper.rect(0, 0, props.width, props.height).attr({'fill': '#fdfdfd'});
         }
 
-        // TODO - make syntax work
-        if(container.syntax !== void 0) {
-            this.events.emit('commandUpdate', container.syntax.command);
-        }
-
-         // check if we have the Raphael paper and if we have elements to display
+        // check if we have the Raphael paper and if we have elements to display
         if (this.paper.setSize && container.elements) {
             for (let key in container.elements) {
                 this.makeObject(container.elements[key]);
             }
         }
+        
+        // TODO - make syntax work
+        if(container.syntax !== void 0) {
+            this.makeCommand(container.syntax);
+        }
+        raphaelPaperObjects.events.on('iSpeak', function(data)
+        {
+            raphaelPaperObjects.makeCommand(container.syntax);
+        });
     },
 
     // create an object based on it's type
@@ -75,6 +81,108 @@ var raphaelPaperObjects = {
                 this.separator.call(this.paper, obj, elType);
                 break;
         }
+    },
+
+    // build the dialog command
+    makeCommand: function(syntax)
+    {
+        let command = syntax.command;
+        let previewCommand = this.updateCommand(command, syntax.defaultElements);
+        
+        // {name}
+        let regex = /({[a-z0-9]+})/g;
+        let elements = command.match(regex);
+        for(let i = 0; i < elements.length; i++) {
+            let name = elements[i].substring(1, elements[i].length-1);
+            let elementValue = raphaelPaperObjects.getCommandElementValue(name);
+            
+            if (elementValue === '') {
+                command = this.updateCommand(command, [name]);
+                previewCommand = this.updateCommand(previewCommand, [name]);
+            }
+            command = command.replace(elements[i], elementValue);                       
+            previewCommand = previewCommand.replace(elements[i], elementValue);                       
+        }
+        // update dialog comand
+        raphaelPaperObjects.command = command;
+        // console.log(command);
+        // console.log(previewCommand);
+        
+        this.events.emit('commandUpdate', previewCommand);
+    },
+
+    // get the element's value for command
+    getCommandElementValue: function(name)
+    {
+        // we have the object
+        if(raphaelPaperObjects.objList[name] !== void 0) {
+            let el = raphaelPaperObjects.objList[name];
+            
+            // is a checkbox
+            if(el.checked !== void 0) {
+                return el.checked;
+            }
+            // is input or counter
+            if(el.value !== void 0) {
+                return el.value;
+            }
+        } else {
+            // check if we have a radioGroup            
+            if(raphaelPaperObjects.radios[name] !== void 0) {
+                let found = '';
+                for (let key in raphaelPaperObjects.radios[name]) {
+        
+                    if(raphaelPaperObjects.objList[key].selected){
+                        found = raphaelPaperObjects.objList[key].name;
+                    }
+                }
+                return found;
+            }
+        }
+    },
+    // updateCommand - remove elements
+    updateCommand: function(command, defaultElements) 
+    {
+        // console.log(command);
+        // nothing to remove
+        if(defaultElements.length == 0) {
+            return command;
+        }
+
+        let commandArgs = [];
+        let newCommand = '';
+        commandArgs = raphaelPaperObjects.getCommandArgs(command);            
+        if (commandArgs.length > 0) {                        
+            newCommand += commandArgs[0]; 
+            for (let j = 1; j < commandArgs.length - 1; j++) {
+                let add = true;                   
+                for (let i = 0; i < defaultElements.length; i++) {
+                    if (commandArgs[j].indexOf(defaultElements[i]) != -1) {
+                        add = false;
+                    }
+                }
+                if (add) {
+                    newCommand += commandArgs[j] + ',';
+                }
+            }
+            newCommand = newCommand.substring(0, newCommand.length - 1);
+            newCommand += commandArgs[commandArgs.length - 1]; 
+        }
+
+        return newCommand;
+    },
+    // get the comand's args
+    getCommandArgs: function(command)
+    {
+        let fIndex = command.indexOf('(');
+        let lIndex = command.lastIndexOf(')');
+        // wrong formula?
+        if (fIndex == -1 || lIndex == -1) {
+            return [];
+        }
+        let cArgs = command.substring(fIndex+1, lIndex);
+        // return splited command        
+        return [command.substring(0, fIndex+1), cArgs.split(','), command.substring(lIndex, command.length)].flat(1);
     },
 
     // Elements 
@@ -721,7 +829,7 @@ var raphaelPaperObjects = {
         elinput.cover.click(function() 
         {
             if(input.enabled) {
-                raphaelPaperObjects.customInput(obj.width - 10, 19, dataLeft+24, dataTop+1, input.value, input.paper).then((result) => {
+                raphaelPaperObjects.customInput(obj.width - 10, 19, dataLeft+22, dataTop+1, input.value, input.paper).then((result) => {
                     input.setValue(result);                    
                 });
             }
@@ -748,11 +856,11 @@ var raphaelPaperObjects = {
             let newValDim = raphaelPaperObjects.getTextDim(val, null);
             
             let newText = (newValDim.width < input.width) ? val :  raphaelPaperObjects.limitTextOnWidth(val, input.width) + '...';
-            input.element.txt = input.paper.text(dataLeft+7, dataTop + 12, newText).attr({"text-anchor": "start", "font-size": 14});
+            input.element.txt = input.paper.text(dataLeft+5, dataTop + 12, newText).attr({"text-anchor": "start", "font-size": 14});
             // make it editable
             input.element.txt.click(function(){
                 if(input.enabled) {
-                    raphaelPaperObjects.customInput(obj.width - 10, 19, dataLeft+24, dataTop+1, input.value, input.paper).then((result) => {
+                    raphaelPaperObjects.customInput(obj.width - 10, 19, dataLeft+22, dataTop+1, input.value, input.paper).then((result) => {
                         input.setValue(result);                    
                     });
                 }
@@ -847,9 +955,7 @@ var raphaelPaperObjects = {
      
         // listen for events / changes
         raphaelPaperObjects.events.on('iSpeak', function(data)
-        {
-            console.log(data);
-            
+        {            
             if(obj.name != data.name){
                 raphaelPaperObjects.conditionsChecker(data, label);
             }
@@ -1385,7 +1491,11 @@ var raphaelPaperObjects = {
             input.focus();
 
             input.addEventListener('keyup', (event) => {
-                if(event.keyCode === 27 || event.keyCode === 13) {
+                if(event.keyCode === 13) {
+                    input.blur();
+                }
+                if(event.keyCode === 27) {
+                    resolve(oldValue);
                     input.blur();
                 }
             });

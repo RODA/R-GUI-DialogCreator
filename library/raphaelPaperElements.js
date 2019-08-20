@@ -13,10 +13,11 @@ var raphaelPaperElements = {
             if(data.fontSize < 10 || data.fontSize > 20){ data.fontSize = 12; }
 
             // data.top + 7 fix
-            let dataTop = parseInt(data.top) + 7;
+            let dataTop = parseInt(data.top) + 8;
+            let dataLeft = parseInt(data.left) + 1;
 
             // return Raphael object
-            return paper.text(data.left, dataTop, data.text).attr({fill: '#000', "font-size": data.fontSize, 'text-anchor': 'start'});
+            return paper.text(dataLeft, dataTop, data.text).attr({fill: '#000', "font-size": data.fontSize, 'text-anchor': 'start'});
         } else {
             return;
         }

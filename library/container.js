@@ -201,14 +201,29 @@ const container = {
     {        
         let noElements = Object.keys(this.elements);
         let response = { syntax: this.syntax, elements: []};
-    
+        let radioGroups = [];
+
         if(noElements.length == 0){ return response; }
 
         for(let i in this.elements){
-            if(this.elements[i].type != 'Label' && this.elements[i].type != 'Separator'){
+            // ignore some elements
+            if(this.elements[i].type != 'Label' && this.elements[i].type != 'Separator' && this.elements[i].type != 'Radio') {
                 response.elements.push({name: this.elements[i].name, type: this.elements[i].type});
             }
+            // get anly the radio grup
+            if(this.elements[i].type == 'Radio') {
+                if(!radioGroups.includes(this.elements[i].radioGroup)) {
+                    radioGroups.push(this.elements[i].radioGroup);
+                }
+            }
         }
+
+        if(radioGroups.length > 0) {
+            for(let i = 0; i < radioGroups.length; i++) {
+                response.elements.push({ name: radioGroups[i], type: 'RadioGroup'});
+            }
+        }
+
         return response;
     },
     
@@ -217,11 +232,7 @@ const container = {
     {        
         // update syntax and elements
         this.syntax.command = data.command;
-        console.log(data.elements);
-        this.syntax.defaultElements = data.elements;
-        
-        console.log(this);
-        
+        this.syntax.defaultElements = data.elements;       
 
         return true;
     }

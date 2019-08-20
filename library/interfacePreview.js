@@ -9,5 +9,5 @@ ipcRenderer.on('dialogCreated', (event, args) =>
 // show syntax / command
 raphaelPaperObjects.events.on('commandUpdate', function(data) 
 {
-    $('#command').append(data);
+    $('#command').html(data);
 });

@@ -248,9 +248,7 @@ var raphaelPaper = {
     },
     // save the dialog syntax
     saveDialogSyntax: function(data)
-    {
-        console.log('raphaelPaper');
-        
+    {        
         return container.saveSyntax(data);
     }
 };

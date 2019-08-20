@@ -23,6 +23,9 @@ body {
     padding: 0px 30px;
     text-align: left;
 }
+#inputEdit:focus{
+    outline: none;
+}
 
 div[id^="container-"]{
     overflow-x: hidden;
