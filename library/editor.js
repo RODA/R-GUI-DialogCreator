@@ -1,23 +1,23 @@
 /* eslint-disable no-console */
-const container = require("./container");
-const paperElements = require("./raphaelPaperElements");
-const helpers = require('./helpers');
 const EventEmitter = require('events');
 const { dialog } = require('electron').remote;
 // get current window for making dialogs modals
-const mainWindow = require('electron').remote.getCurrentWindow();
+const editorWindow = require('electron').remote.getCurrentWindow();
 
-const raphaelPaperSettings = require('./raphaelPaperSettings');
+const defaultSettings = require('./defaultSettings');
+const elements = require("./editorElements");
+const container = require("./container");
+const helpers = require('./helpers');
 
-// class PEvents extends EventEmitter {}
+//TODO -- import function
 
-var raphaelPaper = {
+var editor = {
 
     paper: {}, 
     paperExists: false,   
     bgId: '',
-    paperEvents: new EventEmitter(),
-    settings: raphaelPaperSettings,
+    editorEvents: new EventEmitter(),
+    settings: defaultSettings,
 
     // create available element list
     drawAvailableElements: function()
@@ -46,7 +46,7 @@ var raphaelPaper = {
         //add info to container - add availabel props
         container.initialize(this.settings.dialog);
         // emit dialog update
-        raphaelPaper.paperEvents.emit('dialogUpdate', this.settings.dialog);
+        editor.editorEvents.emit('dialogUpdate', this.settings.dialog);
     },
 
     // update paper
@@ -70,7 +70,7 @@ var raphaelPaper = {
             container.updateProperties(props);            
         } else {
             // alert no paper to resize
-            dialog.showMessageBox(mainWindow, {type: "info", message: "Please create a new dialog first.", title: "No dialog", buttons: ["OK"]});
+            dialog.showMessageBox(editorWindow, {type: "info", message: "Please create a new dialog first.", title: "No dialog", buttons: ["OK"]});
         }
     },
     
@@ -80,7 +80,7 @@ var raphaelPaper = {
         this.paper.remove();
         this.paperExists = false;
         // clear props for any selected element 
-        raphaelPaper.paperEvents.emit('clearProps');
+        editor.editorEvents.emit('clearProps');
     },
 
     // add new element on paper
@@ -89,8 +89,8 @@ var raphaelPaper = {
         // checking if there is a paper
         if(this.paperExists) {
             
-            if(!this.settings.availableElements.includes(type) || (paperElements['add' + type] === void 0)) {
-                dialog.showMessageBox(mainWindow, {type: "error", message: "Element type not available. Probably functionality not added.", title: "Error", buttons: ["OK"]});
+            if(!this.settings.availableElements.includes(type) || (elements['add' + type] === void 0)) {
+                dialog.showMessageBox(editorWindow, {type: "error", message: "Element type not available. Probably functionality not added.", title: "Error", buttons: ["OK"]});
                 return;
             }
             
@@ -101,13 +101,13 @@ var raphaelPaper = {
                 dataSettings.name = container.elementNameReturn(dataSettings.name);
             }   
 
-            let element = paperElements['add' + type](this.paper, dataSettings);            
+            let element = elements['add' + type](this.paper, dataSettings);            
         
             // adn cover, drag and drop and add it to the container
             this.addCoverAndDrag(element, dataSettings, false);
 
         } else {
-            dialog.showMessageBox(mainWindow, {type: "info", message: "Please create a new dialog first.", title: "No dialog", buttons: ["OK"]});
+            dialog.showMessageBox(editorWindow, {type: "info", message: "Please create a new dialog first.", title: "No dialog", buttons: ["OK"]});
         }
     },
 
@@ -136,7 +136,7 @@ var raphaelPaper = {
                 data.name = container.elementNameReturn(data.name);
             }
             
-            let newElement = paperElements['add' + data.type](this.paper, data);
+            let newElement = elements['add' + data.type](this.paper, data);
 
             this.addCoverAndDrag(newElement, data, true);
 
@@ -175,7 +175,7 @@ var raphaelPaper = {
        let containerResp = container.addElement(elId, element, data);
         // check if we have errors | if true show message
         if(containerResp.error){
-            dialog.showMessageBox(mainWindow, {type: "error", message: containerResp.message, title: "Error", buttons: ["OK"]});
+            dialog.showMessageBox(editorWindow, {type: "error", message: containerResp.message, title: "Error", buttons: ["OK"]});
         }
         
         // add element cover for drag and drop functionelity
@@ -190,15 +190,15 @@ var raphaelPaper = {
         
         // element mousedown / clicked? get data from container
         st.mousedown(function() {
-            raphaelPaper.paperEvents.emit('getEl', container.getElement(this.data("elId")));                
+            editor.editorEvents.emit('getEl', container.getElement(this.data("elId")));                
         });
         
         // make element draggable and update container and refresh
-        paperElements.draggable.call(st, raphaelPaper.paperEvents, container);
+        elements.draggable.call(st, editor.editorEvents, container);
 
         // on element update triger interface update
         if(update){            
-            raphaelPaper.paperEvents.emit('getEl', container.getElement(elId));     
+            editor.editorEvents.emit('getEl', container.getElement(elId));     
         }
     }, 
 
@@ -220,7 +220,7 @@ var raphaelPaper = {
         
     //     // check if we have errors | if true show message
     //     if(isDataOK.error){
-    //         dialog.showMessageBox(mainWindow, {type: "error", message: isDataOK.message, title: "Error", buttons: ["OK"]});
+    //         dialog.showMessageBox(editorWindow, {type: "error", message: isDataOK.message, title: "Error", buttons: ["OK"]});
     //     }
         
     //     container.elements[parentID] = Object.assign({}, data);        
@@ -253,4 +253,4 @@ var raphaelPaper = {
     }
 };
 
-module.exports = raphaelPaper;
+module.exports = editor;

@@ -3,18 +3,18 @@ const { ipcRenderer } = require('electron');
 const { dialog } = require('electron').remote;
 // get current window for making dialogs modals
 const mainWindow = require('electron').remote.getCurrentWindow();
-const raphaelPaper = require("../library/raphaelPaper");
+const editor = require("../library/editor");
 
 // new window clicked
 ipcRenderer.on('newWindow', (event, args) => {
-    if(raphaelPaper.paperExists === true) {
+    if(editor.paperExists === true) {
         let confirm = dialog.showMessageBox(mainWindow, {type: "question", message: "Are you sure?", title: "Create new dialog", buttons: ["No", "Yes"]});
         if(confirm){
-            raphaelPaper.remove();
-            raphaelPaper.make();
+            editor.remove();
+            editor.make();
         }
     }else{
-        raphaelPaper.make();
+        editor.make();
     }
     document.getElementById('updateDialogProps').disabled = false;
     document.getElementById('dialogSyntax').disabled = false;
@@ -22,8 +22,8 @@ ipcRenderer.on('newWindow', (event, args) => {
 
 // send data to preview window
 ipcRenderer.on('previewDialog', (event, args) => {
-    if(raphaelPaper.paperExists === true) {
-        let container = raphaelPaper.returnContainer();
+    if(editor.paperExists === true) {
+        let container = editor.returnContainer();
         ipcRenderer.send('containerData', container);
     } else {
         dialog.showMessageBox(mainWindow, {type: "info", message: "Please create a new dialog first.", title: "No dialog", buttons: ["OK"]});
@@ -33,13 +33,13 @@ ipcRenderer.on('previewDialog', (event, args) => {
 
 // verify element's conditions and respond
 ipcRenderer.on('conditionsCheck', (event, args) => {
-    let valid = raphaelPaper.getConditionStatus(args);
+    let valid = editor.getConditionStatus(args);
     ipcRenderer.send('conditionsValid', valid);
 });
 
 // save syntax data
 ipcRenderer.on('saveDialogSyntax', (event, args) => {    
-    let valid = raphaelPaper.saveDialogSyntax(args);
+    let valid = editor.saveDialogSyntax(args);
     ipcRenderer.send('syntaxSaved', valid);
 });
 
@@ -47,11 +47,11 @@ ipcRenderer.on('saveDialogSyntax', (event, args) => {
 $(document).ready(function(){
 
     // draw available elements
-    $('#elementsList').html(raphaelPaper.drawAvailableElements());
+    $('#elementsList').html(editor.drawAvailableElements());
 
     // send event to add element to paper
     $('#paperAvailableElements').on('click', function(evt) {
-        raphaelPaper.addElementToPaper(event.target.id, 20, 60, 'name2');
+        editor.addElementToPaper(event.target.id, 20, 60, 'name2');
     });
 
     // Elements name (id) only leters and numbers and max 15 chars
@@ -74,11 +74,11 @@ $(document).ready(function(){
             obj[key] = el.val();
         });  
 
-       raphaelPaper.update(obj);
+       editor.update(obj);
     });
     // add dialog syntax
     $('#dialogSyntax').on('click', function() {
-        ipcRenderer.send('startSyntaxWindow', raphaelPaper.getDialogSyntax());
+        ipcRenderer.send('startSyntaxWindow', editor.getDialogSyntax());
     });
 
     // update element on press enter
@@ -98,7 +98,7 @@ $(document).ready(function(){
                     }
                 });
                 // send obj for update
-                raphaelPaper.updateElement(obj);
+                editor.updateElement(obj);
             }
         }
     });
@@ -116,14 +116,14 @@ $(document).ready(function(){
             }
         });
         // send obj for update
-        raphaelPaper.updateElement(obj);
+        editor.updateElement(obj);
     });
 
     // remove an element
     $("#removeElement").on('click', function(){
 
         // send element data ID
-        raphaelPaper.removeElement($("#elparentId").val());
+        editor.removeElement($("#elparentId").val());
 
         clearProps();
     });
@@ -131,13 +131,13 @@ $(document).ready(function(){
     // adding / removing an elements conditions
     $('#conditions').on('click', function(){
         let id = $('#elparentId').val();
-        let element = raphaelPaper.getElementFromContainer(id);
+        let element = editor.getElementFromContainer(id);
         ipcRenderer.send('conditionsData', {'id': id, 'name': element.name, 'conditions': element.conditions});
     });
     
     // Paper Events ========================================
     // show element properties
-    raphaelPaper.paperEvents.on('getEl', function(element) {
+    editor.editorEvents.on('getEl', function(element) {
         
         // disable all elements and hide everything | reseting props tab
         $('#propertiesList [id^="el"]').prop('disabled', true);
@@ -161,7 +161,7 @@ $(document).ready(function(){
     });
 
     // show dialog props
-    raphaelPaper.paperEvents.on('dialogUpdate', function(props) {
+    editor.editorEvents.on('dialogUpdate', function(props) {
         
         let properties = $('#dialogProps [id^="dialog"]');
         
@@ -174,7 +174,7 @@ $(document).ready(function(){
     });
 
     // new dialog - clear elements prop
-    raphaelPaper.paperEvents.on('clearProps', function() {
+    editor.editorEvents.on('clearProps', function() {
         clearProps();
     });
 

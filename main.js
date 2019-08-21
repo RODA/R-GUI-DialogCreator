@@ -8,15 +8,15 @@ const { ipcMain } = require('electron');
 // for messages
 const { dialog } = require('electron');
 
-let mainWindow;
+let editorWindow;
 let aboutWindow;
-let previewWindow;
+let objectsWindow;
 
 // Listen for app to be ready
 app.on('ready', function()
 {    
     // Create new window
-    mainWindow = new BrowserWindow({
+    editorWindow = new BrowserWindow({
         webPreferences:{
             nodeIntegration: true
         },
@@ -25,19 +25,19 @@ app.on('ready', function()
         center: true
     });
     // load html into the window
-    mainWindow.loadURL(url.format({
-        pathname: path.join(__dirname, './windows/mainWindow.html'),
+    editorWindow.loadURL(url.format({
+        pathname: path.join(__dirname, './windows/editorWindow.html'),
         protocol: 'file:',
         slashes: true
     }));
     // maximize
-    mainWindow.maximize();
+    editorWindow.maximize();
 
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools()
+    // editorWindow.webContents.openDevTools()
 
     //Quit app when closed
-    mainWindow.on('closed', function(){
+    editorWindow.on('closed', function(){
         app.quit(); 
     });
 
@@ -55,7 +55,7 @@ function createAboutWindow()
         with:600,
         height: 400,
         title: 'About R GUI',
-        parent:mainWindow,
+        parent:editorWindow,
         center: true,
         modal: true
     });
@@ -73,13 +73,13 @@ function createAboutWindow()
 }
 
 // Handle create preview window
-function createPreviewWindow(arg)
+function createObjectsWindow(arg)
 {
     let dialogData = JSON.parse(arg);
 
     // create window but do not show it - waiting for data
     // https://stackoverflow.com/questions/51789711/how-to-send-data-between-parent-and-child-window-in-electron
-    previewWindow = new BrowserWindow({
+    objectsWindow = new BrowserWindow({
         webPreferences:{
             nodeIntegration: true
         },
@@ -89,35 +89,35 @@ function createPreviewWindow(arg)
         height: parseInt(dialogData.properties.height) + 185,
         title: dialogData.properties.title,
         autoHideMenuBar: true,
-        parent: mainWindow,
+        parent: editorWindow,
         resizable: false,
         show: false,
         // modal: true
     });
 
     // Open the DevTools.
-    previewWindow.webContents.openDevTools();
+    objectsWindow.webContents.openDevTools();
 
-    previewWindow.loadURL(url.format({
-        pathname: path.join(__dirname, './windows/previewWindow.html'),
+    objectsWindow.loadURL(url.format({
+        pathname: path.join(__dirname, './windows/objectsWindow.html'),
         protocol: "file:",
         slashes: true
     }));
     // Garbage collection handle
-    previewWindow.on('closed', function(){
-        previewWindow = null;
+    objectsWindow.on('closed', function(){
+        objectsWindow = null;
         
     });
     // when data is ready show window
-    previewWindow.once("show", () => {
-        previewWindow.webContents.send('dialogCreated', dialogData);
+    objectsWindow.once("show", () => {
+        objectsWindow.webContents.send('dialogCreated', dialogData);
     });
     // when window is ready send data
-    previewWindow.once("ready-to-show", ()=>{
-        previewWindow.show();
+    objectsWindow.once("ready-to-show", ()=>{
+        objectsWindow.show();
     });
 
-    previewWindow.setMenu(null);
+    objectsWindow.setMenu(null);
 }
 
 // =================================================
@@ -134,7 +134,7 @@ function createConditionswWindow(arg)
         height: 380,
         title: arg.name+' condtitions',
         autoHideMenuBar: true,
-        parent: mainWindow,
+        parent: editorWindow,
         resizable: false,
         show: false,
     });
@@ -143,7 +143,7 @@ function createConditionswWindow(arg)
     // conditionsWindow.webContents.openDevTools();
 
     conditionsWindow.loadURL(url.format({
-        pathname: path.join(__dirname, './windows/conditionsWindow.html'),
+        pathname: path.join(__dirname, './windows/editorConditionsWindow.html'),
         protocol: "file:",
         slashes: true
     }));
@@ -169,7 +169,7 @@ ipcMain.on('conditionsData', (event, args) => {
 }); 
 // send condition for validation to container
 ipcMain.on('conditionsCheck', (event, args) => {
-    mainWindow.webContents.send('conditionsCheck', args);
+    editorWindow.webContents.send('conditionsCheck', args);
 }); 
 // send back the response
 ipcMain.on('conditionsValid', (event, args) => {
@@ -179,11 +179,11 @@ ipcMain.on('conditionsValid', (event, args) => {
 
 // =================================================
 // Handle create syntax window
-function createSyntaxwWindow(args)
+function createEditorSyntaxWindow(args)
 {   
     // create window but do not show it - waiting for data
     // https://stackoverflow.com/questions/51789711/how-to-send-data-between-parent-and-child-window-in-electron
-    syntaxWindow = new BrowserWindow({
+    editorSyntaxWindow = new BrowserWindow({
         webPreferences:{
             nodeIntegration: true
         },
@@ -191,55 +191,55 @@ function createSyntaxwWindow(args)
         height: 600,
         title: 'Dialog\'s syntax',
         autoHideMenuBar: true,
-        parent: mainWindow,
+        parent: editorWindow,
         resizable: false,
         show: false,
     });
 
     // Open the DevTools.
-    syntaxWindow.webContents.openDevTools();
+    editorSyntaxWindow.webContents.openDevTools();
 
-    syntaxWindow.loadURL(url.format({
-        pathname: path.join(__dirname, './windows/syntaxWindow.html'),
+    editorSyntaxWindow.loadURL(url.format({
+        pathname: path.join(__dirname, './windows/editorSyntaxWindow.html'),
         protocol: "file:",
         slashes: true
     }));
     // Garbage collection handle
-    syntaxWindow.on('closed', function(){
-        syntaxWindow = null;
+    editorSyntaxWindow.on('closed', function(){
+        editorSyntaxWindow = null;
         
     });
     // when data is ready show window
-    syntaxWindow.once("show", () => {
-        syntaxWindow.webContents.send('elementsList', args);
+    editorSyntaxWindow.once("show", () => {
+        editorSyntaxWindow.webContents.send('elementsList', args);
     });
     // when window is ready send data
-    syntaxWindow.once("ready-to-show", ()=>{
-        syntaxWindow.show();
+    editorSyntaxWindow.once("ready-to-show", ()=>{
+        editorSyntaxWindow.show();
     });
     // no menu
-    syntaxWindow.setMenu(null);
+    editorSyntaxWindow.setMenu(null);
 }
 // lunch the conditions window
 ipcMain.on('startSyntaxWindow', (event, args) => {   
-    createSyntaxwWindow(args);
+    createEditorSyntaxWindow(args);
 }); 
 // send syntax to container
 ipcMain.on('saveDialogSyntax', (event, args) => {   
-    mainWindow.webContents.send('saveDialogSyntax', args);
+    editorWindow.webContents.send('saveDialogSyntax', args);
 }); 
 // send back the response
 ipcMain.on('syntaxSaved', (event, args) => {
-    syntaxWindow.webContents.send('syntaxSaved', args);
+    editorSyntaxWindow.webContents.send('syntaxSaved', args);
 }); 
 // =================================================
 
 function saveDataToFile(arg)
 {
     // save data to file - first try
-    dialog.showSaveDialog(mainWindow, {title: 'Save dialog to file', filters: [{name: 'R GUI', extensions: ['dat']}]}, function(filename)
+    dialog.showSaveDialog(editorWindow, {title: 'Save dialog to file', filters: [{name: 'R GUI', extensions: ['dat']}]}, function(filename)
     {    
-        fs.writeFile(filename + '.dat', arg, function(err){
+        fs.writeFile(filename, arg, function(err){
             if(err) { console.log(err); }
             
             console.log('Write Successfully');
@@ -256,17 +256,17 @@ const mainMenuTemplate = [
                 label: 'New',
                 accelerator: "CommandOrControl+N",
                 click(){
-                    mainWindow.webContents.send('newWindow');
+                    editorWindow.webContents.send('newWindow');
                 }
             },
             {
                 label: 'Preview',
                 accelerator: "CommandOrControl+P",
                 click(){
-                    mainWindow.webContents.send('previewDialog');
+                    editorWindow.webContents.send('previewDialog');
                     ipcMain.once('containerData', (event, arg) => {
                         if(arg != false){
-                            createPreviewWindow(arg);
+                            createObjectsWindow(arg);
                         }
                     });  
                 }
@@ -275,14 +275,14 @@ const mainMenuTemplate = [
                 label: 'Load',
                 accelerator: "CommandOrControl+O",
                 click(){
-                    dialog.showMessageBox(mainWindow, {type: "info", message: "Comming soon...", title: "WIP", buttons: ["OK"]});
+                    dialog.showMessageBox(editorWindow, {type: "info", message: "Comming soon...", title: "WIP", buttons: ["OK"]});
                 }
             },
             {
                 label: 'Save',
                 accelerator: "CommandOrControl+S",
                 click(){
-                    mainWindow.webContents.send('previewDialog');
+                    editorWindow.webContents.send('previewDialog');
                     ipcMain.once('containerData', (event, arg) => {
                         if(arg != false){
                             saveDataToFile(arg);
@@ -300,6 +300,18 @@ const mainMenuTemplate = [
         ]
     },
     {
+        label: 'Edit',
+        submenu:[
+            { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
+            { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+            { type: "separator" },
+            { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+            { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+            { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
+            { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
+        ]
+    },
+    {
         label: 'Info',
         submenu:[
             {
@@ -309,7 +321,8 @@ const mainMenuTemplate = [
                 }
             }
         ]
-    }
+    },
+
 ];
 
 // Add developer tools item if not in production

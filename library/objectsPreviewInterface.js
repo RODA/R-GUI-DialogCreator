@@ -1,5 +1,5 @@
 const { ipcRenderer } = require('electron');
-const raphaelPaperObjects = require("../library/raphaelPaperObjects");
+const raphaelPaperObjects = require("../library/objects");
 
 ipcRenderer.on('dialogCreated', (event, args) => 
 {

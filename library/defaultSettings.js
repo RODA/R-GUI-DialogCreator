@@ -1,4 +1,4 @@
-var raphaelPaperSettings = {
+var defaultSettings = {
 
     // dialog properties
     dialog: { name: 'NewDialog', title: 'New dialog', width: 640, height: 480},
@@ -30,4 +30,4 @@ var raphaelPaperSettings = {
 
 };
 
-module.exports = raphaelPaperSettings;
+module.exports = defaultSettings;

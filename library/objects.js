@@ -1,13 +1,14 @@
 /* eslint-disable no-console */
 // numer of max elements (events) - to decide on it
+//TODO -- ADD slider element - intre 0 si 1
 require('events').EventEmitter.prototype._maxListeners = 35;
 const EventEmitter = require('events');
 
-const raphaelPaperSettings = require('./raphaelPaperSettings');
+const raphaelPaperSettings = require('./defaultSettings');
 const helpers = require("./helpers");
 const conditions = require('./conditions');
 
-var raphaelPaperObjects = {
+var objects = {
     
     // the main paper
     paper: {},
@@ -38,7 +39,7 @@ var raphaelPaperObjects = {
             }
         }
         
-        // TODO - make syntax work
+        //TODO - make syntax work
         if(container.syntax !== void 0) {
             this.makeCommand(container.syntax);
         }
@@ -1148,6 +1149,7 @@ var raphaelPaperObjects = {
 
     // the select element
     // TO DO - open element at the bottom of the window
+    // custom list / obiecte din R
     select: function(obj, type, eventMe, list)
     {
         // return if the received object is not corect;
@@ -1532,4 +1534,4 @@ var raphaelPaperObjects = {
     }
 };  
 
-module.exports = raphaelPaperObjects;
+module.exports = objects;
