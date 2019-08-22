@@ -18,6 +18,7 @@ var editor = {
     bgId: '',
     editorEvents: new EventEmitter(),
     settings: defaultSettings,
+    elementList: [],
 
     // create available element list
     drawAvailableElements: function()
@@ -39,6 +40,8 @@ var editor = {
     {
         this.paper = Raphael('paper', this.settings.dialog.width, this.settings.dialog.height);
         let bgRect = this.paper.rect(0, 0, this.settings.dialog.width, this.settings.dialog.height).attr({'fill': '#fdfdfd'});
+        // on paper click deselect all
+        bgRect.click(editor.deselectAll);
         // bg id for resize
         this.bgId = bgRect.id;
         // set paper exists
@@ -62,6 +65,7 @@ var editor = {
                 // remove previous bg and create a new one
                 this.paper.getById(this.bgId).remove();
                 let bgRect = this.paper.rect(0, 0, props.width, props.height).attr({'fill': '#fdfdfd'}).toBack();
+                bgRect.click(editor.deselectAll);
                 this.bgId = bgRect.id;
                 // upSize = true;
             }
@@ -180,7 +184,7 @@ var editor = {
         
         // add element cover for drag and drop functionelity
         let bbEl = element.getBBox();
-        let cover = this.paper.rect(bbEl.x-5, bbEl.y-5, bbEl.width+10, bbEl.height+10).attr({fill: "#FFF", opacity: 0, cursor: "pointer"}).toFront();
+        let cover = this.paper.rect(bbEl.x-5, bbEl.y-5, Math.ceil(bbEl.width+10), Math.ceil(bbEl.height+10)).attr({fill: "#fdfdfd", 'fill-opacity': 0, 'stroke-width': 0, cursor: "pointer"}).toFront();
         
         var st = this.paper.set();
         st.push( element, cover );
@@ -188,8 +192,13 @@ var editor = {
         // set element ID for get data
         st.data('elId', elId);
         
+        // add to the main list 
+        editor.elementList.push(st);
+
         // element mousedown / clicked? get data from container
         st.mousedown(function() {
+            editor.deselectAll();
+            st.items[st.items.length - 1].attr({'stroke': '#4D90FE', 'stroke-width': 0.5, 'stroke-opacity': 1, 'stroke-dasharray': ["--"]});
             editor.editorEvents.emit('getEl', container.getElement(this.data("elId")));                
         });
         
@@ -198,33 +207,11 @@ var editor = {
 
         // on element update triger interface update
         if(update){            
+            st.items[st.items.length - 1].attr({'stroke': '#4D90FE', 'stroke-width': 0.5, 'stroke-opacity': 1, 'stroke-dasharray': ["--"]});
             editor.editorEvents.emit('getEl', container.getElement(elId));     
         }
     }, 
 
-    // add element & data to container
-    // addToContainer: function(parentID, element, data)
-    // {
-    //     data.parentId = parentID;
-
-    //     if(element.type == 'set') {
-    //         element.forEach( (element) => {
-    //             data.elementIds.push(element.id);
-    //         });
-    //     } else {
-    //         data.elementIds.push(element.id);
-    //     }
-
-    //     // we are modifying the data object here
-    //     let isDataOK = container.prepareData(data);
-        
-    //     // check if we have errors | if true show message
-    //     if(isDataOK.error){
-    //         dialog.showMessageBox(editorWindow, {type: "error", message: isDataOK.message, title: "Error", buttons: ["OK"]});
-    //     }
-        
-    //     container.elements[parentID] = Object.assign({}, data);        
-    // }, 
 
     // return a copy of the container for creating the preview dialog
     returnContainer: function()
@@ -250,6 +237,15 @@ var editor = {
     saveDialogSyntax: function(data)
     {        
         return container.saveSyntax(data);
+    },
+
+    // deselect all paper elements
+    deselectAll: function()
+    {
+        for( let i = 0; i < editor.elementList.length; i++){
+            // last element in the set should be the cover
+            editor.elementList[i].items[editor.elementList[i].items.length - 1].attr({'stroke-width': 0, 'stroke-opacity': 0});
+        }
     }
 };
 
