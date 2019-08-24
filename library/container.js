@@ -51,12 +51,13 @@ const container = {
         // we are modifying the data object here
         let isDataOK = this.prepareData(data);
         
+        // add/save element
+        this.elements[parentID] = Object.assign({}, data);  
+
         // check if we have errors | if true show message
         if(isDataOK.error){
             return isDataOK;
         }
-        // add/save element
-        this.elements[parentID] = Object.assign({}, data);     
         // everythig is okay
         return {error: false, message: ''};   
     },
@@ -74,7 +75,7 @@ const container = {
     // Elements helper 
     // ======================================
     // clean / make element data
-    prepareData: function(data)
+        prepareData: function(data)
     {
         let response = { error: false, message: ''};
         // trim & convert to int data

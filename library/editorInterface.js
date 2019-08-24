@@ -135,6 +135,15 @@ $(document).ready(function(){
         ipcRenderer.send('conditionsData', {'id': id, 'name': element.name, 'conditions': element.conditions});
     });
     
+    // hide parent container
+    $('#elobjViewClass').on("change", () => {
+        if ($('#elobjViewClass option:selected').val() == 'variable') {
+            $('#parentContainer').show();
+        }else {
+            $('#parentContainer').hide();
+        }
+    });
+
     // Paper Events ========================================
     // show element properties
     editor.editorEvents.on('getEl', function(element) {
@@ -158,6 +167,7 @@ $(document).ready(function(){
         // disable update and remove button | force reselection
         $('#updateElProps').prop('disabled', false);
         $("#removeElement").prop('disabled', false);
+        $("#elobjViewClass" ).trigger("change");
     });
 
     // show dialog props

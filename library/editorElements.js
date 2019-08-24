@@ -230,6 +230,33 @@ var editorElements = {
         }
     },
 
+    // Add plot
+    addPlot: function(paper, data)
+    {
+        if( this.isObject(data) ) 
+        {    
+            // data to int
+            let dataLeft = parseInt(data.left);
+            let dataTop = parseInt(data.top);
+
+            // check for user input
+            if(data.width < 50) { data.width = 50; }
+            else if(data.width > paper.width - 15) { data.width = paper.width - 30; dataLeft = 15;}
+
+            if(data.height < 50) { data.height = 50; }
+            else if(data.height > paper.height - 15) { data.height = paper.height - 30; dataTop = 15; }
+
+            let rect = paper.rect(dataLeft, dataTop, data.width, data.height).attr({fill: "#ffffff", "stroke": "#d6d6d6", "stroke-width": 1});
+
+            if(data.isEnabled == 'false'){
+                rect.attr({fill: "#eeeeee"});
+            }
+            return rect;
+        } else {
+            return;
+        }
+    },
+    
     // Add radio button
     addRadio: function(paper, data)
     {

@@ -6,6 +6,9 @@ body {
     padding: 0px;
     margin: 0px;
     font: caption;
+    font-family: 'Open Sans';
+    font-size: 13px;
+    font-weight: 400;
 }
 
 .container{
@@ -51,3 +54,16 @@ div[id^="container-"]{
      background-color: #bbbbbb;
      border: 1px solid #bbbbbb;
  }
+ @font-face {
+    font-family: "Open Sans";
+    src: url("./Open_Sans/OpenSans-Regular.ttf") format("ttf"),
+         url("./Open_Sans/OpenSans-RegularItalic.ttf") format("ttf"),
+         url("./Open_Sans/OpenSans-Light.ttf") format("ttf"),
+         url("./Open_Sans/OpenSans-LightItalic.ttf") format("ttf"),
+         url("./Open_Sans/OpenSans-SemiBold.ttf") format("ttf"),
+         url("./Open_Sans/OpenSans-SemiBoldItalic.ttf") format("ttf"),
+         url("./Open_Sans/OpenSans-Bold.ttf") format("ttf"),
+         url("./Open_Sans/OpenSans-BoldItalic.ttf") format("ttf"),
+         url("./Open_Sans/OpenSans-ExtraBold.ttf") format("ttf"),
+         url("./Open_Sans/OpenSans-ExtraBoldItalic.ttf") format("ttf"),
+}

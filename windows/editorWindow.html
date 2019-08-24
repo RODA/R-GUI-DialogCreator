@@ -107,10 +107,14 @@
                         <select name="elobjViewClass" id="elobjViewClass">
                             <option value="dataSet">Data Set</option>
                             <option value="variable">Variable</option>
-                            <option value="plot">Plot</option>
                         </select>
                     </div>
-                    
+                    <!-- Parent Container -->
+                    <div class="elprop" style="display:none;" id="parentContainer">
+                        <label for="elparentContainer">Parent</label>
+                        <input type="text" name="elparentContainer" id="elparentContainer"/>
+                    </div>
+
                     <!-- label -->
                     <div class="elprop" style="display:none;">
                         <label for="elfontSize">Font size</label>
@@ -161,6 +165,14 @@
                         <select name="elisEnabled" id="elisEnabled">
                             <option value="true">Yes</option>
                             <option value="false">No</option>
+                        </select>
+                    </div>
+                    <!-- isEnabled -->
+                    <div class="elprop" style="display:none;">
+                        <label for="elonClick">onClick</label>
+                        <select name="elonClick" id="elonClick">
+                            <option value="run">Run Command</option>
+                            <option value="reset">Reset Dialog</option>
                         </select>
                     </div>
                     <!-- checkbox -->

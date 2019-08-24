@@ -59,7 +59,7 @@ var helpers = {
     // remove item from array
     removeValueFromArray(arr, value)
     {
-        return arr.filter(function(element){
+        return arr.filter(function(element){            
             return element != value;
         });
     }
