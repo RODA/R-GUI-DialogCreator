@@ -47,7 +47,7 @@ ipcRenderer.on('saveDialogSyntax', (event, args) => {
 $(document).ready(function(){
 
     // draw available elements
-    $('#elementsList').html(editor.drawAvailableElements());
+    $('#elementsList').append(editor.drawAvailableElements());
 
     // send event to add element to paper
     $('#paperAvailableElements').on('click', function(evt) {

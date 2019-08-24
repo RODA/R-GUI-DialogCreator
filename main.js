@@ -131,8 +131,8 @@ function createConditionswWindow(arg)
             nodeIntegration: true
         },
         width: 640,
-        height: 380,
-        title: arg.name+' condtitions',
+        height: 310,
+        title: toProperCase(arg.name) + ' condtitions',
         autoHideMenuBar: true,
         parent: editorWindow,
         resizable: false,
@@ -342,4 +342,12 @@ if(process.env.NODE_ENV !== 'production'){
             }
         ]
     });
+}
+
+// Helpers 
+// ========
+function toProperCase(str) {
+    let first = str[0].toUpperCase();
+    let rest = str.substring(1, str.lenght);
+    return first + rest;
 }

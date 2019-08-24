@@ -2,9 +2,14 @@
 
 var editorElements = {
 
+    // defaults
+    fontFamily: 'Open Sans',
+    fontSize: '13px',
+
     // The elements
     // ==============================================
     // Add button
+    // TODO add execute and reset
     addButton: function(paper, data)
     {
         if( this.isObject(data) ) 
@@ -14,13 +19,13 @@ var editorElements = {
             let dataTop = parseInt(data.top);
 
             // temporari element to get the button's width
-            let labelT = paper.text(dataLeft, dataTop, data.label).attr({"text-anchor": "middle", "font-size": 14});
+            let labelT = paper.text(dataLeft, dataTop, data.label).attr({"text-anchor": "middle", "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
             let lBBox = labelT.getBBox();
             labelT.remove();
 
             let rect = paper.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#f9f9f9", "stroke": "#eeeeee", "stroke-width": 0.7});
 
-            let label = paper.text(dataLeft+10, dataTop + ((Math.round(lBBox.height) / 2) + 5), data.label).attr({"text-anchor": "start", "font-size": 14});
+            let label = paper.text(dataLeft+10, dataTop + ((Math.round(lBBox.height) / 2) + 5), data.label).attr({"text-anchor": "start", "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
 
             if(data.isEnabled == 'false') {
                 rect.attr({fill: "#000", opacity: 0.2});
@@ -64,7 +69,7 @@ var editorElements = {
             // label is to the right
             xpos += 20;
             ypos += dim / 2;
-            let label = paper.text(xpos, ypos, data.label).attr({"text-anchor": txtanchor, "font-size": "14px"});
+            let label = paper.text(xpos, ypos, data.label).attr({"text-anchor": txtanchor, "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
             let square = paper.rect(parseInt(data.left), dataTop, dim, dim).attr({fill: (data.isChecked === 'true') ? "#97bd6c" : "#eeeeee","stroke-width": 1, stroke: "#a0a0a0"});
             let checked;
 
@@ -131,12 +136,9 @@ var editorElements = {
 
             var txtanchor = "middle";
             let crtVal = data.startval;
-        
-            // let textlabel = paper.text(dataLeft, dataTop, "")
-            //     .attr({"text-anchor": txtanchor, "font-size": "14px"});
-            
+                    
             let textvalue = paper.text(dataLeft, dataTop, "" + data.startval)
-                .attr({"text-anchor": txtanchor, "font-size": "14px"});
+                .attr({"text-anchor": txtanchor, "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
             
             let downsign = paper.path([
                 ["M", dataLeft - 12 - parseInt(data.width) / 2, dataTop - 5],
@@ -193,7 +195,7 @@ var editorElements = {
             let rect = paper.rect(dataLeft, dataTop, data.width, 25).attr({fill: "#ffffff", "stroke": "#bbbbbb", "stroke-width": 0.7});
 
             if(data.value.trim() != '') {
-                let label = paper.text(dataLeft+7, dataTop + 12, data.value).attr({"text-anchor": "start", "font-size": 14});
+                let label = paper.text(dataLeft+7, dataTop + 12, data.value).attr({"text-anchor": "start", "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
                 let set = paper.set();
                 set.push( label, rect );
                 return set;
@@ -215,14 +217,14 @@ var editorElements = {
             // check for user input
             if(data.left < 10 || data.left > paper.width - 10){ data.left = 10; }
             if(data.top < 10 || data.top > paper.height - 10){ data.top = 10; }
-            if(data.fontSize < 10 || data.fontSize > 20){ data.fontSize = 12; }
+            if(data.fontSize < 10 || data.fontSize > 20){ data.fontSize = 14; }
 
             // data.top + 7 fix
             let dataTop = parseInt(data.top) + 8;
             let dataLeft = parseInt(data.left);
 
             // return Raphael object
-            return paper.text(dataLeft, dataTop, data.text).attr({fill: '#000', "font-size": data.fontSize, 'text-anchor': 'start'});
+            return paper.text(dataLeft, dataTop, data.text).attr({fill: '#000', 'text-anchor': 'start', "font-size": data.fontSize, "font-family": editorElements.fontFamily});
         } else {
             return;
         }
@@ -237,7 +239,7 @@ var editorElements = {
             let dataLeft = parseInt(data.left)+7;
             let dataTop = parseInt(data.top)+8;
 
-            let label = paper.text(dataLeft + 15, dataTop, data.label).attr({"text-anchor": "start", "font-size": 14});
+            let label = paper.text(dataLeft + 15, dataTop, data.label).attr({"text-anchor": "start", "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
             
             // the regular gray circles
             let circle = paper.circle(dataLeft, dataTop, 7).attr({fill: "#eeeeee", "stroke": "#a0a0a0", "stroke-width": 1.2});

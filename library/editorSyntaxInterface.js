@@ -15,16 +15,11 @@ $(document).ready(function(){
         }
 
         // if we have default elements
-        if(args.syntax.defaultElements.length > 0) { 
-            args.syntax.defaultElements.forEach(element => {
-                let e = document.getElementById('cb_'+element);
-                if(e !== null){
-                    e.checked = true;
-                    console.log('m');
-                }
-                console.log(e);
-                
-            });
+        for(let keyEl in args.syntax.defaultElements) {
+            let e = document.getElementById('defaultInput_' + keyEl);
+            if(e !== null){
+                e.value = args.syntax.defaultElements[keyEl];
+            }
         }
 
     });
@@ -38,18 +33,19 @@ $(document).ready(function(){
     {        
         let syntax = $('#syntax').val();
 
-        let elements = $('input[id^="cb_"]:checked');
-        let isDefault = [];
+        let elements = $('[id^="defaultInput_"]');
+        let isDefault = {};
         $.each( elements, function(index, element){
-            isDefault.push($(element).attr('name'));
+            if(element.value !== '') {
+                isDefault[$(element).attr('name')] = element.value;
+            }
         });
 
         // send data to container and wait for response
         ipcRenderer.send('saveDialogSyntax', {command: syntax, elements: isDefault});
     });
+    // if syntax saved close window
     ipcRenderer.on('syntaxSaved', (event, args) => {
-        console.log(args);
-        
         if(args) {
             let window = BrowserWindow.getFocusedWindow();
             window.close();
@@ -78,15 +74,43 @@ function addRow(tableID, data) {
     newCell1.id = data.name;
 
     let newText2 = document.createTextNode(data.type);
-    newCell2.appendChild(newText2);
+    newCell2.appendChild(newText2); 
 
-    // create the is defaul checkbox
-    let cb = document.createElement('input');
-    cb.setAttribute('id', 'cb_'+ data.name);
-    cb.setAttribute('type', 'checkbox');
-    cb.setAttribute('name', data.name);
-    newCell3.appendChild(cb);
+    let defaultInput;
+    // default value
+    if (data.type == 'Checkbox') {
+       defaultInput = createSelect(data.name, ['checked', 'unchecked']);  
+    } else if(data.type == 'RadioGroup') {
+        defaultInput = createSelect(data.name, data.values);  
+    }
+    else {
+        // create default
+        defaultInput = document.createElement('input');
+        defaultInput.setAttribute('id', 'defaultInput_'+ data.name);
+        defaultInput.setAttribute('type', 'text');
+        defaultInput.setAttribute('name', data.name);
+    }
+    console.log(data);
+    
+    newCell3.appendChild(defaultInput);
 }
+
+function createSelect(name, options){
+    
+    select = document.createElement('select');    
+    select.setAttribute('id', 'defaultInput_'+ name);
+    select.setAttribute('name', name);
+    
+    for(let i = 0; i < options.length; i++) {
+        let option = document.createElement("option");
+        option.value = options[i];
+        option.text = options[i];
+        select.appendChild(option);
+    }
+    return select;
+}
+
+
 // insert element at the position
 // https://stackoverflow.com/questions/1064089/inserting-a-text-where-cursor-is-using-javascript-jquery
 function insertAtPosition(areaId, text) {

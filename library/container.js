@@ -167,7 +167,7 @@ const container = {
     },
     // validate conditions and add them to the element
     validateConditions : function(data)
-    {    
+    {      
         // if empty string -  remove conditions and save
         if(data.conditions === ''){
             this.elements[data.id].conditions = '';
@@ -201,27 +201,28 @@ const container = {
     {        
         let noElements = Object.keys(this.elements);
         let response = { syntax: this.syntax, elements: []};
-        let radioGroups = [];
+        let radioGroups = {};
 
         if(noElements.length == 0){ return response; }
 
         for(let i in this.elements){
             // ignore some elements
-            if(this.elements[i].type != 'Label' && this.elements[i].type != 'Separator' && this.elements[i].type != 'Radio') {
+            if(this.elements[i].type != 'Label' && this.elements[i].type != 'Separator' && this.elements[i].type != 'Button' && this.elements[i].type != 'Radio') {
                 response.elements.push({name: this.elements[i].name, type: this.elements[i].type});
             }
-            // get anly the radio grup
+            // get anly the radio grup - and their values
             if(this.elements[i].type == 'Radio') {
-                if(!radioGroups.includes(this.elements[i].radioGroup)) {
-                    radioGroups.push(this.elements[i].radioGroup);
+                if(Array.isArray(radioGroups[this.elements[i].radioGroup])) {
+                    radioGroups[this.elements[i].radioGroup].push(this.elements[i].name);
+                } else {
+                    radioGroups[this.elements[i].radioGroup] = [];
+                    radioGroups[this.elements[i].radioGroup].push(this.elements[i].name);
                 }
             }
         }
 
-        if(radioGroups.length > 0) {
-            for(let i = 0; i < radioGroups.length; i++) {
-                response.elements.push({ name: radioGroups[i], type: 'RadioGroup'});
-            }
+        for(let i in radioGroups) {
+            response.elements.push({ name: i, type: 'RadioGroup', values: radioGroups[i]});
         }
 
         return response;
