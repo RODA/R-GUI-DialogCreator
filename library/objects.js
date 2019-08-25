@@ -513,7 +513,6 @@ var objects = {
 
     // the container element
     // TODO --- check data functionality
-    // TODO --- svg and div positions to fix
     container: function(obj, type)
     {
         // return if the received object is not corect;
@@ -554,22 +553,22 @@ var objects = {
             selectElements: {},
             makeSupport: function(noElements) {
                 // make hight for div, svg and rect
-                let divWidth = (obj.height > noElements * 25 + 11) ? obj.width + 5 : obj.width + 6;
-                let svgHeight = (obj.height < noElements * 25 + 11) ? noElements * 25 + 11 : obj.height;
+                let divWidth = (obj.height > noElements * 25 + 11) ? obj.width + 4 : obj.width + 4;
+                let svgHeight = (obj.height < noElements * 25 + 11) ? noElements * 25 + 10 : obj.height - 2;
 
                 listSupport.div.style.position = "absolute";
-                listSupport.div.style.top = dataTop + 'px';
-                listSupport.div.style.left = dataLeft + 'px';
+                listSupport.div.style.top = (dataTop - 1) + 'px';
+                listSupport.div.style.left = (dataLeft + 16) + 'px';
                 // listSupport.div.style.backgroundColor = '#FF0000';
                 listSupport.div.style.width = divWidth + 'px';
-                listSupport.div.style.height = obj.height + 'px';
+                listSupport.div.style.height = (obj.height - 2) + 'px';
                 //  make object scroll Y if needed
                 if(obj.height < noElements * 25 + 11) {
                     listSupport.div.id = 'container-' + obj.name;
                     listSupport.div.className = 'scrollbarStyle';
                 } else {
-                    listSupport.div.style.border = '1px';
-                    listSupport.div.style.borderColor = '#d6d6d6';
+                    listSupport.div.style.border = '2px';
+                    listSupport.div.style.borderColor = '#eaeaea';
                     listSupport.div.style.borderStyle = 'solid';
                 }
 
@@ -621,6 +620,10 @@ var objects = {
         // The containers's element list
         // ===============================================================================
         let selectedElementsList = [];
+        let txt = [];
+        let cover = [];
+        let listLength = 0;
+
         // on click element
         let elClicked = function() { 
             // active only if container is enable
@@ -640,7 +643,7 @@ var objects = {
                         container.value.length = 0;
 
                         // deselect everything
-                        for(let i = 0; i < list.length; i++) {
+                        for(let i = 0; i < listLength; i++) {
                             cover[i].attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
                         }
 
@@ -683,9 +686,7 @@ var objects = {
                     }
                     
                     // something selected / deselected 
-                }                
-                console.log({name: container.name, data: container.data, selected: container.value});
-                
+                }                               
                 objects.events.emit('containerData', {name: container.name, data: container.data, selected: container.value});            
             }
         };
@@ -698,10 +699,9 @@ var objects = {
             listSupport.makeSupport(list.length);
             let newPaper = listSupport.paper;           
 
-            let position = 15;
-            let txt = [];
-            let cover = [];
+            listLength = list.length;
             
+            let position = 15;
             // populate the list
             for(let i = 0; i < list.length; i++) {
                 txt[i] = newPaper.text(11, position+3, list[i]).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily, fill: '#333333'});
@@ -728,24 +728,28 @@ var objects = {
         
             // level one array
             list = list.flat(list.length);
+            console.log(list);
             
-            // do we have data?
-            if(list.length == 0) {
-                container.element.show();
-                if (typeof listSupport.paper.remove === 'function') {
-                    listSupport.paper.remove();
+            listLength = list.length;
+
+            // remove ald paper and div
+            if (typeof listSupport.paper.remove === 'function') {
+                listSupport.paper.remove();
+                if(listSupport.div.parentNode != null) {
                     listSupport.div.parentNode.removeChild(listSupport.div);
                 }
-            } else {
-                listSupport.makeSupport(list.length);
-                let newPaper = listSupport.paper;
+            }
 
-                let position = 15;
-                let txt = [];
-                let cover = [];
+            // do we have data?
+            if(listLength == 0) {
+                container.element.show();
+            } else {
+                listSupport.makeSupport(listLength);
+                let newPaper = listSupport.paper;
                 
+                let position = 15;
                 // populate the list
-                for(let i = 0; i < list.length; i++) {
+                for(let i = 0; i < listLength; i++) {
                     txt[i] = newPaper.text(11, position+3, list[i]).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily, fill: '#333333'});
                     // save the name of the
                     cover[i] = newPaper.rect(5 , position-10, obj.width - 10, 25).attr({fill: "#eeeeee", "opacity": 0, "cursor": "pointer", stroke: 0})

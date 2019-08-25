@@ -9,6 +9,7 @@ body {
     font-family: 'Open Sans';
     font-size: 13px;
     font-weight: 400;
+    user-select: none;
 }
 
 .container{
@@ -34,7 +35,7 @@ div[id^="container-"]{
     overflow-x: hidden;
     overflow-y: scroll;
     background: #ffffff;
-    border: 1px solid #d6d6d6;
+    border: 2px solid #eaeaea;
 }
 
  .scrollbarStyle::-webkit-scrollbar-track

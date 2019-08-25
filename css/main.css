@@ -9,7 +9,8 @@ body {
     font-family: 'Open Sans';
     font-size: 13px;
     font-weight: 400;
-    /* -webkit-font-smoothing: antialiased; */
+    /* do not autoselect text */
+    user-select: none;
 }
 
 .container{
