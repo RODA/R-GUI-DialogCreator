@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 // numer of max elements (events) - to decide on it
-//TODO -- ADD slider element - intre 0 si 1
 require('events').EventEmitter.prototype._maxListeners = 35;
 const EventEmitter = require('events');
 
@@ -10,7 +9,7 @@ const objectsHelpers = require("./objectsHelpers");
 const conditions = require('./conditions');
 
 
-const mockup = require('./objectsMockup');
+const mockupData = require('./objectsMockup');
 
 var objects = {
     
@@ -46,9 +45,6 @@ var objects = {
             }
         }
         
-        //TODO - make syntax work
-        // console.log(container.syntax);
-        
         if(container.syntax !== void 0 && container.syntax.command != '') {
             this.makeCommand(container.syntax);
         }
@@ -59,8 +55,10 @@ var objects = {
             }
         });
 
+        // TODO -- to be removed
         // Testing with mockup data
-        objects.events.emit('containerData', mockup);
+        objects.events.emit('containerData', mockupData.df);
+        objects.events.emit('selectData', mockupData.select);
     },
 
     // create an object based on it's type
@@ -85,6 +83,9 @@ var objects = {
                 break;
             case "label": 
                 this.label.call(this.paper, obj, elType);
+                break;
+            case "plot": 
+                this.plot.call(this.paper, obj, elType);
                 break;
             case "radio": 
                 this.radio.call(this.paper, this.radios, obj, elType);
@@ -125,9 +126,9 @@ var objects = {
         this.events.emit('commandUpdate', command);
     },
 
-    keyPressedEvent: function(key, status)
+    keyPressedEvent: function(theKey, theStatus)
     {
-        objects.events.emit('keyTriggered', {key: key, status: status});
+        objects.events.emit('keyTriggered', {key: theKey, status: theStatus});
     },
 
     // Elements 
@@ -770,7 +771,7 @@ var objects = {
         };
 
         // obj properties
-        if (helpers.missing(obj.fontsize)) { obj.fontsize = 14; }
+        if (helpers.missing(obj.fontsize)) { obj.fontsize = objects.fontSize; } else { obj.fontsize = obj.fontsize + "px"; }
         if (helpers.missing(obj.width)) { obj.width = 20; }
         
         let elCounter = {};      
@@ -782,7 +783,7 @@ var objects = {
         let txtanchor = "middle";
         
         elCounter.textvalue = this.text(dataLeft, dataTop, "" + obj.startval)
-            .attr({"text-anchor": txtanchor, "font-size": obj.fontsize + "px"});
+            .attr({"text-anchor": txtanchor, "font-size": obj.fontsize, "font-family": objects.fontFamily});
         
         elCounter.downsign = this.path([
             ["M", dataLeft - 12 - obj.width / 2, dataTop - 6],
@@ -927,7 +928,7 @@ var objects = {
         elinput.cover.click(function() 
         {
             if(input.enabled) {
-                objects.customInput(obj.width - 10, 19, dataLeft+22, dataTop+1, input.value, input.paper).then((result) => {
+                objectsHelpers.customInput(obj.width - 10, 19, dataLeft+22, dataTop+1, input.value, input.paper, objects.fontSize, objects.fontFamily).then((result) => {
                     input.setValue(result);                    
                 });
             }
@@ -953,12 +954,12 @@ var objects = {
             // check if the new text is bigger then the input an trim if so
             let newValDim = objectsHelpers.getTextDim(input.paper, val, objects.fontSize, objects.fontFamily);
             
-            let newText = (newValDim.width < input.width) ? val :  objects.limitTextOnWidth(val, input.width) + '...';
-            input.element.txt = input.paper.text(dataLeft+5, dataTop + 12, newText).attr({"text-anchor": "start", "font-size": 14});
+            let newText = (newValDim.width < input.width) ? val :  objectsHelpers.limitTextOnWidth(val, input.width, input.paper, objects.fontSize, objects.fontFamily) + '...';
+            input.element.txt = input.paper.text(dataLeft+5, dataTop + 12, newText).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily});
             // make it editable
             input.element.txt.click(function(){
                 if(input.enabled) {
-                    objects.customInput(obj.width - 10, 19, dataLeft+22, dataTop+1, input.value, input.paper).then((result) => {
+                    objectsHelpers.customInput(obj.width - 10, 19, dataLeft+22, dataTop+1, input.value, input.paper, objects.fontSize, objects.fontFamily).then((result) => {
                         input.setValue(result);                    
                     });
                 }
@@ -1049,7 +1050,7 @@ var objects = {
             initialize: true,
         };
 
-        label.element = this.text(obj.left, obj.top, obj.text).attr({'fill': '#000000', "font-size": obj.fontSize, 'text-anchor': 'start', "cursor": "default"});
+        label.element = this.text(obj.left, obj.top, obj.text).attr({'fill': '#000000', "font-size": obj.fontSize, "font-family": objects.fontFamily, 'text-anchor': 'start', "cursor": "default"});
      
         // listen for events / changes
         objects.events.on('iSpeak', function(data)
@@ -1089,6 +1090,65 @@ var objects = {
         objects.objList[obj.name] = label;
     },
 
+    // the plot element
+    // TODO -- add functionality
+    plot: function(obj, type)
+    {
+        // return if the received object is not corect;
+        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+
+        let plot = {
+            name: obj.name,
+            visible: (obj.isVisible == 'true') ? true : false,
+            element: {},
+            conditions: objects.conditionsParser(obj.conditions),
+            initialize: true,
+        };
+
+        
+        plot.element.rect = this.rect(obj.left, obj.top, obj.width, obj.height).attr({fill: "#ffffff", "stroke": "#d6d6d6", "stroke-width": 1});
+        plot.element.text = this.text(obj.left + 20, obj.top + 20, 'This is a plot').attr({'fill': '#000000', "font-size": obj.fontSize, "font-family": objects.fontFamily, 'text-anchor': 'start', "cursor": "default"});
+
+        // listen for events / changes
+        objects.events.on('iSpeak', function(data)
+        {            
+            if(obj.name != data.name){
+                objects.conditionsChecker(data, plot);
+            }
+        });
+        
+        // the lable's methods
+        plot.show = function() {
+            this.element.rect.show();
+            this.element.text.show();
+            //  emit event only if already intialized
+            if(!plot.initialize) {
+                objects.events.emit('iSpeak', {name: obj.name, status: 'show'});
+            }
+        };
+        plot.hide = function() {
+            this.element.rect.hide();
+            this.element.text.hide();
+            //  emit event only if already intialized
+            if(!plot.initialize) {
+                objects.events.emit('iSpeak', {name: obj.name, status: 'hide'});
+            }
+        };
+
+        // initial status
+        if(plot.visible){
+            plot.show();
+        } else {
+            plot.hide();
+        }
+
+        // set to false - we have initialized the element
+        plot.initialize = false;
+
+        // add the element to the main list
+        objects.objList[obj.name] = plot;
+    },
+
     // the radio element
     radio: function(radios, obj, type) 
     {
@@ -1111,7 +1171,7 @@ var objects = {
 
         if (helpers.missing(obj.size)) { obj.size = 7; }
         if (helpers.missing(obj.vertspace)) { obj.vertspace = 25; }
-        if (helpers.missing(obj.fontsize)) { obj.fontsize = 14; }
+        if (helpers.missing(obj.fontsize)) { obj.fontsize = objects.fontSize; } else { obj.fontsize = obj.fontsize + 'px'; }
         
         // data
         let dataLeft = parseInt(obj.left);
@@ -1127,7 +1187,7 @@ var objects = {
         // drawing the radio and label
         let cColor = (obj.isEnabled == 'true') ? "#eeeeee" : "#6c757d";
         let tColor = (obj.isEnabled == 'true') ? "#000000" : "#6c757d";
-        me.label = this.text(dataLeft + 15, dataTop, obj.label).attr({"text-anchor": "start", "font-size": obj.fontsize+"px", fill:tColor, "cursor":"default"});
+        me.label = this.text(dataLeft + 15, dataTop, obj.label).attr({"text-anchor": "start", "font-size": obj.fontsize, "font-family": objects.fontFamily, fill:tColor, "cursor":"default"});
         me.circle = this.circle(dataLeft, dataTop, obj.size).attr({fill: cColor, "stroke": "#a0a0a0", "stroke-width": 1.2});
     
         // selected - initial hide - new Raphael SET
@@ -1245,8 +1305,7 @@ var objects = {
     },
 
     // the select element
-    // TO DO - open element at the bottom of the window
-    // custom list / obiecte din R
+    // TODO - custom list / obiecte din R
     select: function(obj, type, eventMe, list)
     {
         // return if the received object is not corect;
@@ -1271,21 +1330,162 @@ var objects = {
         obj.width = (obj.width > 350) ? 350 : obj.width;
         let dataWidth = parseInt(obj.width);
 
-        let div = document.createElement("div");
-        div.style.position = "absolute";
-        div.style.top = dataTop + 'px';
-        div.style.left = dataLeft + 'px';
-        // div.style.backgroundColor = '#FF0000';
-        div.style.width = (dataWidth + 10) + 'px';
-        div.style.height = '32px';
+        const listSupport = {
+            div: document.createElement("div"),
+            paper: {},
+            rect: {},
+            downsign: {},
+            upsign: {},
+            showList: {},
+            listSet: {},
 
-        // initialy paper is small - allow ather elements to be clickable
-        let newPaper = Raphael(div, dataWidth + 10, 32);
+            makeSupport: function(noElements) {
+                listSupport.div.style.position = "absolute";
+                listSupport.div.style.top = dataTop + 'px';
+                listSupport.div.style.left = dataLeft + 'px';
+                listSupport.div.style.width = (dataWidth + 10) + 'px';
+                // initial height only visible
+                listSupport.div.style.height = '32px';
 
-        let p = document.getElementById('paper');
-        p.appendChild(div);
+                // initialy paper is small - allow ather elements to be clickable
+                let newPaper = Raphael(listSupport.div, dataWidth + 10, 32);
+                let p = document.getElementById('paper');
+                p.appendChild(listSupport.div);
 
-        select.element.rect = newPaper.rect(5, 5, dataWidth, 25).attr({fill: "#FFFFFF", "stroke": "#333333", "stroke-width": 0.2});  
+                // draw visibel rectangle
+                listSupport.rect = newPaper.rect(5, 5, dataWidth, 25).attr({fill: "#FFFFFF", "stroke": "#333333", "stroke-width": 0.2});  
+                // Open / close element list
+                listSupport.downsign = newPaper.path([
+                    ["M", dataWidth - 10 , 13 ],
+                    ["l", 8, 0],
+                    ["l", -4, 8],
+                    ["z"]
+                ]).attr({fill: "#999999", "stroke-width": 0});
+                listSupport.upsign = newPaper.path([
+                    ["M", dataWidth - 10 , 21 ],
+                    ["l", 8, 0],
+                    ["l", -4, -8],
+                    ["z"]
+                ]).attr({fill: "#999999", "stroke-width": 0}).hide();
+                listSupport.showList = newPaper.rect(8 , 8, dataWidth - 6, 19).attr({fill: "#FF0000", "opacity": 0, "cursor": "pointer"});        
+                listSupport.showList.click(function() {
+                    if(select.enabled) {
+                        if(listSupport.listSet[0].data('visible')) {
+                            listSupport.hideSelectables();
+                            // resize div and paper
+                            listSupport.div.style.height = '32px';
+                            newPaper.setSize((dataWidth + 10), 30);
+                        } else {
+                            listSupport.showSelectables();
+                            // resize div and paper
+                            listSupport.div.style.height = ((list.length * 25) + 43) + 'px';
+                            newPaper.setSize(dataWidth + 10, ((list.length * 25) + 43));
+                        }
+                    }
+                });
+                listSupport.paper = newPaper;
+            },
+            makeList: function(list) {
+                // The select's element list
+                // ===============================================================================
+                let selectElements = listSupport.paper.rect(5, 30, dataWidth, list.length * 25).attr({fill: "#FFFFFF", "stroke": "#333333", "stroke-width": 0.2}); 
+                selectElements.hide();
+                selectElements.data('visible', 0);
+                selectElements.toFront();   
+
+                listSupport.listSet = listSupport.paper.set();                
+                listSupport.listSet.push(selectElements);
+
+                let position = 40;
+                let txt = [];
+                let cover = [];
+
+                // on click element
+                let elClicked = function() { 
+                    let isOn = this.data('clicked');
+                    for(let j = 0; j < cover.length; j++) {
+                        cover[j].attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
+                        txt[j].attr({"fill": "#333333"});
+                    }
+                    
+                    if(!isOn) {
+                        this.attr({"fill": "blue", "opacity": 0.5}).data('clicked', 1);
+                        eventMe.emit('selected', this.data('elName'));
+                    } else {
+                        this.attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
+                        eventMe.emit('deSelected', this.data('elName'));
+                    }
+                };
+                // on element over
+                let elIn = function() { 
+                    if(!this.data('clicked')){
+                        this.attr({"opacity": 0.5}); 
+                    }
+                };
+                // on element out
+                let elOut = function() { 
+                    if(!this.data('clicked')){
+                        this.attr({"opacity": 0}); 
+                    }                                             
+                };
+                
+                // populate the list
+                for(let i = 0; i < list.length; i++) {
+                    txt[i] = listSupport.paper.text(10, position+3, list[i]).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily, fill: '#333333'}).hide();
+                    // save the name of the
+                    cover[i] = listSupport.paper.rect(5 , position-10, dataWidth, 25).attr({fill: "#eeeeee", "opacity": 0, "cursor": "pointer", stroke: 0})
+                                    .hide()
+                                    .data('clicked', 0)
+                                    .data('elName', list[i])
+                                    .click( elClicked )
+                                    .hover( elIn, elOut );
+                    listSupport.listSet.push( txt[i], cover[i] );
+                    position += 25;
+                } 
+            },
+        
+            // the select's methods
+            hideSelectables: function(){
+                // hide element list
+                if(typeof listSupport.listSet.hide === 'function') {
+                    listSupport.listSet.hide();
+                    listSupport.listSet[0].data('visible', 0);
+                    listSupport.downsign.show();
+                    listSupport.upsign.hide();
+                }
+            },
+            showSelectables: function(){
+                // show element list
+                if (typeof listSupport.listSet.show === 'function') {
+                    listSupport.listSet.show();
+                    listSupport.listSet[0].data('visible', 1);
+                    listSupport.downsign.hide();
+                    listSupport.upsign.show();
+                }
+            }
+        };
+
+
+        if (obj.dataSource == 'custom') {
+            let list = obj.dataValue.split(',');
+            
+            // do we have a list?
+            if (Array.isArray(list) && list.length != 0) {
+                listSupport.makeSupport(list.length);
+                // make the list with tha data
+                listSupport.makeList(list);    
+            }
+        }
+
+        // listen for events / changes
+        objects.events.on('selectData', function(data)
+        {
+            if(obj.dataSource == 'fromR'){
+                listSupport.makeSupport(data.length);
+                // make the list with tha data
+                listSupport.makeList(data);    
+            }            
+        });
         
         // show / hide selected    
         // ===============================================================================
@@ -1294,7 +1494,7 @@ var objects = {
             if(typeof select.selected.remove === "function") {
                 select.selected.remove();                
             }
-            select.selected = newPaper.text(13, 18, data).attr({"text-anchor": "start",fill: "#333333", "font-size": "14px"});
+            select.selected = listSupport.paper.text(13, 18, data).attr({"text-anchor": "start",fill: "#333333", "font-size": objects.fontSize, "font-family": objects.fontFamily});
             select.value = data;
             // etmit event - obj value change
             objects.events.emit('iSpeak', {name: obj.name, status: 'select'});
@@ -1306,94 +1506,6 @@ var objects = {
             objects.events.emit('iSpeak', {name: obj.name, status: 'deselect'});
         });
 
-        // Open / close element list
-        // ===============================================================================
-        select.element.downsign = newPaper.path([
-            ["M", dataWidth - 10 , 13 ],
-            ["l", 8, 0],
-            ["l", -4, 8],
-            ["z"]
-        ]).attr({fill: "#333333", "stroke-width": 0});
-        select.element.upsign = newPaper.path([
-            ["M", dataWidth - 10 , 21 ],
-            ["l", 8, 0],
-            ["l", -4, -8],
-            ["z"]
-        ]).attr({fill: "#333333", "stroke-width": 0}).hide();
-        
-        select.element.showList = newPaper.rect(8 , 8, dataWidth - 6, 19).attr({fill: "#FF0000", "opacity": 0, "cursor": "pointer"});        
-        select.element.showList.click(function() {
-            if(select.enabled) {
-                if(listSet[0].data('visible')) {
-                    hideSelectables();
-                    // resize div and paper
-                    div.style.height = '32px';
-                    newPaper.setSize((dataWidth + 10), 30);
-                } else {
-                    showSelectables();
-                    // resize div and paper
-                    div.style.height = ((list.length * 25) + 43) + 'px';
-                    newPaper.setSize(dataWidth + 10, ((list.length * 25) + 43));
-                }
-            }
-        });
-
-        // The select's element list
-        // ===============================================================================
-        let selectElements = newPaper.rect(5, 30, dataWidth, list.length * 25).attr({fill: "#FFFFFF", "stroke": "#333333", "stroke-width": 0.2}); 
-        selectElements.hide();
-        selectElements.data('visible', 0);
-        selectElements.toFront();   
-
-        let listSet = this.set();
-        listSet.push(selectElements);
-
-        let position = 40;
-        let txt = [];
-        let cover = [];
-
-        // on click element
-        let elClicked = function() { 
-            let isOn = this.data('clicked');
-            for(let j = 0; j < cover.length; j++) {
-                cover[j].attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
-                txt[j].attr({"fill": "#333333"});
-            }
-            
-            if(!isOn) {
-                this.attr({"fill": "blue", "opacity": 0.5}).data('clicked', 1);
-                eventMe.emit('selected', this.data('elName'));
-            } else {
-                this.attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
-                eventMe.emit('deSelected', this.data('elName'));
-            }
-        };
-        // on element over
-        let elIn = function() { 
-            if(!this.data('clicked')){
-                this.attr({"opacity": 0.5}); 
-            }
-        };
-        // on element out
-        let elOut = function() { 
-            if(!this.data('clicked')){
-                this.attr({"opacity": 0}); 
-            }                                             
-        };
-        
-        // populate the list
-        for(let i = 0; i < list.length; i++) {
-            txt[i] = newPaper.text(10, position+3, list[i]).attr({"text-anchor": "start", "font-size": 14, fill: '#333333'}).hide();
-            // save the name of the
-            cover[i] = newPaper.rect(5 , position-10, dataWidth, 25).attr({fill: "#eeeeee", "opacity": 0, "cursor": "pointer", stroke: 0})
-                            .hide()
-                            .data('clicked', 0)
-                            .data('elName', list[i])
-                            .click( elClicked )
-                            .hover( elIn, elOut );
-            listSet.push( txt[i], cover[i] );
-            position += 25;
-        } 
 
         // listen for events / changes
         objects.events.on('iSpeak', function(data)
@@ -1403,47 +1515,31 @@ var objects = {
             }            
         });
 
-        // the select's methods
-        let hideSelectables = function(){
-            // hide element list
-            listSet.hide();
-            listSet[0].data('visible', 0);
-            select.element.downsign.show();
-            select.element.upsign.hide();
-        };
-        let showSelectables = function(){
-            // show element list
-            listSet.show();
-            listSet[0].data('visible', 1);
-            select.element.downsign.hide();
-            select.element.upsign.show();
-        };
-
         select.show = function(){
-            for( let i in select.element) {                
-                select.element[i].show();
-            }
+            // for( let i in select.element) {                
+            //     select.element[i].show();
+            // }
             // check if we have anythig selected and hide-it
             if(typeof select.selected.remove === "function") {
                 select.selected.show();
             }
-            hideSelectables();
+            // listSupport.hideSelectables();
             //  emit event only if already intialized
             if(!select.initialize) {
                 objects.events.emit('iSpeak', {name: select.name, status: 'show'});
             }
         };
         select.hide = function(){
-            for( let i in select.element){
-                select.element[i].hide();
-            }
+            // for( let i in select.element){
+            //     select.element[i].hide();
+            // }
             // check if we have anythig selected and hide-it
             if(typeof select.selected.remove === "function") {
                 select.selected.hide();
             }
-            hideSelectables();
+            // listSupport.hideSelectables();
             // override hideSelectables
-            select.element.downsign.hide();
+            // select.element.downsign.hide();
             //  emit event only if already intialized
             if(!select.initialize) {
                 objects.events.emit('iSpeak', {name: select.name, status: 'hide'});
@@ -1451,10 +1547,10 @@ var objects = {
         };
         select.enable = function() {
             select.enabled = true;
-            select.element.rect.attr({fill: "#FFFFFF", opacity: 1});
-            select.element.downsign.attr({opacity:1});
-            select.element.showList.attr({'cursor': 'pointer'});
-            hideSelectables();
+            // listSupport.rect.attr({fill: "#FFFFFF", opacity: 1});
+            // listSupport.downsign.attr({opacity:1});
+            // listSupport.showList.attr({'cursor': 'pointer'});
+            // listSupport.hideSelectables();
             //  emit event only if already intialized
             if(!select.initialize) {
                 objects.events.emit('iSpeak', {name: select.name, status: 'enable'});
@@ -1462,10 +1558,10 @@ var objects = {
         };
         select.disable = function() {
             select.enabled = false;
-            select.element.rect.attr({fill: "#000", opacity: 0.2});
-            select.element.downsign.attr({opacity:0.5});
-            select.element.showList.attr({'cursor': 'default'});
-            hideSelectables();
+            // listSupport.rect.attr({fill: "#000", opacity: 0.2});
+            // listSupport.downsign.attr({opacity:0.5});
+            // listSupport.showList.attr({'cursor': 'default'});
+            // listSupport.hideSelectables();
             //  emit event only if already intialized
             if(!select.initialize) {
                 objects.events.emit('iSpeak', {name: select.name, status: 'disable'});
@@ -1703,51 +1799,6 @@ var objects = {
             conditions.checkConditions(data, element, objects.objList);
         }
     },
-
-    // Helper Functions ===========================================================
-    // enable input editing
-    customInput: function(width, height, x, y, oldValue, paper) 
-    {    
-        return new Promise((resolve, reject) => {
-            let container = paper.canvas.parentNode;    
-            let styles = "position: absolute; width: "+ (width) +"px; height: "+ (height) +"px; left: "+ x +"px; top: "+ y +"px; border: none; font-size: 14px; font-weight: 400; background: #ffffff; z-index:9000;";
-            
-            let input = document.createElement("input");
-
-            input.setAttribute("style", styles);
-            input.setAttribute("id", "inputEdit");
-            input.value = oldValue;
-            container.appendChild(input);
-            input.focus();
-
-            input.addEventListener('keyup', (event) => {
-                if(event.keyCode === 13) {
-                    input.blur();
-                }
-                if(event.keyCode === 27) {
-                    resolve(oldValue);
-                    input.blur();
-                }
-            });
-            input.addEventListener('blur', (event) => {
-                input.parentNode.removeChild(input);            
-                resolve(input.value);
-            });            
-        });
-    },
-
-    // limit a text to a fix width
-    limitTextOnWidth(text, width)
-    {
-        let textDim =  this.getTextDim(text, null);
-        
-        while(textDim.width > (width - 13))
-        {
-            text = text.substring(0, text.length - 5);
-            textDim = this.getTextDim(text, null);           
-        }
-        return text;
-    }
 };  
 
 module.exports = objects;

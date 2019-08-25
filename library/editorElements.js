@@ -141,14 +141,14 @@ var editorElements = {
                 .attr({"text-anchor": txtanchor, "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
             
             let downsign = paper.path([
-                ["M", dataLeft - 12 - parseInt(data.width) / 2, dataTop - 5],
+                ["M", dataLeft - 12 - parseInt(data.width) / 2, dataTop - 6],
                 ["l", 12, 0],
                 ["l", -6, 12],
                 ["z"]
             ]).attr({fill: "#eeeeee", "stroke-width": 1.2, stroke: "#a0a0a0"});
             
             let upsign = paper.path([
-                ["M", dataLeft + parseInt(data.width) / 2, dataTop + 5],
+                ["M", dataLeft + parseInt(data.width) / 2, dataTop + 6],
                 ["l", 12, 0],
                 ["l", -6, -12],
                 ["z"]
@@ -313,7 +313,7 @@ var editorElements = {
             ["l", 8, 0],
             ["l", -4, 8],
             ["z"]
-        ]).attr({fill: "#000000", "stroke-width": 0});
+        ]).attr({fill: "#999999", "stroke-width": 0});
 
         // if select is disable
         if(data.isEnabled == 'false'){

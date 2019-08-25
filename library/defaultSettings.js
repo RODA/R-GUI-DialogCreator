@@ -18,13 +18,13 @@ var defaultSettings = {
     
     input: { parentId: '', type: 'Input', name: 'input1', 'width': 120, left: '15', top: '15', isVisible: 'true', isEnabled: 'true', value: '', elementIds: [], conditions: ''},
     
-    label: { parentId: '', type: 'Label', name: 'label1', text: 'My label', left: '10', top: '10', fontSize: 14, isVisible: 'true', elementIds: [], conditions: ''},
+    label: { parentId: '', type: 'Label', name: 'label1', text: 'My label', left: '10', top: '10', fontSize: 13, isVisible: 'true', elementIds: [], conditions: ''},
     
     plot: { parentId: '', type: 'Plot', name: 'plot1', width: 250, height: 220, left: '15', top: '15', isVisible: 'true', isEnabled: 'true', elementIds: [], conditions: ''},
     
     radio: { parentId: '', type: 'Radio', name: 'radio1', radioGroup: 'radiogroup1', label: 'My radiobox', left: '10', top: '10', isSelected: 'false', isEnabled: 'true', isVisible: 'true', elementIds: [], conditions: ''},
 
-    select: { parentId: '', type: 'Select', name: 'select1', 'width': 120, label: "My Select", left: '15', top: '15', isVisible: 'true', isEnabled: 'true', elementIds: [], conditions: ''},
+    select: { parentId: '', type: 'Select', name: 'select1', 'width': 120, label: "My Select", left: '15', top: '15', isVisible: 'true', isEnabled: 'true', dataSource: 'custom', dataValue: '', elementIds: [], conditions: ''},
     
     separator: { parentId: '', type: 'Separator', name: 'separator1', direction: 'x', left: '10', top: '10', length: 300, isVisible: 'true', elementIds: [], conditions: ''},
 

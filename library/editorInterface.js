@@ -114,7 +114,7 @@ $(document).ready(function(){
                 let key = el.attr('name').substr(2);
                 obj[key] = el.val();
             }
-        });
+        });       
         // send obj for update
         editor.updateElement(obj);
     });
@@ -136,12 +136,29 @@ $(document).ready(function(){
     });
     
     // hide parent container
-    $('#elobjViewClass').on("change", () => {
+    $('#eldataSource').on("change", () => {
         if ($('#elobjViewClass option:selected').val() == 'variable') {
             $('#parentContainer').show();
         }else {
             $('#parentContainer').hide();
         }
+    });
+    // hide parent container
+    $('#eldataSource').on("change", () => {
+        let val = '';
+        if ($('#eldataSource option:selected').val() == 'custom') {
+            val = '<label for="eldataValue">Values</label> ';
+            val += '<input type="text" name="eldataValue" id="eldataValue" />';
+        }else {
+            val = '<label for="eldataValue">Values</label> ';
+            val += '<select name="eldataValue" id="eldataValue">';
+            val += '<option value="all">All</option>';
+            val += '<option value="dataDrames">Data Frames</option>';
+            val += '<option value="lists">Lists</option>';
+            val += '<option value="matrices">Matrices</option>';
+            val += '<option value="vectors">Vectors</option></select>';
+        }
+        $('#selectSourceChange').html(val);
     });
 
     // Paper Events ========================================
@@ -151,6 +168,9 @@ $(document).ready(function(){
         // disable all elements and hide everything | reseting props tab
         $('#propertiesList [id^="el"]').prop('disabled', true);
         $('#propertiesList .elprop').hide();
+        
+        // trigger change for the select element source values
+        $("#eldataSource" ).trigger("change");
 
         // update props tab
         for( let key in element){
@@ -167,7 +187,9 @@ $(document).ready(function(){
         // disable update and remove button | force reselection
         $('#updateElProps').prop('disabled', false);
         $("#removeElement").prop('disabled', false);
+        // trigger change for container
         $("#elobjViewClass" ).trigger("change");
+        
     });
 
     // show dialog props
