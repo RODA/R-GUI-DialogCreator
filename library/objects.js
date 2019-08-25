@@ -105,107 +105,29 @@ var objects = {
     makeCommand: function(syntax)
     {
         let command = syntax.command;
-        let previewCommand = this.updateCommand(command, syntax.defaultElements);
+        // let previewCommand = objectsHelpers.updateCommand(command, syntax.defaultElements);
         
         // {name}
         let regex = /({[a-z0-9]+})/g;
         let elements = command.match(regex);
         for(let i = 0; i < elements.length; i++) {
             let name = elements[i].substring(1, elements[i].length-1);
-            let elementValue = objects.getCommandElementValue(name);
+            let elementValue = objectsHelpers.getCommandElementValue(objects.objList, objects.radios, name);
+            // console.log(elementValue);
             
-            if (elementValue === '') {
-                command = this.updateCommand(command, [name]);
-                previewCommand = this.updateCommand(previewCommand, [name]);
-            }
-            command = command.replace(elements[i], elementValue);                       
-            previewCommand = previewCommand.replace(elements[i], elementValue);                       
+            command = objectsHelpers.updateCommand(command, syntax.defaultElements, name, elements[i], elementValue);
+            // previewCommand = previewCommand.replace(elements[i], elementValue);                       
         }
         // update dialog comand
         objects.command = command;
-        // console.log(command);
-        // console.log(previewCommand);
+        console.log(command);
         
-        this.events.emit('commandUpdate', previewCommand);
+        this.events.emit('commandUpdate', command);
     },
 
     keyPressedEvent: function(key, status)
     {
         objects.events.emit('keyTriggered', {key: key, status: status});
-    },
-
-    // get the element's value for command
-    getCommandElementValue: function(name)
-    {
-        // we have the object
-        if(objects.objList[name] !== void 0) {
-            let el = objects.objList[name];
-            
-            // is a checkbox
-            if(el.checked !== void 0) {
-                return el.checked;
-            }
-            // is input or counter
-            if(el.value !== void 0) {
-                return el.value;
-            }
-        } else {
-            // check if we have a radioGroup            
-            if(objects.radios[name] !== void 0) {
-                let found = '';
-                for (let key in objects.radios[name]) {
-        
-                    if(objects.objList[key].selected){
-                        found = objects.objList[key].name;
-                    }
-                }
-                return found;
-            }
-        }
-    },
-    // updateCommand - remove elements
-    updateCommand: function(command, defaultElements) 
-    {
-        // console.log(command);
-        // nothing to remove
-        if(defaultElements.length == 0) {
-            return command;
-        }
-
-        let commandArgs = [];
-        let newCommand = '';
-        commandArgs = objects.getCommandArgs(command);            
-        if (commandArgs.length > 0) {                        
-            newCommand += commandArgs[0]; 
-            for (let j = 1; j < commandArgs.length - 1; j++) {
-                let add = true;                   
-                for (let i = 0; i < defaultElements.length; i++) {
-                    if (commandArgs[j].indexOf(defaultElements[i]) != -1) {
-                        add = false;
-                    }
-                }
-                if (add) {
-                    newCommand += commandArgs[j] + ',';
-                }
-            }
-            newCommand = newCommand.substring(0, newCommand.length - 1);
-            newCommand += commandArgs[commandArgs.length - 1]; 
-        }
-
-        return newCommand;
-    },
-    // get the comand's args
-    getCommandArgs: function(command)
-    {
-        let fIndex = command.indexOf('(');
-        let lIndex = command.lastIndexOf(')');
-        // wrong formula?
-        if (fIndex == -1 || lIndex == -1) {
-            return [];
-        }
-        let cArgs = command.substring(fIndex+1, lIndex);
-        // return splited command        
-        return [command.substring(0, fIndex+1), cArgs.split(','), command.substring(lIndex, command.length)].flat(1);
     },
 
     // Elements 
@@ -688,6 +610,7 @@ var objects = {
                     // something selected / deselected 
                 }                               
                 objects.events.emit('containerData', {name: container.name, data: container.data, selected: container.value});            
+                objects.events.emit('iSpeak', {name: container.name, status: container.value});            
             }
         };
         container.makeDataSetList = function(data)
@@ -1028,7 +951,7 @@ var objects = {
                 input.element.txt.remove();                
             }
             // check if the new text is bigger then the input an trim if so
-            let newValDim = objects.getTextDim(val, null);
+            let newValDim = objectsHelpers.getTextDim(input.paper, val, objects.fontSize, objects.fontFamily);
             
             let newText = (newValDim.width < input.width) ? val :  objects.limitTextOnWidth(val, input.width) + '...';
             input.element.txt = input.paper.text(dataLeft+5, dataTop + 12, newText).attr({"text-anchor": "start", "font-size": 14});

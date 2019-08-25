@@ -103,7 +103,16 @@ function createSelect(name, options){
     
     for(let i = 0; i < options.length; i++) {
         let option = document.createElement("option");
-        option.value = options[i];
+
+        let val = options[i];
+        if(options[i] == 'checked'){
+            val = true;
+        }
+        if(options[i] == 'unchecked'){
+            val = false;
+        }
+        
+        option.value = val;
         option.text = options[i];
         select.appendChild(option);
     }
