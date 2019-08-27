@@ -275,7 +275,17 @@ const mainMenuTemplate = [
                 label: 'Load',
                 accelerator: "CommandOrControl+O",
                 click(){
-                    dialog.showMessageBox(editorWindow, {type: "info", message: "Comming soon...", title: "WIP", buttons: ["OK"]});
+                    dialog.showOpenDialog(editorWindow, {title: "Load dialog data", filters: [{name: 'R-GUI-DialogCreator', extensions: ['dat']}], properties: ['openFile']}, result => {
+                        if (result !== void 0) {                            
+                            fs.readFile(result[0], 'utf-8', (err, data) => {
+                                if (err) {
+                                    dialog.showMessageBox(editorWindow, {type: 'error', title: 'Could not open the file!', buttons: ['OK']});
+                                } else {
+                                    editorWindow.webContents.send('openFile', data);
+                                }
+                            });
+                        }
+                    });
                 }
             },
             {

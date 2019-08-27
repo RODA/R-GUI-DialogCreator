@@ -43,6 +43,10 @@ ipcRenderer.on('saveDialogSyntax', (event, args) => {
     ipcRenderer.send('syntaxSaved', valid);
 });
 
+// load previous saved data
+ipcRenderer.on('openFile', (event, args) => {
+    editor.loadDialogDataFromFile(args);    
+});
 
 $(document).ready(function(){
 
@@ -51,7 +55,7 @@ $(document).ready(function(){
 
     // send event to add element to paper
     $('#paperAvailableElements').on('click', function(evt) {
-        editor.addElementToPaper(event.target.id, 20, 60, 'name2');
+        editor.addElementToPaper(event.target.id, null);
     });
 
     // Elements name (id) only leters and numbers and max 15 chars
@@ -170,7 +174,9 @@ $(document).ready(function(){
         $('#propertiesList .elprop').hide();
         
         // trigger change for the select element source values
-        $("#eldataSource" ).trigger("change");
+        if(element.objViewClass !== void 0) {
+            $("#eldataSource" ).trigger("change");
+        }
 
         // update props tab
         for( let key in element){

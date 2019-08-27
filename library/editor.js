@@ -9,7 +9,8 @@ const elements = require("./editorElements");
 const container = require("./container");
 const helpers = require('./helpers');
 
-//TODO -- import function
+// TODO -- import function
+// TODO -- rewrite file
 
 var editor = {
 
@@ -87,8 +88,47 @@ var editor = {
         editor.editorEvents.emit('clearProps');
     },
 
+    // load data from file
+    // TODO -- make it work
+    loadDialogDataFromFile: function(data)
+    {
+        let loadData = JSON.parse(data);
+        // check for valid paper
+        if(this.paper.setSize) {
+            // alert paper override
+            dialog.showMessageBox(editorWindow, {type: "question", message: "Override curent dialog?", title: "Override", buttons: ["No", "Yes"]}, (response) => {
+                if (response) {
+                    editor.remove();
+
+                    this.paper = Raphael('paper', loadData.properties.width, loadData.properties.height);
+                    let bgRect = this.paper.rect(0, 0, loadData.properties.width, loadData.properties.height).attr({'fill': '#fdfdfd'});
+                    // on paper click deselect all
+                    bgRect.click(editor.deselectAll);
+                    // bg id for resize
+                    this.bgId = bgRect.id;
+                    // set paper exists
+                    this.paperExists = true;        
+                    //add info to container - add availabel props
+                    container.initialize(loadData.properties);
+                    // emit dialog update
+                    editor.editorEvents.emit('dialogUpdate', loadData.properties);
+            
+                    for(let element in loadData.elements){
+                        // console.log(loadData.elements[element]);
+                        let data = loadData.elements[element]; 
+                        this.addElementToPaper(data.type, data);
+                    }
+            
+                    this.saveDialogSyntax(loadData.syntax);
+                } else {
+                    return;
+                }
+            });
+        }
+    },
+
     // add new element on paper
-    addElementToPaper: function(type) 
+    addElementToPaper: function(type, withData) 
     {
         // checking if there is a paper
         if(this.paperExists) {
@@ -98,7 +138,13 @@ var editor = {
                 return;
             }
             
-            let dataSettings = this.settings[type.toLowerCase()];
+            let dataSettings;
+
+            if (withData !== null) {
+                dataSettings = withData;
+            } else {
+                dataSettings = this.settings[type.toLowerCase()];
+            }
 
             // checking for duplicate names | checking for the name propertie if exist should not be necessary as all elements should have it           
             if(dataSettings.hasOwnProperty('name')) {
