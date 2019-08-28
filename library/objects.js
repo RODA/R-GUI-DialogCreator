@@ -14,7 +14,7 @@ const mockupData = require('./objectsMockup');
 var objects = {
     
     // defaults 
-    fontFamily: 'Open Sans',
+    fontFamily: 'Arial',
     fontSize: '13px',
     // the main paper
     paper: {},
@@ -35,7 +35,7 @@ var objects = {
             let props = container.properties;
             // create a new raphael paper
             this.paper = Raphael('paper', props.width, props.height);
-            this.paper.rect(0, 0, props.width, props.height).attr({'fill': '#fdfdfd'});
+            this.paper.rect(1, 1, props.width - 1, props.height - 1).attr({'fill': '#FFFFFF'});
         }
 
         // check if we have the Raphael paper and if we have elements to display
@@ -158,10 +158,10 @@ var objects = {
         let lBBox = objectsHelpers.getTextDim(this, obj.label, objects.fontSize, objects.fontFamily);
 
         let elButton = {};
-        elButton.rect = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#f9f9f9", "stroke": "#eeeeee", "stroke-width": 0.7});
+        elButton.rect = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#FFFFFF", "stroke": "#BBBBBB", "stroke-width": 0.7});
         elButton.txt = this.text(dataLeft+10, dataTop + ((Math.round(lBBox.height) / 2) + 5), obj.label).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily});
 
-        elButton.cover = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#eeeeee", stroke: "none", "fill-opacity": 0, "cursor": "pointer"});
+        elButton.cover = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#FFFFFF", stroke: "none", "fill-opacity": 0, "cursor": "pointer"});
         elButton.cover.click(function() 
         {
             // if enable emit event with command (run or reset)      
@@ -202,7 +202,7 @@ var objects = {
         };
         button.enable = function() {
             button.enabled = true;
-            button.element.rect.attr({fill: "#f9f9f9", opacity: 1});
+            button.element.rect.attr({fill: "#FFFFFF", opacity: 1});
             button.element.txt.attr({opacity: 1});
             button.element.cover.attr({'cursor': 'pointer'});
             //  emit event only if already intialized
@@ -1315,7 +1315,8 @@ var objects = {
             name: obj.name,
             visible: (obj.isVisible == 'true') ? true : false,
             enabled: (obj.isEnabled == 'true') ? true : false,
-            selected: {},
+            selected: false,
+            objSelected: {},
             value: '',
             element: {},
             conditions: objects.conditionsParser(obj.conditions),
@@ -1385,19 +1386,24 @@ var objects = {
         // ===============================================================================
         eventMe.on('selected', function(data) {
             // check if we have an element | if yes remove it
-            if(typeof select.selected.remove === "function") {
-                select.selected.remove();                
+            if(typeof select.objSelected.remove === "function") {
+                select.objSelected.remove();                
             }
-            select.selected = select.paper.text(dataLeft+10, dataTop+12, data).attr({"text-anchor": "start",fill: "#333333", "font-size": objects.fontSize, "font-family": objects.fontFamily});
+            select.objSelected = select.paper.text(dataLeft+10, dataTop+12, data).attr({"text-anchor": "start",fill: "#333333", "font-size": objects.fontSize, "font-family": objects.fontFamily});
             select.value = data;
+            select.selected = true;
             // etmit event - obj value change
             objects.events.emit('iSpeak', {name: obj.name, status: 'select'});
+            console.log(select);
+            
         });
         eventMe.on('deSelected', function(data) {
-            select.selected.remove();
+            select.objSelected.remove();
             select.value = '';
+            select.selected = false;
             // etmit event - obj value change
             objects.events.emit('iSpeak', {name: obj.name, status: 'deselect'});
+            console.log(select);
         });
 
         const listSupport = {
@@ -1409,7 +1415,7 @@ var objects = {
             makeSupport: function(noElements) {
                 listSupport.div.style.position = "absolute";
                 listSupport.div.style.top = (dataTop + 24) + 'px';
-                listSupport.div.style.left = (dataLeft + 16) + 'px';
+                listSupport.div.style.left = (dataLeft + 18) + 'px';
                 listSupport.div.style.width = (dataWidth - 2) + 'px';
                 // initial height only visible
                 listSupport.div.style.height = '0px';
@@ -1511,9 +1517,13 @@ var objects = {
         objects.events.on('selectData', function(data)
         {
             if(obj.dataSource == 'fromR'){
-                listSupport.makeSupport(data.length);
-                // make the list with tha data
-                listSupport.makeList(data);    
+                
+                if(data[obj.dataValue] !== void 0 && data[obj.dataValue].length > 0) {
+                    // TODO -- all values
+                    listSupport.makeSupport(data[obj.dataValue].length);
+                    // make the list with tha data
+                    listSupport.makeList(data[obj.dataValue]);    
+                }
             }            
         });
 
@@ -1695,12 +1705,22 @@ var objects = {
         let v = parseInt(dataWidth) + parseInt(dataLeft);
         
         let line = this.path("M" + dataLeft + " " + dataTop + "L"+ v +" " + dataTop).attr({stroke: "#a0a0a0", "stroke-width": 2});
-        let circleLeft = dataLeft + (dataWidth * dataVal);
-        let circle = this.circle( circleLeft, dataTop, 7).attr({fill: "#a0a0a0", "cursor": "pointer"});
+        let tLeft = dataLeft + (dataWidth * dataVal);
+        let triangle = this.path([
+            ["M", tLeft - 6, dataTop + 13],
+            ["l", 12, 0],
+            ["l", -6, -12],
+            ["z"]
+        ]).attr({fill: "#eeeeee", "stroke-width": 1.2, stroke: "#a0a0a0"});
     
         let ox = 0;
         let oy = 0;
-        circle.drag(
+        let lx = 0;
+        let ly = 0;
+        let startX = 0;
+        let moveX = 0;
+
+        triangle.drag(
             function move(dx, dy){
                 if (slider.enabled) {
                     lx = dx + ox;
@@ -1708,22 +1728,40 @@ var objects = {
                     if(lx <= -(dataWidth * dataVal)) {lx = -(dataWidth * dataVal); }
                     if(lx >= (dataWidth - (dataWidth * dataVal))) { lx = dataWidth - (dataWidth * dataVal); }
 
-                    circle.transform('T' + lx + ',' + 0);
+                    triangle.transform('T' + lx + ',' + 0);
+                    let newX = lx;
+                    if (newX > dataLeft + dataWidth) {
+                        newX = dataLeft + dataWidth;
+                    }
+                    if (newX > dataLeft) {
+                        newX = dataLeft;
+                    }
+                    moveX = newX;
                 }
             },
-            function start(){},
-            function end(){
-                if (slider.enabled) {                
+            function start(dx, dy){
+                let getBB = triangle.getBBox();
+                startX = getBB.x + getBB.width / 2;
+            },
+            function end(dx, dy){
+                if (slider.enabled) {
                     ox = lx;
                     oy = ly;
-                    slider.value = Number(lx / dataWidth).toFixed(2); 
+                    let val = ((startX + moveX) - dataLeft) / dataWidth;
+                    console.log(startX);
+                    console.log(moveX);
+                    console.log(val);
+                    // console.log(Number((dataWidth * lx) / dataVal).toFixed(2));
+                    moveX = 0;
+                    
+                    slider.value = Number((dataWidth * lx) / dataVal).toFixed(2); 
                     // say that the value has changed
                     objects.events.emit('iSpeak', {name: slider.name, status: 'value'});               
                 }
             }
         );
         let set = this.set();
-        set.push(line, circle);
+        set.push(line, triangle);
         // save to elements
         slider.element = set;
         // listen for events / changes

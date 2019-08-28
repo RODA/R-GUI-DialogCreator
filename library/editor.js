@@ -40,7 +40,7 @@ var editor = {
     make: function() 
     {
         this.paper = Raphael('paper', this.settings.dialog.width, this.settings.dialog.height);
-        let bgRect = this.paper.rect(0, 0, this.settings.dialog.width, this.settings.dialog.height).attr({'fill': '#fdfdfd'});
+        let bgRect = this.paper.rect(1, 1, this.settings.dialog.width - 1, this.settings.dialog.height - 1).attr({'fill': '#FFFFFF'});
         // on paper click deselect all
         bgRect.click(editor.deselectAll);
         // bg id for resize

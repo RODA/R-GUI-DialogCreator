@@ -1,5 +1,5 @@
 html, body{
-    font-family: 'Open Sans';
+    font-family: 'Arial';
     font-size: 13px;
     font-weight: 400;
 }
@@ -8,6 +8,12 @@ html, body{
     font-size: 13px;
     font-weight: 500;
 } */
+rect{
+    shape-rendering: crispEdges;
+}
+circle, path { 
+    shape-rendering: geometricPrecision;
+}
 .container{
     display: flex;
     flex-direction: column;

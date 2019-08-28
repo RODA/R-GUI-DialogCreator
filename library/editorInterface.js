@@ -157,10 +157,10 @@ $(document).ready(function(){
             val = '<label for="eldataValue">Values</label> ';
             val += '<select name="eldataValue" id="eldataValue">';
             val += '<option value="all">All</option>';
-            val += '<option value="dataDrames">Data Frames</option>';
-            val += '<option value="lists">Lists</option>';
-            val += '<option value="matrices">Matrices</option>';
-            val += '<option value="vectors">Vectors</option></select>';
+            val += '<option value="dataframe">Data Frames</option>';
+            val += '<option value="list">Lists</option>';
+            val += '<option value="matrix">Matrices</option>';
+            val += '<option value="vector">Vectors</option></select>';
         }
         $('#selectSourceChange').html(val);
     });
@@ -174,7 +174,9 @@ $(document).ready(function(){
         $('#propertiesList .elprop').hide();
         
         // trigger change for the select element source values
-        if(element.objViewClass !== void 0) {
+        console.log(element);
+        
+        if(element.dataSource !== void 0) {
             $("#eldataSource" ).trigger("change");
         }
 

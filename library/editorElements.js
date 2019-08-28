@@ -3,7 +3,7 @@
 var editorElements = {
 
     // defaults
-    fontFamily: 'Open Sans',
+    fontFamily: 'Arial',
     fontSize: '13px',
 
     // The elements
@@ -23,7 +23,7 @@ var editorElements = {
             let lBBox = labelT.getBBox();
             labelT.remove();
 
-            let rect = paper.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#f9f9f9", "stroke": "#eeeeee", "stroke-width": 0.7});
+            let rect = paper.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#FFFFFF", "stroke": "#bbbbbb"});
 
             let label = paper.text(dataLeft+10, dataTop + ((Math.round(lBBox.height) / 2) + 5), data.label).attr({"text-anchor": "start", "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
 

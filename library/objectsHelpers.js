@@ -42,7 +42,9 @@ const objectsHelpers = {
         commandArgs = this.getCommandArgs(command);            
         // console.log(commandArgs);
         
-        if (commandArgs.length > 0) {                        
+        if (commandArgs.length > 0) {    
+            console.log(commandArgs[0]);
+                                
             newCommand += commandArgs[0]; 
             for (let j = 1; j < commandArgs.length - 1; j++) {
                 let add = true;  
@@ -63,7 +65,9 @@ const objectsHelpers = {
                     newCommand += commandArgs[j] + ',';
                 }
             }
-            newCommand = newCommand.substring(0, newCommand.length - 1);
+            if(newCommand[newCommand.length - 1] === ','){
+                newCommand = newCommand.substring(0, newCommand.length - 1);
+            }
             newCommand += commandArgs[commandArgs.length - 1]; 
         }
         // replace with value

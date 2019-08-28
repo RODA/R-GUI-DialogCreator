@@ -6,11 +6,17 @@ body {
     padding: 0px;
     margin: 0px;
     font: caption;
-    font-family: 'Open Sans';
+    font-family: 'Arial';
     font-size: 13px;
     font-weight: 400;
     /* do not autoselect text */
     user-select: none;
+}
+rect{
+    shape-rendering: crispEdges;
+}
+circle, path { 
+    shape-rendering: geometricPrecision;
 }
 
 .container{

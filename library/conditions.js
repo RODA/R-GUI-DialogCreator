@@ -125,19 +125,26 @@ const conditions = {
         for(let i in methods){
             let mtd = methods[i];
             // recursively checking the conditions (left side of if - now an array)
-            let respArray = this.conditionCheckRecursion(conditions[mtd], list);
-            
-            // get the array's depth for flatening the array
-            let depth = helpers.getArrayDepth(respArray);
-            
-            isOK = this.textConditionTest(respArray.flat(depth).join(' '));
-                        
+            let respArray = [];
+            let isOK = false;
+            if(conditions[mtd] !== void 0) {
+                respArray = this.conditionCheckRecursion(conditions[mtd], list);
+                // get the array's depth for flatening the array
+                let depth = helpers.getArrayDepth(respArray);
+                
+                isOK = this.textConditionTest(respArray.flat(depth).join(' '));
+            }
+                                
             // if conditions are meet, try to apply the 'method'
             if(isOK) {
                 let asg = mtd.split('=');
                 let mtdIs = asg[0].trim();
                 let valueIs = (asg[1] != void 0) ? helpers.removeExternalQuotes(asg[1].trim()) : true;
                 
+                if ( list[valueIs] !== void 0 && list[valueIs].value !== void 0){
+                    valueIs = list[valueIs].value;
+                } 
+
                 // check if valid method
                 if ( typeof list[element.name][mtdIs] === 'function') 
                 {
