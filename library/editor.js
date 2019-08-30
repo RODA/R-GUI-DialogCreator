@@ -47,6 +47,8 @@ var editor = {
         this.bgId = bgRect.id;
         // set paper exists
         this.paperExists = true;        
+        // set font size and family
+        elements.setDefaultFont(this.settings.fontSize, this.settings.fontFamily);
         //add info to container - add availabel props
         container.initialize(this.settings.dialog);
         // emit dialog update

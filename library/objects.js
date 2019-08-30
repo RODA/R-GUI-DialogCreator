@@ -158,7 +158,7 @@ var objects = {
         let lBBox = objectsHelpers.getTextDim(this, obj.label, objects.fontSize, objects.fontFamily);
 
         let elButton = {};
-        elButton.rect = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#FFFFFF", "stroke": "#BBBBBB", "stroke-width": 0.7});
+        elButton.rect = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#FFFFFF", "stroke": "#5d5d5d", "stroke-width": 1});
         elButton.txt = this.text(dataLeft+10, dataTop + ((Math.round(lBBox.height) / 2) + 5), obj.label).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily});
 
         elButton.cover = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#FFFFFF", stroke: "none", "fill-opacity": 0, "cursor": "pointer"});
@@ -212,8 +212,8 @@ var objects = {
         };
         button.disable = function() {
             button.enabled = false;
-            button.element.rect.attr({fill: "#000", opacity: 0.2});
-            button.element.txt.attr({opacity: 0.2});
+            button.element.rect.attr({fill: "#cccccc", stroke: "#848484"});
+            button.element.txt.attr({fill: "#848484"});
             button.element.cover.attr({'cursor': 'default'});
             //  emit event only if already intialized
             if(!button.initialize) {
@@ -293,7 +293,7 @@ var objects = {
         // the label
         cbElement.label = this.text(xpos, ypos, obj.label).attr({"text-anchor": txtanchor, "font-size": (obj.fontsize + "px"), "font-family": objects.fontFamily, "cursor": "default"});
         // the box        
-        cbElement.box = this.rect(parseInt(obj.left), parseInt(obj.top), obj.dim, obj.dim).attr({fill: (checkBox.checked ? "#97bd6c" : "#eeeeee"),"stroke-width": 1, stroke: "#a0a0a0"});
+        cbElement.box = this.rect(parseInt(obj.left), parseInt(obj.top), obj.dim, obj.dim).attr({fill: (checkBox.checked ? "#97bd6c" : "#eeeeee"), "stroke-width": 1, stroke: "#5d5d5d"});
         // the checked 
         cbElement.chk = this.path([
             ["M", parseInt(obj.left) + 0.2*obj.dim, parseInt(obj.top) + 0.3*obj.dim],
@@ -343,7 +343,9 @@ var objects = {
             checkBox.enabled = true;
             checkBox.element.cover.active = true;
             checkBox.element.cover.attr({cursor: "pointer"});
-            cbElement.box.attr({fill: (checkBox.checked ? "#97bd6c" : "#eeeeee"), 'stroke': '#a0a0a0'});
+            cbElement.box.attr({fill: (checkBox.checked ? "#97bd6c" : "#eeeeee"), stroke: "#5d5d5d"});
+            cbElement.label.attr({fill: "#000000"});
+            cbElement.chk.attr({stroke: "#000000"});
             //  emit event only if already intialized
             if(!checkBox.initialize) {
                 objects.events.emit('iSpeak', {name: obj.name, status: 'enable'});
@@ -354,7 +356,9 @@ var objects = {
             checkBox.enabled = false;
             checkBox.element.cover.active = false;
             checkBox.element.cover.attr({cursor: "default"});
-            cbElement.box.attr({fill: "#aaaaaa", 'stroke': '#666666'});
+            cbElement.box.attr({fill: "#cccccc", stroke: "#848484"});
+            cbElement.label.attr({fill: "#848484"});
+            cbElement.chk.attr({stroke: "#848484"});
             //  emit event only if already intialized
             if(!checkBox.initialize) {
                 objects.events.emit('iSpeak', {name: obj.name, status: 'disable'});
@@ -435,7 +439,6 @@ var objects = {
     },
 
     // the container element
-    // TODO --- check data functionality
     container: function(obj, type)
     {
         // return if the received object is not corect;
@@ -453,7 +456,8 @@ var objects = {
             // multiple items can be selected
             value: [],
             shiftKey: false,
-            data: [] 
+            data: {}, 
+            listLength: 0
         };
 
         // data to int
@@ -467,7 +471,7 @@ var objects = {
         else if(obj.height > paper.height - 15) { obj.height = paper.height - 30; dataTop = 15; }
 
         // draw rectangle till we have data
-        container.element = this.rect(dataLeft, dataTop, obj.width + 6, obj.height).attr({fill: "#ffffff", "stroke": "#d6d6d6", "stroke-width": 1});
+        container.element = this.rect(dataLeft, dataTop, obj.width + 6, obj.height).attr({fill: "#ffffff", "stroke": "#5d5d5d", "stroke-width": 1});
         // The containers's element list paper support
         // ===============================================================================
         const listSupport = {
@@ -480,18 +484,18 @@ var objects = {
                 let svgHeight = (obj.height < noElements * 25 + 11) ? noElements * 25 + 10 : obj.height - 2;
 
                 listSupport.div.style.position = "absolute";
-                listSupport.div.style.top = (dataTop - 1) + 'px';
+                listSupport.div.style.top = (dataTop + 4) + 'px';
                 listSupport.div.style.left = (dataLeft + 16) + 'px';
                 // listSupport.div.style.backgroundColor = '#FF0000';
-                listSupport.div.style.width = divWidth + 'px';
-                listSupport.div.style.height = (obj.height - 2) + 'px';
+                listSupport.div.style.width = (divWidth + 1) + 'px';
+                listSupport.div.style.height = (obj.height - 1) + 'px';
                 //  make object scroll Y if needed
                 if(obj.height < noElements * 25 + 11) {
                     listSupport.div.id = 'container-' + obj.name;
                     listSupport.div.className = 'scrollbarStyle';
                 } else {
-                    listSupport.div.style.border = '2px';
-                    listSupport.div.style.borderColor = '#eaeaea';
+                    listSupport.div.style.border = '1px';
+                    listSupport.div.style.borderColor = '#5d5d5d';
                     listSupport.div.style.borderStyle = 'solid';
                 }
 
@@ -505,7 +509,8 @@ var objects = {
                 }
 
                 let newPaper = Raphael(listSupport.div, obj.width + 2, svgHeight);
-                listSupport.selectElements = newPaper.rect(1, 1, obj.width, svgHeight).attr({fill: "#FFFFFF", "stroke-width": 0}).toFront();
+                listSupport.selectElements = newPaper.rect(1, 1, obj.width, svgHeight).attr({fill: container.enabled ? "#FFFFFF" : "#cccccc", "stroke-width": 0}).toFront();
+
                 // append div to original|main paper
                 document.getElementById('paper').appendChild(listSupport.div);
                 
@@ -525,7 +530,7 @@ var objects = {
         objects.events.on('containerData', function(data) // new data
         {
             if(obj.name != data.name){
-                container.data = (data.data === void 0) ? data : data.data;
+                container.data = (data.data === void 0) ? data : data.data;                
                 if (container.type === 'dataSet' && data.name === void 0) {
                     container.makeDataSetList(data);
                 } else if (container.type === 'variable' && container.parent == data.name) { // variable container and triggered by dataSet container
@@ -544,11 +549,12 @@ var objects = {
         // ===============================================================================
         let selectedElementsList = [];
         let txt = [];
+        let bg = [];
         let cover = [];
         let listLength = 0;
 
         // on click element
-        let elClicked = function() { 
+        let elClicked = function() {             
             // active only if container is enable
             if(container.enabled)
             {
@@ -556,8 +562,8 @@ var objects = {
                 let valueName = this.data('elName');            
                 let position = this.data('position');            
                 
-                // if shift key presed
-                if(container.shiftKey) {
+                // if shift key presed | only vor variables
+                if(container.shiftKey && container.type == 'variable') {
                     // if we have already selected at least an element
                     if ( selectedElementsList.length > 0) {
                                 
@@ -567,18 +573,21 @@ var objects = {
 
                         // deselect everything
                         for(let i = 0; i < listLength; i++) {
-                            cover[i].attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
+                            cover[i].data('clicked', 0);
+                            bg[i].attr({opacity: 0});
                         }
 
                         if (position >= first) {
                             for(let i = first; i <= position; i++) {
-                                cover[i].attr({"fill": "blue", "opacity": 0.5}).data('clicked', 1);
+                                cover[i].data('clicked', 1);
+                                bg[i].attr({opacity: 1});
                                 selectedElementsList.push(i);
                                 container.value.push(cover[i].data('elName'));
                             }   
                         } else if (position < first) {
                             for(let i = position; i <= first; i++) {
-                                cover[i].attr({"fill": "blue", "opacity": 0.5}).data('clicked', 1);
+                                cover[i].data('clicked', 1);
+                                bg[i].attr({opacity: 1});
                                 selectedElementsList.push(i);
                                 container.value.push(cover[i].data('elName'));
                             }
@@ -589,31 +598,50 @@ var objects = {
                         });
 
                     } else {
-                        this.attr({"fill": "blue", "opacity": 0.5}).data('clicked', 1);
+                        this.data('clicked', 1);
+                        bg[position].attr({opacity: 1});
                         // save|add the name of the selected
                         container.value.push(valueName);
                         selectedElementsList.push(position);
                     }
                 } else {
-            
-                    if(!isOn) {
-                        this.attr({"fill": "blue", "opacity": 0.5}).data('clicked', 1);
-                        // save|add the name of the selected
-                        container.value.push(valueName);
-                        selectedElementsList.push(position);
-                    } else {
-                        this.attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
-                        // remove the unselected item
-                        container.value = helpers.removeValueFromArray(container.value, valueName);
-                        selectedElementsList = helpers.removeValueFromArray(selectedElementsList, position);
-                    }
                     
+                    if(!isOn) {
+                        // save|add the name of the selected
+                        if(container.type === 'variable') {
+                            container.value.push(valueName);
+                            selectedElementsList.push(position);
+                        } else {
+                            // for dataFrames you can select only one value
+                            container.value = [valueName];
+                            selectedElementsList = [position]; 
+                            for(let i = 0; i < listLength; i++) {
+                                cover[i].data('clicked', 0);
+                                bg[i].attr({opacity: 0});
+                            }
+                        }
+                        this.data('clicked', 1);
+                        bg[position].attr({opacity: 1});
+                    } else {
+                        this.data('clicked', 0);
+                        bg[position].attr({opacity: 0});
+                        // remove the unselected item
+                        if(container.type === 'variable') {
+                            container.value = helpers.removeValueFromArray(container.value, valueName);
+                            selectedElementsList = helpers.removeValueFromArray(selectedElementsList, position);
+                        } else {
+                            // for dataFrames you can select only one value
+                            container.value.length = 0;
+                            selectedElementsList.length = 0;
+                        }
+                    }
                     // something selected / deselected 
-                }                               
+                }     
                 objects.events.emit('containerData', {name: container.name, data: container.data, selected: container.value});            
                 objects.events.emit('iSpeak', {name: container.name, status: container.value});            
             }
         };
+        // dataSet list
         container.makeDataSetList = function(data)
         {
             // get dataframes
@@ -624,13 +652,15 @@ var objects = {
             let newPaper = listSupport.paper;           
 
             listLength = list.length;
+            container.listLength = list.length;
             
             let position = 15;
             // populate the list
             for(let i = 0; i < list.length; i++) {
-                txt[i] = newPaper.text(11, position+3, list[i]).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily, fill: '#333333'});
+                bg[i] = newPaper.rect(3 , position-10, obj.width - 5, 25).attr({fill: "#79a74c", "opacity": 0, "cursor": "pointer", stroke: 0});
+                txt[i] = newPaper.text(11, position+3, list[i]).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily, fill: container.enabled ? '#000000' : '#848484'});
                 // save the name of the
-                cover[i] = newPaper.rect(5 , position-10, obj.width - 10, 25).attr({fill: "#eeeeee", "opacity": 0, "cursor": "pointer", stroke: 0})
+                cover[i] = newPaper.rect(3 , position-10, obj.width - 5, 25).attr({fill: "#eeeeee", opacity: 0, stroke: 0, cursor: container.enabled ? "pointer" : "default"})
                                 .data('clicked', 0)
                                 .data('elName', list[i])
                                 .data('position', i);
@@ -642,6 +672,7 @@ var objects = {
                  cover[i].click(elClicked);
             }
         };
+        // variable list
         container.makeVarialeSetList = function(data)
         {           
             // get dataframes
@@ -649,12 +680,10 @@ var objects = {
             for (let i = 0; i < data.selected.length; i++) {
                 list.push(data.data[data.selected[i]]);
             }
-        
             // level one array
-            list = list.flat(list.length);
-            console.log(list);
-            
+            list = list.flat(list.length);            
             listLength = list.length;
+            container.listLength = list.length;
 
             // remove ald paper and div
             if (typeof listSupport.paper.remove === 'function') {
@@ -674,9 +703,10 @@ var objects = {
                 let position = 15;
                 // populate the list
                 for(let i = 0; i < listLength; i++) {
-                    txt[i] = newPaper.text(11, position+3, list[i]).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily, fill: '#333333'});
+                    bg[i] = newPaper.rect(3 , position-10, obj.width - 5, 25).attr({fill: "#79a74c", "opacity": 0, "cursor": "pointer", stroke: 0});
+                    txt[i] = newPaper.text(11, position+3, list[i]).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily, fill: container.enabled ? '#000000' : '#848484'});
                     // save the name of the
-                    cover[i] = newPaper.rect(5 , position-10, obj.width - 10, 25).attr({fill: "#eeeeee", "opacity": 0, "cursor": "pointer", stroke: 0})
+                    cover[i] = newPaper.rect(3 , position-10, obj.width - 5, 25).attr({fill: "#eeeeee", opacity: 0, stroke: 0, cursor: container.enabled ? "pointer" : "default"})
                                     .data('clicked', 0)
                                     .data('elName', list[i])
                                     .data('position', i);
@@ -710,12 +740,18 @@ var objects = {
         };
         container.enable = function() {
             container.enabled = true;
-            for(let i = 0; i < container.data.length; i++) {
+            container.element.attr({fill: "#FFFFFF"});
+            
+            for(let i = 0; i < listLength; i++) {
                 cover[i].attr({'cursor':'pointer'});
+                txt[i].attr({fill: "#000000"});
             }
             if (typeof listSupport.selectElements.attr === 'function') {
                 listSupport.selectElements.attr({fill: "#ffffff"});
             }
+
+            listSupport.div.style.backgroundColor = '#FFFFFF';
+
             //  emit event only if already intialized
             if(!container.initialize) {
                 objects.events.emit('iSpeak', {name: container.name, status: 'enable'});
@@ -723,12 +759,18 @@ var objects = {
         };
         container.disable = function() {
             container.enabled = false;
-            for(let i = 0; i < container.data.length; i++) {
+            container.element.attr({fill: "#cccccc", stroke: "#848484"});
+
+            for(let i = 0; i < listLength; i++) {
                 cover[i].attr({'cursor':'default'});
+                txt[i].attr({fill: "#848484"});
             }
             if (typeof listSupport.selectElements.attr === 'function') {
-                listSupport.selectElements.attr({fill: "#eeeeee"});
+                listSupport.selectElements.attr({fill: "#cccccc", stroke: "#848484"});
             }
+
+            listSupport.div.style.backgroundColor = '#cccccc';
+            
             //  emit event only if already intialized
             if(!container.initialize) {
                 objects.events.emit('iSpeak', {name: container.name, status: 'disable'});
@@ -790,14 +832,14 @@ var objects = {
             ["l", 12, 0],
             ["l", -6, 12],
             ["z"]
-        ]).attr({fill: "#eeeeee", "stroke-width": 1.2, stroke: "#a0a0a0"});
+        ]).attr({fill: "#79a74c", "stroke-width": 1, stroke: "#5d5d5d"});
         
         elCounter.upsign = this.path([
             ["M", dataLeft + obj.width / 2, dataTop + 6],
             ["l", 12, 0],
             ["l", -6, -12],
             ["z"]
-        ]).attr({fill: "#eeeeee", "stroke-width": 1.2, stroke: "#a0a0a0"});
+        ]).attr({fill: "#79a74c", "stroke-width": 1, stroke: "#5d5d5d"});
         
         // listen for events / changes - must be declared before thee emit events
         objects.events.on('iSpeak', function(data)
@@ -808,7 +850,7 @@ var objects = {
         }); 
 
         elCounter.down = this.rect((dataLeft - (obj.width / 2)) - 14, dataTop - 7, 15, 15)
-            .attr({fill: "#fff", opacity: 0, stroke: "#000", "stroke-width": 1, cursor: "pointer"})
+            .attr({fill: "#fff", opacity: 0,cursor: "pointer"})
             .click(function() {
                 if(counter.enabled) {
                     if (counter.value > parseInt(obj.startval)) {
@@ -821,7 +863,7 @@ var objects = {
             });
         
         elCounter.up = this.rect((dataLeft + (obj.width / 2)) - 2, dataTop - 7, 15, 15)
-            .attr({fill: "#fff", opacity: 0, stroke: "#000", "stroke-width": 1, cursor: "pointer"})
+            .attr({fill: "#fff", opacity: 0, cursor: "pointer"})
             .click(function() {
                 if(counter.enabled) {
                     if (counter.value < parseInt(obj.maxval)) {
@@ -858,8 +900,8 @@ var objects = {
         counter.enable = function() {
             counter.enabled = true;
             counter.element.textvalue.attr({fill: '#000000'});
-            counter.element.upsign.attr({fill: '#eeeeee', opacity: 1});
-            counter.element.downsign.attr({fill: '#eeeeee', opacity: 1});
+            counter.element.upsign.attr({fill: '#79a74c', stroke: "#5d5d5d"});
+            counter.element.downsign.attr({fill: '#79a74c', stroke: "#5d5d5d"});
             counter.element.up.attr({'cursor': 'pointer'});
             counter.element.down.attr({'cursor': 'pointer'});
             //  emit event only if already intialized
@@ -869,9 +911,9 @@ var objects = {
         };
         counter.disable = function() {
             counter.enabled = false;
-            counter.element.textvalue.attr({fill: '#bbbbbb'});
-            counter.element.upsign.attr({fill: '#000000', opacity: 0.2});
-            counter.element.downsign.attr({fill: '#000000', opacity: 0.2});
+            counter.element.textvalue.attr({fill: '#848484'});
+            counter.element.upsign.attr({fill: '#cccccc', stroke: "#848484"});
+            counter.element.downsign.attr({fill: '#cccccc', stroke: "#848484"});
             counter.element.up.attr({'cursor': 'default'});
             counter.element.down.attr({'cursor': 'default'});
             //  emit event only if already intialized
@@ -922,13 +964,13 @@ var objects = {
         let dataTop = parseInt(obj.top);
 
         let elinput = {};
-        elinput.rect = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#ffffff", "stroke": "#bbbbbb", "stroke-width": 0.7});
+        elinput.rect = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#ffffff", "stroke": "#5d5d5d", "stroke-width": 1});
 
-        elinput.cover = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#eeeeee", stroke: "none", "opacity": 0, "cursor": "text"});
+        elinput.cover = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#ffffff", stroke: "none", opacity: 0, "cursor": "text"});
         elinput.cover.click(function() 
         {
             if(input.enabled) {
-                objectsHelpers.customInput(obj.width - 10, 19, dataLeft+22, dataTop+1, input.value, input.paper, objects.fontSize, objects.fontFamily).then((result) => {
+                objectsHelpers.customInput(obj.width - 10, 19, dataLeft+22, dataTop+7, input.value, input.paper, objects.fontSize, objects.fontFamily).then((result) => {
                     input.setValue(result);                    
                 });
             }
@@ -959,7 +1001,7 @@ var objects = {
             // make it editable
             input.element.txt.click(function(){
                 if(input.enabled) {
-                    objectsHelpers.customInput(obj.width - 10, 19, dataLeft+22, dataTop+1, input.value, input.paper, objects.fontSize, objects.fontFamily).then((result) => {
+                    objectsHelpers.customInput(obj.width - 10, 19, dataLeft+22, dataTop+7, input.value, input.paper, objects.fontSize, objects.fontFamily).then((result) => {
                         input.setValue(result);                    
                     });
                 }
@@ -991,9 +1033,9 @@ var objects = {
         };
         input.enable = function() {
             input.enabled = true;
-            input.element.rect.attr({fill: "#ffffff"});
+            input.element.rect.attr({fill: "#ffffff", stroke: "#5d5d5d"});
             if(typeof input.element.txt === 'object'){
-                input.element.txt.attr({"fill-opacity" : 1, "cursor": "text"});
+                input.element.txt.attr({cursor: "text", fill: "#000000"});
             }
             input.element.cover.attr({"cursor": "text"});
             //  emit event only if already intialized
@@ -1003,11 +1045,11 @@ var objects = {
         };
         input.disable = function() {            
             input.enabled = false;
-            input.element.rect.attr({fill: "#BBB"});
+            input.element.rect.attr({fill: "#cccccc", stroke: "#848484"});
             if(typeof input.element.txt === 'object'){
-                input.element.txt.attr({"fill-opacity" : 0.5, "cursor": "pointer"});
+                input.element.txt.attr({cursor: "default", fill: "#848484"});
             }
-            input.element.cover.attr({"cursor": "pointer"});
+            input.element.cover.attr({"cursor": "default"});
             //  emit event only if already intialized
             if(!input.initialize) {
                 objects.events.emit('iSpeak', {name: input.name, status: 'disable'});
@@ -1092,62 +1134,62 @@ var objects = {
 
     // the plot element
     // TODO -- add functionality
-    plot: function(obj, type)
-    {
-        // return if the received object is not corect;
-        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+    // plot: function(obj, type)
+    // {
+    //     // return if the received object is not corect;
+    //     if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
 
-        let plot = {
-            name: obj.name,
-            visible: (obj.isVisible == 'true') ? true : false,
-            element: {},
-            conditions: objects.conditionsParser(obj.conditions),
-            initialize: true,
-        };
+    //     let plot = {
+    //         name: obj.name,
+    //         visible: (obj.isVisible == 'true') ? true : false,
+    //         element: {},
+    //         conditions: objects.conditionsParser(obj.conditions),
+    //         initialize: true,
+    //     };
 
         
-        plot.element.rect = this.rect(obj.left, obj.top, obj.width, obj.height).attr({fill: "#ffffff", "stroke": "#d6d6d6", "stroke-width": 1});
-        plot.element.text = this.text(obj.left + 20, obj.top + 20, 'This is a plot').attr({'fill': '#000000', "font-size": obj.fontSize, "font-family": objects.fontFamily, 'text-anchor': 'start', "cursor": "default"});
+    //     plot.element.rect = this.rect(obj.left, obj.top, obj.width, obj.height).attr({fill: "#ffffff", "stroke": "#d6d6d6", "stroke-width": 1});
+    //     plot.element.text = this.text(obj.left + 20, obj.top + 20, 'This is a plot').attr({'fill': '#000000', "font-size": obj.fontSize, "font-family": objects.fontFamily, 'text-anchor': 'start', "cursor": "default"});
 
-        // listen for events / changes
-        objects.events.on('iSpeak', function(data)
-        {            
-            if(obj.name != data.name){
-                objects.conditionsChecker(data, plot);
-            }
-        });
+    //     // listen for events / changes
+    //     objects.events.on('iSpeak', function(data)
+    //     {            
+    //         if(obj.name != data.name){
+    //             objects.conditionsChecker(data, plot);
+    //         }
+    //     });
         
-        // the lable's methods
-        plot.show = function() {
-            this.element.rect.show();
-            this.element.text.show();
-            //  emit event only if already intialized
-            if(!plot.initialize) {
-                objects.events.emit('iSpeak', {name: obj.name, status: 'show'});
-            }
-        };
-        plot.hide = function() {
-            this.element.rect.hide();
-            this.element.text.hide();
-            //  emit event only if already intialized
-            if(!plot.initialize) {
-                objects.events.emit('iSpeak', {name: obj.name, status: 'hide'});
-            }
-        };
+    //     // the lable's methods
+    //     plot.show = function() {
+    //         this.element.rect.show();
+    //         this.element.text.show();
+    //         //  emit event only if already intialized
+    //         if(!plot.initialize) {
+    //             objects.events.emit('iSpeak', {name: obj.name, status: 'show'});
+    //         }
+    //     };
+    //     plot.hide = function() {
+    //         this.element.rect.hide();
+    //         this.element.text.hide();
+    //         //  emit event only if already intialized
+    //         if(!plot.initialize) {
+    //             objects.events.emit('iSpeak', {name: obj.name, status: 'hide'});
+    //         }
+    //     };
 
-        // initial status
-        if(plot.visible){
-            plot.show();
-        } else {
-            plot.hide();
-        }
+    //     // initial status
+    //     if(plot.visible){
+    //         plot.show();
+    //     } else {
+    //         plot.hide();
+    //     }
 
-        // set to false - we have initialized the element
-        plot.initialize = false;
+    //     // set to false - we have initialized the element
+    //     plot.initialize = false;
 
-        // add the element to the main list
-        objects.objList[obj.name] = plot;
-    },
+    //     // add the element to the main list
+    //     objects.objList[obj.name] = plot;
+    // },
 
     // the radio element
     radio: function(radios, obj, type) 
@@ -1185,22 +1227,22 @@ var objects = {
         let me = radios[obj.radioGroup][obj.name];
 
         // drawing the radio and label
-        let cColor = (obj.isEnabled == 'true') ? "#eeeeee" : "#6c757d";
-        let tColor = (obj.isEnabled == 'true') ? "#000000" : "#6c757d";
-        me.label = this.text(dataLeft + 15, dataTop, obj.label).attr({"text-anchor": "start", "font-size": obj.fontsize, "font-family": objects.fontFamily, fill:tColor, "cursor":"default"});
-        me.circle = this.circle(dataLeft, dataTop, obj.size).attr({fill: cColor, "stroke": "#a0a0a0", "stroke-width": 1.2});
+        let cColor = (obj.isEnabled == 'true') ? "#eeeeee" : "#cccccc";
+        let tColor = (obj.isEnabled == 'true') ? "#000000" : "#848484";
+        me.label = this.text(dataLeft + 15, dataTop, obj.label).attr({"text-anchor": "start", "font-size": obj.fontsize, "font-family": objects.fontFamily, fill:tColor, cursor:"default"});
+        me.circle = this.circle(dataLeft, dataTop, obj.size).attr({fill: cColor, "stroke": "#5d5d5d", "stroke-width": 1});
     
         // selected - initial hide - new Raphael SET
         me.fill = this.set();
         // the interior green circle
         me.fill.push(this.circle(dataLeft, dataTop, obj.size - 0.5).attr({fill: "#97bd6c", stroke: "none"}));
         // the interior black smaller circle
-        me.fill.push(this.circle(dataLeft, dataTop, obj.size - 4.5).attr({fill: "#000000", stroke: "none"}));
+        me.fill.push(this.circle(dataLeft, dataTop, obj.size - 4.5).attr({fill: tColor, stroke: "none"}));
         // add iD / name
         me.name = obj.name;
         me.fill.hide();
 
-        me.cover =  this.circle(dataLeft, dataTop, obj.size + 2).attr({fill: "#eeeeee", stroke: "none", "fill-opacity": 0, "cursor": "pointer"});
+        me.cover =  this.circle(dataLeft, dataTop, obj.size + 2).attr({fill: "#ffffff", opacity:0, "cursor": "pointer"});
         me.cover.click(function() 
         {
             if(radio.enabled) {
@@ -1253,6 +1295,10 @@ var objects = {
         radio.enable = function() {
             radio.enabled = true;
             me.cover.attr({'cursor': 'pointer'});
+            me.circle.attr({fill: "#eeeeee", "stroke": "#5d5d5d"});
+            me.label.attr({fill: "#000000"});
+            // me.fill[0].attr({fill: "#97bd6c"});
+            me.fill[1].attr({fill: "#000000"});
             //  emit event only if already intialized
             if(!radio.initialize) {            
                 objects.events.emit('iSpeak', {name: radio.name, status: 'enable'});
@@ -1261,6 +1307,10 @@ var objects = {
         radio.disable = function() {
             radio.enabled = false;
             me.cover.attr({'cursor': 'default'});
+            // me.circle.attr({fill: "#cccccc", "stroke": "#848484"});
+            me.label.attr({fill: "#848484"});
+            // me.fill[0].attr({fill: "#97bd6c"});
+            me.fill[1].attr({fill: "#848484"});
             //  emit event only if already intialized
             if(!radio.initialize) {            
                 objects.events.emit('iSpeak', {name: radio.name, status: 'disable'});
@@ -1333,25 +1383,25 @@ var objects = {
         let dataWidth = parseInt(obj.width);
 
         // draw visibel rectangle
-        select.element.rect = this.rect(dataLeft, dataTop, dataWidth, 25).attr({fill: "#FFFFFF", "stroke": "#d6d6d6", "stroke-width": 1});  
+        select.element.rect = this.rect(dataLeft, dataTop, dataWidth, 25).attr({fill: "#FFFFFF", "stroke": "#5d5d5d", "stroke-width": 1});  
         // Open / close element list
         select.element.downsign = this.path([
             ["M", dataLeft + dataWidth - 15 , dataTop + 8],
             ["l", 8, 0],
             ["l", -4, 8],
             ["z"]
-        ]).attr({fill: "#999999", "stroke-width": 0});
+        ]).attr({fill: "#5d5d5d", "stroke-width": 0});
         select.element.upsign = this.path([
             ["M", dataLeft + dataWidth - 15 , dataTop + 15 ],
             ["l", 8, 0],
             ["l", -4, -8],
             ["z"]
-        ]).attr({fill: "#999999", "stroke-width": 0}).hide();
+        ]).attr({fill: "#5d5d5d", "stroke-width": 0}).hide();
         
-        select.element.showList = this.rect(dataLeft, dataTop, dataWidth, 25).attr({fill: "blue", "opacity": 0, "cursor": "pointer"});        
+        select.element.showList = this.rect(dataLeft, dataTop, dataWidth, 25).attr({fill: "#79a74c", "opacity": 0, "cursor": "pointer"});        
         select.element.showList.click(function() {
-            if(select.enabled) {                
-                if(listSupport.listSet[0].data('visible')) {
+            if(select.enabled && typeof listSupport.paper.setSize === "function") {                                
+                if(listSupport.listSet[0] !== void 0 && listSupport.listSet[0].data('visible')) {
                     listSupport.hide();
 
                     select.element.downsign.show();
@@ -1389,7 +1439,7 @@ var objects = {
             if(typeof select.objSelected.remove === "function") {
                 select.objSelected.remove();                
             }
-            select.objSelected = select.paper.text(dataLeft+10, dataTop+12, data).attr({"text-anchor": "start",fill: "#333333", "font-size": objects.fontSize, "font-family": objects.fontFamily});
+            select.objSelected = select.paper.text(dataLeft+10, dataTop+12, data).attr({"text-anchor": "start",fill: "#000000", "font-size": objects.fontSize, "font-family": objects.fontFamily});
             select.value = data;
             select.selected = true;
             // etmit event - obj value change
@@ -1414,9 +1464,9 @@ var objects = {
 
             makeSupport: function(noElements) {
                 listSupport.div.style.position = "absolute";
-                listSupport.div.style.top = (dataTop + 24) + 'px';
-                listSupport.div.style.left = (dataLeft + 18) + 'px';
-                listSupport.div.style.width = (dataWidth - 2) + 'px';
+                listSupport.div.style.top = (dataTop + 29) + 'px';
+                listSupport.div.style.left = (dataLeft + 16) + 'px';
+                listSupport.div.style.width = (dataWidth -1) + 'px';
                 // initial height only visible
                 listSupport.div.style.height = '0px';
 
@@ -1431,7 +1481,7 @@ var objects = {
             makeList: function(list) {
                 // The select's element list
                 // ===============================================================================
-                let selectElements = listSupport.paper.rect(0, 0, dataWidth, list.length * 25).attr({fill: "#FFFFFF", "stroke": "#333333", "stroke-width": 0}); 
+                let selectElements = listSupport.paper.rect(0, 0, dataWidth, list.length * 25).attr({fill: "#FFFFFF", stroke: "#5d5d5d", "stroke-width": 0}); 
                 selectElements.hide();
                 selectElements.data('visible', 0);
                 selectElements.toFront();   
@@ -1440,45 +1490,51 @@ var objects = {
                 listSupport.listSet.push(selectElements);
 
                 let position = 10;
+                let bg = [];
                 let txt = [];
                 let cover = [];
 
                 // on click element
                 let elClicked = function() { 
                     let isOn = this.data('clicked');
+                    let pos = this.data('position');
                     for(let j = 0; j < cover.length; j++) {
-                        cover[j].attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
-                        txt[j].attr({"fill": "#333333"});
+                        cover[j].data('clicked', 0);
+                        bg[j].attr({fill: "#ffffff"});
+                        txt[j].attr({"fill": "#000000"});
                     }
                     
                     if(!isOn) {
-                        this.attr({"fill": "blue", "opacity": 0.5}).data('clicked', 1);
+                        this.data('clicked', 1);
+                        bg[pos].attr({fill: "#79a74c"});
                         eventMe.emit('selected', this.data('elName'));
                     } else {
-                        this.attr({fill: "#eeeeee", "opacity": 0}).data('clicked', 0);
+                        this.data('clicked', 0);
                         eventMe.emit('deSelected', this.data('elName'));
                     }
                 };
                 // on element over
                 let elIn = function() { 
                     if(!this.data('clicked')){
-                        this.attr({"opacity": 0.5}); 
+                        bg[this.data('position')].attr({fill: "#79a74c"});
                     }
                 };
                 // on element out
                 let elOut = function() { 
                     if(!this.data('clicked')){
-                        this.attr({"opacity": 0}); 
+                        bg[this.data('position')].attr({fill: "#ffffff"});
                     }                                             
                 };
                 
                 // populate the list
                 for(let i = 0; i < list.length; i++) {
+                    bg[i] = listSupport.paper.rect(0 , position-10, dataWidth - 5, 25).attr({fill: "#ffffff", stroke: 0});
                     txt[i] = listSupport.paper.text(10, position+3, list[i]).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily, fill: '#333333'}).hide();
                     // save the name of the
-                    cover[i] = listSupport.paper.rect(0 , position-10, dataWidth - 5, 25).attr({fill: "#eeeeee", "opacity": 0, "cursor": "pointer", stroke: 0})
+                    cover[i] = listSupport.paper.rect(0 , position-10, dataWidth - 5, 25).attr({fill: "#eeeeee", opacity: 0, cursor: "pointer", stroke: 0})
                                     .hide()
                                     .data('clicked', 0)
+                                    .data('position', i)
                                     .data('elName', list[i])
                                     .click( elClicked )
                                     .hover( elIn, elOut );
@@ -1504,8 +1560,11 @@ var objects = {
         };
 
         //  add data based on type
-        if (obj.dataSource == 'custom') {
+        if (obj.dataSource === 'custom') {
             let list = obj.dataValue.split(',');
+            // remove last element if ""
+            if(list[list.length-1] === "") { list.pop(); }
+
             // do we have a list?
             if (Array.isArray(list) && list.length != 0) {
                 listSupport.makeSupport(list.length);
@@ -1516,13 +1575,24 @@ var objects = {
         // listen for events / changes for data
         objects.events.on('selectData', function(data)
         {
-            if(obj.dataSource == 'fromR'){
-                
+            if(obj.dataSource === 'fromR') {
+                // specific data type
                 if(data[obj.dataValue] !== void 0 && data[obj.dataValue].length > 0) {
-                    // TODO -- all values
                     listSupport.makeSupport(data[obj.dataValue].length);
                     // make the list with tha data
                     listSupport.makeList(data[obj.dataValue]);    
+                } else {
+                    // all data types
+                    if(obj.dataValue === 'all') {
+                        let allData = [];
+                        let keys = Object.keys(data);
+                        for(let i = 0; i < keys.length; i++) {
+                            allData = allData.concat(data[keys[i]]);                            
+                        }                        
+                        listSupport.makeSupport(allData.length);
+                        // make the list with tha data
+                        listSupport.makeList(allData);    
+                    }
                 }
             }            
         });
@@ -1530,6 +1600,7 @@ var objects = {
         // listen for events / changes
         objects.events.on('iSpeak', function(data)
         {
+            
             if(obj.name != data.name){
                 objects.conditionsChecker(data, select);
             }            
@@ -1541,8 +1612,8 @@ var objects = {
             select.element.downsign.show();
             select.element.showList.show();
             // check if we have anythig selected and hide-it
-            if(typeof select.selected.remove === "function") {
-                select.selected.show();
+            if(typeof select.objSelected.remove === "function") {
+                select.objSelected.show();
             }
             //  emit event only if already intialized
             if(!select.initialize) {
@@ -1556,8 +1627,8 @@ var objects = {
             select.element.downsign.hide();
             select.element.showList.hide();
             // check if we have anythig selected and hide-it
-            if(typeof select.selected.remove === "function") {
-                select.selected.hide();
+            if(typeof select.objSelected.remove === "function") {
+                select.objSelected.hide();
             }
             //  emit event only if already intialized
             if(!select.initialize) {
@@ -1566,23 +1637,29 @@ var objects = {
         };
         select.enable = function() {
             select.enabled = true;
-            select.element.rect.attr({fill: "#FFFFFF", opacity: 1});
-            select.element.downsign.attr({opacity:1});
+            select.element.rect.attr({fill: "#FFFFFF"});
+            select.element.downsign.attr({fill: "#5d5d5d"});
             select.element.upsign.hide();
             select.element.showList.attr({'cursor': 'pointer'});
+            if(typeof select.objSelected.remove === "function") {
+                select.objSelected.attr({fill: "#000000"});
+            }
             //  emit event only if already intialized
             if(!select.initialize) {
                 objects.events.emit('iSpeak', {name: select.name, status: 'enable'});
             }
         };
-        select.disable = function() {
+        select.disable = function() {            
             select.enabled = false;
-            select.element.rect.attr({fill: "#000", opacity: 0.2});
+            select.element.rect.attr({fill: "#cccccc", stroke: "#848484"});
             select.element.downsign.show();
-            select.element.downsign.attr({opacity:0.5});
+            select.element.downsign.attr({fill: "#848484"});
             select.element.upsign.hide();
             select.element.showList.attr({'cursor': 'default'});
             listSupport.hide();
+            if(typeof select.objSelected.remove === "function") {
+                select.objSelected.attr({fill: "#848484"});
+            }
             //  emit event only if already intialized
             if(!select.initialize) {
                 objects.events.emit('iSpeak', {name: select.name, status: 'disable'});
@@ -1626,12 +1703,12 @@ var objects = {
         {    
             if(obj.length < 10 || obj.length > this.width - 20){ obj.length = 300; }
             let v = parseInt(obj.length) + parseInt(obj.left);
-            separator.element = this.path("M" + obj.left + " " + obj.top + "L"+ v +" " + obj.top).attr({stroke: "#ccc"});
+            separator.element = this.path("M" + obj.left + " " + obj.top + "L"+ v +" " + obj.top).attr({stroke: "#5d5d5d"});
         } else if(obj.direction == 'y') 
         {
             if(obj.length < 10 || obj.length > this.height - 20){ obj.length = 300; }
             let v = parseInt(obj.length) + parseInt(obj.top);
-            separator.element = this.path("M" + obj.left + " " + obj.top + "L" + obj.left + " " + v).attr({stroke: "#ccc"});
+            separator.element = this.path("M" + obj.left + " " + obj.top + "L" + obj.left + " " + v).attr({stroke: "#5d5d5d"});
         }
 
         // listen for events / changes
@@ -1704,62 +1781,57 @@ var objects = {
 
         let v = parseInt(dataWidth) + parseInt(dataLeft);
         
-        let line = this.path("M" + dataLeft + " " + dataTop + "L"+ v +" " + dataTop).attr({stroke: "#a0a0a0", "stroke-width": 2});
+        let line = this.path("M" + dataLeft + " " + dataTop + "L"+ v +" " + dataTop).attr({stroke: "#000000", "stroke-width": 2});
         let tLeft = dataLeft + (dataWidth * dataVal);
         let triangle = this.path([
             ["M", tLeft - 6, dataTop + 13],
             ["l", 12, 0],
             ["l", -6, -12],
             ["z"]
-        ]).attr({fill: "#eeeeee", "stroke-width": 1.2, stroke: "#a0a0a0"});
+        ]).attr({fill: "#79a74c", "stroke-width": 1, stroke: "#5d5d5d"});
     
-        let ox = 0;
-        let oy = 0;
-        let lx = 0;
-        let ly = 0;
-        let startX = 0;
-        let moveX = 0;
+        let lastX = 0;
+        let absoluteX = 0;
 
         triangle.drag(
             function move(dx, dy){
                 if (slider.enabled) {
-                    lx = dx + ox;
-                    ly = dy + oy;
-                    if(lx <= -(dataWidth * dataVal)) {lx = -(dataWidth * dataVal); }
-                    if(lx >= (dataWidth - (dataWidth * dataVal))) { lx = dataWidth - (dataWidth * dataVal); }
+                    let newX = dx - lastX;
 
-                    triangle.transform('T' + lx + ',' + 0);
-                    let newX = lx;
-                    if (newX > dataLeft + dataWidth) {
-                        newX = dataLeft + dataWidth;
+                    if (absoluteX + dx > dataLeft + dataWidth) {
+                        newX = dataLeft + dataWidth - absoluteX - lastX;
                     }
-                    if (newX > dataLeft) {
-                        newX = dataLeft;
+                    
+                    if (absoluteX + dx < dataLeft) {
+                        newX = dataLeft - absoluteX - lastX;
                     }
-                    moveX = newX;
+                    
+                    triangle.translate(newX, 0);
+                    // transform() does not work the same as translate() ... !!
+                    // triangle.transform('T' + newX + ',' + 0);
+        
+                    if (absoluteX + dx < dataLeft) {
+                        lastX = dataLeft - absoluteX;
+                    }
+                    else {
+                        lastX += newX;
+                    }
                 }
             },
-            function start(dx, dy){
+            function start() {
+                lastX = 0;
                 let getBB = triangle.getBBox();
-                startX = getBB.x + getBB.width / 2;
+                absoluteX = getBB.x + getBB.width / 2;
             },
-            function end(dx, dy){
-                if (slider.enabled) {
-                    ox = lx;
-                    oy = ly;
-                    let val = ((startX + moveX) - dataLeft) / dataWidth;
-                    console.log(startX);
-                    console.log(moveX);
-                    console.log(val);
-                    // console.log(Number((dataWidth * lx) / dataVal).toFixed(2));
-                    moveX = 0;
-                    
-                    slider.value = Number((dataWidth * lx) / dataVal).toFixed(2); 
+            function end(){
+                if (slider.enabled) {        
+                    slider.value = ((absoluteX + lastX) - dataLeft) / dataWidth; 
                     // say that the value has changed
-                    objects.events.emit('iSpeak', {name: slider.name, status: 'value'});               
+                    objects.events.emit('iSpeak', {name: slider.name, status: 'value'});
                 }
             }
         );
+
         let set = this.set();
         set.push(line, triangle);
         // save to elements
@@ -1792,9 +1864,9 @@ var objects = {
         slider.enable = function() {
             slider.enabled = true;
             // first element in set is the line            
-            slider.element.items[0].attr({stroke: "#a0a0a0"});
+            slider.element.items[0].attr({stroke: "#5d5d5d"});
             // second element in the set is teh circle
-            slider.element.items[1].attr({fill: "#a0a0a0", "cursor": "pointer", "stroke": "#000000", "stroke-width": 1});
+            slider.element.items[1].attr({fill: "#79a74c", "cursor": "pointer", "stroke": "#5d5d5d", "stroke-width": 1});
             //  emit event only if already intialized
             if(!slider.initialize) {
                 objects.events.emit('iSpeak', {name: slider.name, status: 'enable'});
@@ -1803,9 +1875,9 @@ var objects = {
         slider.disable = function() {
             slider.enabled = false;
             // first element in set is the line 
-            slider.element.items[0].attr({stroke: '#cfcfcf'});
+            slider.element.items[0].attr({stroke: '#cccccc'});
             // second element in the set is teh circle
-            slider.element.items[1].attr({fill: "#cfcfcf", "stroke": "#cfcfcf", "stroke-width": 0.2, 'cursor': 'default'});
+            slider.element.items[1].attr({fill: "#cccccc", "stroke": "#cccccc", 'cursor': 'default'});
             //  emit event only if already intialized
             if(!slider.initialize) {
                 objects.events.emit('iSpeak', {name: slider.name, status: 'disable'});

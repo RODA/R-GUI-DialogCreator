@@ -1,10 +1,13 @@
 var defaultSettings = {
 
+    fontSize: '13px',
+    fontFamily: 'Arial',
+
     // dialog properties
     dialog: { name: 'NewDialog', title: 'New dialog', width: 640, height: 480},
-
+    
     // available dialog elements
-    availableElements: ['Button', 'Checkbox', 'Container', 'Counter', 'Input', 'Label', 'Plot', 'Radio', 'Select', 'Separator', 'Slider'],
+    availableElements: ['Button', 'Checkbox', 'Container', 'Counter', 'Input', 'Label', 'Radio', 'Select', 'Separator', 'Slider'],
 
     // elements -----------------------------------------------------------
 
@@ -20,7 +23,7 @@ var defaultSettings = {
     
     label: { parentId: '', type: 'Label', name: 'label1', text: 'My label', left: '10', top: '10', fontSize: 13, isVisible: 'true', elementIds: [], conditions: ''},
     
-    plot: { parentId: '', type: 'Plot', name: 'plot1', width: 250, height: 220, left: '15', top: '15', isVisible: 'true', isEnabled: 'true', elementIds: [], conditions: ''},
+    // plot: { parentId: '', type: 'Plot', name: 'plot1', width: 250, height: 220, left: '15', top: '15', isVisible: 'true', isEnabled: 'true', elementIds: [], conditions: ''},
     
     radio: { parentId: '', type: 'Radio', name: 'radio1', radioGroup: 'radiogroup1', label: 'My radiobox', left: '10', top: '10', isSelected: 'false', isEnabled: 'true', isVisible: 'true', elementIds: [], conditions: ''},
 

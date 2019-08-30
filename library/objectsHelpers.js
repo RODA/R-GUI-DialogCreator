@@ -118,7 +118,7 @@ const objectsHelpers = {
     {    
         return new Promise((resolve, reject) => {
             let container = paper.canvas.parentNode;    
-            let styles = "position: absolute; width: "+ (width) +"px; height: "+ (height) +"px; left: "+ x +"px; top: "+ y +"px; border: none; font-size: "+ fSize +"; font-family: "+ fFamily +" ; background: #ffffff; z-index:9000;";
+            let styles = "position: absolute; width: "+ (width) +"px; height: "+ (height) +"px; left: "+ x +"px; top: "+ y +"px; border: none; font-size: "+ fSize +"; font-family: "+ fFamily +" ; background: #FFFFFF; z-index:9000;";
             
             let input = document.createElement("input");
 

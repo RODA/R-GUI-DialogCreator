@@ -9,6 +9,7 @@ body {
     font-family: 'Arial';
     font-size: 13px;
     font-weight: 400;
+    -webkit-font-smoothing: antialiased;
     /* do not autoselect text */
     user-select: none;
 }
