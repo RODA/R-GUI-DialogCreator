@@ -9,9 +9,6 @@ const elements = require("./editorElements");
 const container = require("./container");
 const helpers = require('./helpers');
 
-// TODO -- import function
-// TODO -- rewrite file
-
 var editor = {
 
     paper: {}, 
@@ -54,6 +51,32 @@ var editor = {
         // emit dialog update
         editor.editorEvents.emit('dialogUpdate', this.settings.dialog);
     },
+    // create paper with data from file
+    makeFromFile: function(loadData)
+    {
+        this.paper = Raphael('paper', loadData.properties.width, loadData.properties.height);
+        let bgRect = this.paper.rect(1, 1, loadData.properties.width - 1, loadData.properties.height - 1).attr({'fill': '#fdfdfd'});
+        // on paper click deselect all
+        bgRect.click(editor.deselectAll);
+        // bg id for resize
+        this.bgId = bgRect.id;
+        // set paper exists
+        this.paperExists = true;        
+        // set font size and family
+        elements.setDefaultFont(this.settings.fontSize, this.settings.fontFamily);
+        //add info to container - add availabel props
+        container.initialize(loadData.properties);
+        // emit dialog update
+        editor.editorEvents.emit('dialogUpdate', loadData.properties);
+
+        for(let element in loadData.elements){
+            // console.log(loadData.elements[element]);
+            let data = loadData.elements[element]; 
+            this.addElementToPaper(data.type, data);
+        }
+
+        this.saveDialogSyntax(loadData.syntax);
+    },
 
     // update paper
     update: function(props) 
@@ -90,8 +113,7 @@ var editor = {
         editor.editorEvents.emit('clearProps');
     },
 
-    // load data from file
-    // TODO -- make it work
+    // load data from file - uses makeFromFile
     loadDialogDataFromFile: function(data)
     {
         let loadData = JSON.parse(data);
@@ -101,31 +123,13 @@ var editor = {
             dialog.showMessageBox(editorWindow, {type: "question", message: "Override curent dialog?", title: "Override", buttons: ["No", "Yes"]}, (response) => {
                 if (response) {
                     editor.remove();
-
-                    this.paper = Raphael('paper', loadData.properties.width, loadData.properties.height);
-                    let bgRect = this.paper.rect(0, 0, loadData.properties.width, loadData.properties.height).attr({'fill': '#fdfdfd'});
-                    // on paper click deselect all
-                    bgRect.click(editor.deselectAll);
-                    // bg id for resize
-                    this.bgId = bgRect.id;
-                    // set paper exists
-                    this.paperExists = true;        
-                    //add info to container - add availabel props
-                    container.initialize(loadData.properties);
-                    // emit dialog update
-                    editor.editorEvents.emit('dialogUpdate', loadData.properties);
-            
-                    for(let element in loadData.elements){
-                        // console.log(loadData.elements[element]);
-                        let data = loadData.elements[element]; 
-                        this.addElementToPaper(data.type, data);
-                    }
-            
-                    this.saveDialogSyntax(loadData.syntax);
+                    this.makeFromFile(loadData);
                 } else {
                     return;
                 }
             });
+        } else {
+            this.makeFromFile(loadData);
         }
     },
 
@@ -260,10 +264,18 @@ var editor = {
         }
     }, 
 
+    // deselect all paper elements
+    deselectAll: function()
+    {
+        for( let i = 0; i < editor.elementList.length; i++){
+            // last element in the set should be the cover
+            editor.elementList[i].items[editor.elementList[i].items.length - 1].attr({'stroke-width': 0, 'stroke-opacity': 0});
+        }
+    },
 
+    // ======================================================
     // return a copy of the container for creating the preview dialog
-    returnContainer: function()
-    {    
+    returnContainer: function(){    
         return JSON.stringify(container);
     },
     
@@ -278,23 +290,13 @@ var editor = {
 
     // ======================================================
     // get elements for dialog syntax
-    getDialogSyntax: function() {
+    getDialogSyntax: function(){
         return container.dataForSyntax();
     },
     // save the dialog syntax
-    saveDialogSyntax: function(data)
-    {        
+    saveDialogSyntax: function(data){        
         return container.saveSyntax(data);
     },
-
-    // deselect all paper elements
-    deselectAll: function()
-    {
-        for( let i = 0; i < editor.elementList.length; i++){
-            // last element in the set should be the cover
-            editor.elementList[i].items[editor.elementList[i].items.length - 1].attr({'stroke-width': 0, 'stroke-opacity': 0});
-        }
-    }
 };
 
 module.exports = editor;

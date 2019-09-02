@@ -6,7 +6,7 @@ const { dialog } = require('electron').remote;
 // get current window for making dialogs modals
 const objectsWindow = require('electron').remote.getCurrentWindow();
 
-const raphaelPaperSettings = require('./defaultSettings');
+const defaultSettings = require('./defaultSettings');
 const helpers = require("./helpers");
 const objectsHelpers = require("./objectsHelpers");
 const conditions = require('./conditions');
@@ -16,9 +16,9 @@ const mockupData = require('./objectsMockup');
 
 var objects = {
     
-    // defaults 
-    fontFamily: 'Arial',
-    fontSize: '13px',
+    // default styles
+    fontFamily: defaultSettings.fontFamily,
+    fontSize: defaultSettings.fontSize,
     // the container -- needed for dialog reset
     dialogDefaultData: {},
     // the main paper
@@ -35,7 +35,7 @@ var objects = {
     // create the main window & Raphael paper
     makeDialog: function(container) 
     {       
-        if (((container.properties === void 0) == false) && helpers.hasSameProps(raphaelPaperSettings.dialog, container.properties)) {
+        if (((container.properties === void 0) == false) && helpers.hasSameProps(defaultSettings.dialog, container.properties)) {
          
             // save data for laer use
             if(!this.reseted) {
@@ -194,7 +194,7 @@ var objects = {
     button: function(obj, type)
     {
         // return if the received object is not corect;
-        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+        if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
 
         let button = {
             name: obj.name,
@@ -302,7 +302,7 @@ var objects = {
     checkBox: function(obj, type) 
     {    
         // return if the received object is not corect;
-        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+        if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
 
         // x, y, isChecked, label, pos, dim, fontsize
         // checking / making properties
@@ -503,7 +503,7 @@ var objects = {
     container: function(obj, type)
     {
         // return if the received object is not corect;
-        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+        if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
 
         let container = {
             name: obj.name,
@@ -875,7 +875,7 @@ var objects = {
     counter: function(obj, type) 
     {
         // return if the received object is not corect;
-        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+        if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
 
         let counter = {
             name: obj.name,
@@ -1042,7 +1042,7 @@ var objects = {
     input: function(obj, type)
     {
         // return if the received object is not corect;
-        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+        if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
 
         let input = {
             name: obj.name,
@@ -1182,7 +1182,7 @@ var objects = {
     label: function(obj, type)
     {
         // return if the received object is not corect;
-        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+        if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
 
         let label = {
             name: obj.name,
@@ -1240,7 +1240,7 @@ var objects = {
     // plot: function(obj, type)
     // {
     //     // return if the received object is not corect;
-    //     if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+    //     if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
 
     //     let plot = {
     //         name: obj.name,
@@ -1298,7 +1298,7 @@ var objects = {
     radio: function(radios, obj, type) 
     {
         // return if the received object is not corect;
-        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+        if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
 
         let radio = {
             name: obj.name,
@@ -1465,7 +1465,7 @@ var objects = {
     select: function(obj, type, eventMe)
     {
         // return if the received object is not corect;
-        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+        if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
 
         let select = {
             name: obj.name,
@@ -1569,6 +1569,8 @@ var objects = {
             div: document.createElement("div"),
             paper: {},
             listSet: {},
+            // listBg used only for having a referance to clear selection
+            listBg: {},
             height: 0,
 
             makeSupport: function(noElements) {
@@ -1597,6 +1599,8 @@ var objects = {
 
                 listSupport.listSet = listSupport.paper.set();                
                 listSupport.listSet.push(selectElements);
+                // new set for background
+                listSupport.listBg = listSupport.paper.set();                
 
                 let position = 10;
                 let bg = [];
@@ -1610,7 +1614,6 @@ var objects = {
                     for(let j = 0; j < cover.length; j++) {
                         cover[j].data('clicked', 0);
                         bg[j].attr({fill: "#ffffff"});
-                        txt[j].attr({"fill": "#000000"});
                     }
                     
                     if(!isOn) {
@@ -1638,7 +1641,7 @@ var objects = {
                 // populate the list
                 for(let i = 0; i < list.length; i++) {
                     bg[i] = listSupport.paper.rect(0 , position-10, dataWidth - 5, 25).attr({fill: "#ffffff", stroke: 0});
-                    txt[i] = listSupport.paper.text(10, position+3, list[i]).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily, fill: '#333333'}).hide();
+                    txt[i] = listSupport.paper.text(10, position+3, list[i]).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily, fill: '#000000'}).hide();
                     // save the name of the
                     cover[i] = listSupport.paper.rect(0 , position-10, dataWidth - 5, 25).attr({fill: "#eeeeee", opacity: 0, cursor: "pointer", stroke: 0})
                                     .hide()
@@ -1647,7 +1650,8 @@ var objects = {
                                     .data('elName', list[i])
                                     .click( elClicked )
                                     .hover( elIn, elOut );
-                    listSupport.listSet.push( txt[i], cover[i] );
+                    listSupport.listSet.push(txt[i], cover[i]);
+                    listSupport.listBg.push(bg[i]);
                     position += 25;
                 } 
             },
@@ -1724,12 +1728,31 @@ var objects = {
         // the select's methods
         select.setValue = function(val) {
             select.value = val;
-            console.trace(val);
-            
             if (val === '') {
                 eventMe.emit('deSelected');
             } else if (select.dataList.includes(val)) {
                 eventMe.emit('selected', val);
+            }
+            // the position of the selected value if it exists
+            let exist = null; 
+            // clear bg and deselect all
+            if (listSupport.listSet.length > 0) {
+                for(let j = 0; j < listSupport.listSet.length; j++) {
+                    if (listSupport.listSet[j].data('clicked')) {
+                        listSupport.listSet[j].data('clicked', 0);
+                    }
+                    if (listSupport.listSet[j].data('elName') && listSupport.listSet[j].data('elName') === val) {
+                        listSupport.listSet[j].data('clicked', 1);
+                        exist = listSupport.listSet[j].data('position');
+                    }
+                    if (listSupport.listBg.items[j] !== void 0) {
+                        listSupport.listBg.items[j].attr({fill: "#ffffff"});
+                    }
+                }
+                // make the background of the selected value green in the list
+                if( exist && listSupport.listBg.items[exist] !== void 0) {
+                    listSupport.listBg.items[exist].attr({fill: "#79a74c"});
+                }
             }
             listSupport.hide();
         },
@@ -1815,7 +1838,7 @@ var objects = {
     separator: function(obj, type)
     {
         // return if the received object is not corect;
-        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+        if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
 
         let separator = {
             name: obj.name,
@@ -1882,7 +1905,7 @@ var objects = {
     slider: function(obj, type)
     {
         // return if the received object is not corect;
-        if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
+        if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
 
         let slider = {
             name: obj.name,
