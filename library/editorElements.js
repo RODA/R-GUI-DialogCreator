@@ -58,8 +58,8 @@ var editorElements = {
             
 
             // data.top + 1 fix
-            let dataTop = parseInt(data.top)+6;
-            let dataLeft = parseInt(data.left)+5;
+            let dataTop = (data.isChecked === 'true') ? parseInt(data.top)+2 : parseInt(data.top)+1;
+            let dataLeft = parseInt(data.left);
 
             // return Raphael object
             var cb = [];
@@ -74,7 +74,7 @@ var editorElements = {
             var dim = 12;            
 
             // label is to the right
-            xpos += 25;
+            xpos += 20;
             ypos += dim / 2;
             let label = paper.text(xpos, ypos, data.label).attr({"text-anchor": txtanchor, "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
             let square = paper.rect(dataLeft, dataTop, dim, dim).attr({fill: (data.isChecked === 'true') ? "#97bd6c" : "#eeeeee", "stroke-width": 1, stroke: "#5d5d5d"});
@@ -277,8 +277,8 @@ var editorElements = {
     {
         if( this.isObject(data) ) 
         {    
-            let dataLeft = parseInt(data.left)+12;
-            let dataTop = parseInt(data.top)+12;
+            let dataLeft = parseInt(data.left)+7;
+            let dataTop = parseInt(data.top)+7;
 
             let label = paper.text(dataLeft + 15, dataTop, data.label).attr({"text-anchor": "start", "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
             
@@ -390,6 +390,11 @@ var editorElements = {
             // check for user input
             if(dataLeft < 10 || dataLeft > paper.width - 10){ dataLeft = 10; }
             if(dataTop < 10 || dataTop > paper.height - 10){ dataTop = 10; }
+            if(dataVal < 0) {
+                dataVal = 0;
+            } else if (dataVal > 1) {
+                dataVal = 1;
+            }
   
             // width to big
             if(dataWidth < 50) { dataWidth = 50; }

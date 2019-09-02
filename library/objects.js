@@ -2,6 +2,9 @@
 // numer of max elements (events) - to decide on it
 require('events').EventEmitter.prototype._maxListeners = 35;
 const EventEmitter = require('events');
+const { dialog } = require('electron').remote;
+// get current window for making dialogs modals
+const objectsWindow = require('electron').remote.getCurrentWindow();
 
 const raphaelPaperSettings = require('./defaultSettings');
 const helpers = require("./helpers");
@@ -16,6 +19,8 @@ var objects = {
     // defaults 
     fontFamily: 'Arial',
     fontSize: '13px',
+    // the container -- needed for dialog reset
+    dialogDefaultData: {},
     // the main paper
     paper: {},
     // list of all created objects
@@ -26,12 +31,17 @@ var objects = {
     events: new EventEmitter(),
     // command
     command: '',
-    
+
     // create the main window & Raphael paper
     makeDialog: function(container) 
     {       
         if (((container.properties === void 0) == false) && helpers.hasSameProps(raphaelPaperSettings.dialog, container.properties)) {
-            
+         
+            // save data for laer use
+            if(!this.reseted) {
+                this.dialogData = container;
+            }
+        
             let props = container.properties;
             // create a new raphael paper
             this.paper = Raphael('paper', props.width, props.height);
@@ -55,6 +65,8 @@ var objects = {
             }
         });
 
+        // register listener for executing the command
+        this.executeCommand();
         // TODO -- to be removed
         // Testing with mockup data
         objects.events.emit('containerData', mockupData.df);
@@ -64,6 +76,7 @@ var objects = {
     // create an object based on it's type
     makeObject: function(obj) 
     {
+        
         let elType = obj.type.toLowerCase();
         switch(elType) {
             case "button": 
@@ -120,12 +133,55 @@ var objects = {
             // previewCommand = previewCommand.replace(elements[i], elementValue);                       
         }
         // update dialog comand
-        objects.command = command;
-        console.log(command);
-        
+        objects.command = command;        
         this.events.emit('commandUpdate', command);
     },
 
+    // execute a command trigered by a button
+    executeCommand: function()
+    {        
+        objects.events.on('iSpeakButton', function(data)
+        {            
+            if (data.type == "run"){
+                //TODO -- trigger command execution - / dialog name
+                // objects.events.emit('iSpeakRun', objects.container.properties.name);
+            } else if (data.type == "reset") {
+                dialog.showMessageBox(objectsWindow, {type: "question", message: "Are you sure you want to reset the dialog?", title: "Reset dialog", buttons: ["No", "Yes"]}, (response) => {
+                    if (response) {
+                        for (let element in objects.dialogDefaultData) {
+                            
+                            if ( objects.objList[element] !== void 0) {
+                                // reinitalizing do not emit events
+                                objects.objList[element].initialize = true;
+                                let theEl = objects.dialogDefaultData[element];
+                                for (let prop in theEl) {
+                                    switch(prop){
+                                        case 'visible':
+                                            if (theEl[prop]) { objects.objList[element].show(); } else { objects.objList[element].hide(); }
+                                            break;
+                                        case 'enabled':
+                                            if (theEl[prop]) { objects.objList[element].enable(); } else { objects.objList[element].disable(); }
+                                            break;
+                                        case 'checked':
+                                            if (theEl[prop]) { objects.objList[element].check(); } else { objects.objList[element].uncheck(); }
+                                            break;
+                                        case 'value':
+                                            objects.objList[element].setValue(theEl[prop]);
+                                            break;
+                                        case 'selected':
+                                            if (theEl[prop]) { objects.objList[element].select(); } else { objects.objList[element].deselect(); }
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    },
+
+    // shift key - container multiselect
     keyPressedEvent: function(theKey, theStatus)
     {
         objects.events.emit('keyTriggered', {key: theKey, status: theStatus});
@@ -149,6 +205,8 @@ var objects = {
             initialize: true,
             click: obj.onClick,
         };
+        // save default values
+        objects.dialogDefaultData[obj.name] = {visible: button.visible, enabled: button.enabled};
 
         // data to int
         let dataLeft = parseInt(obj.left);
@@ -165,9 +223,8 @@ var objects = {
         elButton.cover.click(function() 
         {
             // if enable emit event with command (run or reset)      
-            if(button.enabled) {
-                // alert(button.click);
-                objects.events.emit('iSpeakButton', {name: button.name, status: button.click});
+            if(button.enabled) {            
+                objects.events.emit('iSpeakButton', {name: button.name, type: button.click});
             }
         });
 
@@ -183,6 +240,7 @@ var objects = {
 
         // Button's properties
         button.show = function(){
+            button.visible = true;
             for( let i in button.element){
                 button.element[i].show();
             }
@@ -192,6 +250,7 @@ var objects = {
             }
         };
         button.hide = function(){
+            button.visible = false;
             for( let i in button.element){
                 button.element[i].hide();
             }
@@ -241,7 +300,7 @@ var objects = {
 
     // the checkbox element
     checkBox: function(obj, type) 
-    {        
+    {    
         // return if the received object is not corect;
         if(!helpers.hasSameProps(raphaelPaperSettings[type], obj)) { return false; }
 
@@ -264,6 +323,8 @@ var objects = {
             conditions: objects.conditionsParser(obj.conditions),
             initialize: true,
         };
+        // save default values
+        objects.dialogDefaultData[obj.name] = {visible: checkBox.visible, checked: checkBox.checked, enabled: checkBox.enabled};
 
         var cbElement = {};     
     
@@ -459,6 +520,9 @@ var objects = {
             data: {}, 
             listLength: 0
         };
+        
+        // save default values
+        objects.dialogDefaultData[obj.name] = {visible: container.visible, value: container.value, enabled: container.enabled};
 
         // data to int
         let dataLeft = parseInt(obj.left);
@@ -721,7 +785,18 @@ var objects = {
             }     
         };
 
-        // the container's properties    
+        // the container's properties
+        container.setValue = function(val){ // more like a clear selected values for dataSet containers - variable do not have data without dataSets
+            if (container.type === 'dataSet') {
+                container.value.length = 0;
+                selectedElementsList.length = 0;
+                for(let i = 0; i < container.listLength; i++) {
+                    cover[i].data('clicked', 0);
+                    bg[i].attr({opacity: 0});
+                }
+                objects.events.emit('containerData', {name: container.name, data: container.data, selected: []});
+            }
+        },   
         container.show = function(){
             // container.element.show();
             listSupport.div.style.display = 'block';
@@ -807,10 +882,16 @@ var objects = {
             visible: (obj.isVisible == 'true') ? true : false,
             enabled: (obj.isEnabled == 'true') ? true : false,
             value: parseInt(obj.startval),
+            min: parseInt(obj.startval),
+            max: parseInt(obj.maxval),
             element: {},
             conditions: objects.conditionsParser(obj.conditions),
             initialize: true,
+            paper: this,
         };
+
+        // save default values
+        objects.dialogDefaultData[obj.name] = {visible: counter.visible, value: counter.value, enabled: counter.enabled};        
 
         // obj properties
         if (helpers.missing(obj.fontsize)) { obj.fontsize = objects.fontSize; } else { obj.fontsize = obj.fontsize + "px"; }
@@ -853,7 +934,7 @@ var objects = {
             .attr({fill: "#fff", opacity: 0,cursor: "pointer"})
             .click(function() {
                 if(counter.enabled) {
-                    if (counter.value > parseInt(obj.startval)) {
+                    if (counter.value > counter.min) {
                         counter.value -= 1;
                         elCounter.textvalue.attr({"text": ("" + counter.value)});
                         // say that the value has changed
@@ -866,7 +947,7 @@ var objects = {
             .attr({fill: "#fff", opacity: 0, cursor: "pointer"})
             .click(function() {
                 if(counter.enabled) {
-                    if (counter.value < parseInt(obj.maxval)) {
+                    if (counter.value < counter.max) {
                         counter.value += 1;
                         elCounter.textvalue.attr({"text": ("" + counter.value)});
                         // say that the value has changed
@@ -878,6 +959,22 @@ var objects = {
         counter.element = elCounter;   
 
         // the counter's methods
+        counter.setValue = function(val) 
+        {
+            let newVal = parseInt(val);
+            // check for valid value and limits
+            if (isNaN(newVal) || newVal < counter.min || newVal > counter.max) {
+                return;
+            }
+            // we should have a value
+            if (typeof counter.element.textvalue.remove === 'function') {
+                counter.element.textvalue.remove();
+                counter.element.textvalue = counter.paper.text(dataLeft, dataTop, "" + newVal)
+                .attr({"text-anchor": txtanchor, "font-size": obj.fontsize, "font-family": objects.fontFamily});
+                counter.value = newVal;
+            }
+        },
+
         counter.show = function() {
             for (let i in counter.element){
                 counter.element[i].show();
@@ -958,6 +1055,9 @@ var objects = {
             paper: this,
             width: obj.width,
         };
+
+        // save default values
+        objects.dialogDefaultData[obj.name] = {visible: input.visible, value: input.value, enabled: input.enabled};
 
         // data to int
         let dataLeft = parseInt(obj.left);
@@ -1092,6 +1192,9 @@ var objects = {
             initialize: true,
         };
 
+        // save default values
+        objects.dialogDefaultData[obj.name] = {visible: label.visible};
+
         label.element = this.text(parseInt(obj.left), parseInt(obj.top) + (obj.fontSize / 2 + 1), obj.text).attr({'fill': '#000000', "font-size": obj.fontSize, "font-family": objects.fontFamily, 'text-anchor': 'start', "cursor": "default"});
      
         // listen for events / changes
@@ -1207,7 +1310,10 @@ var objects = {
             conditions: objects.conditionsParser(obj.conditions),
             initialize: true,
         };
-        
+
+        // save default values
+        objects.dialogDefaultData[obj.name] = {visible: radio.visible, selected: radio.selected, enabled: radio.enabled};        
+
         // add the element to the main list
         objects.objList[obj.name] = radio;  
 
@@ -1371,8 +1477,12 @@ var objects = {
             element: {},
             conditions: objects.conditionsParser(obj.conditions),
             initialize: true,
+            dataList: [],
             paper: this,
         };
+
+        // save default values
+        objects.dialogDefaultData[obj.name] = {visible: select.visible, value: select.value, enabled: select.enabled};
 
         // data to int
         let dataLeft = parseInt(obj.left);
@@ -1446,12 +1556,13 @@ var objects = {
             objects.events.emit('iSpeak', {name: obj.name, status: 'select'});            
         });
         eventMe.on('deSelected', function(data) {
-            select.objSelected.remove();
+            if(typeof select.objSelected.remove === "function") {
+                select.objSelected.remove();                
+            }
             select.value = '';
             select.selected = false;
             // etmit event - obj value change
             objects.events.emit('iSpeak', {name: obj.name, status: 'deselect'});
-            console.log(select);
         });
 
         const listSupport = {
@@ -1567,7 +1678,9 @@ var objects = {
             if (Array.isArray(list) && list.length != 0) {
                 listSupport.makeSupport(list.length);
                 // make the list with tha data
-                listSupport.makeList(list);    
+                listSupport.makeList(list);  
+                // save data list  
+                select.dataList = list;
             }
         }
         // listen for events / changes for data
@@ -1578,7 +1691,9 @@ var objects = {
                 if(data[obj.dataValue] !== void 0 && data[obj.dataValue].length > 0) {
                     listSupport.makeSupport(data[obj.dataValue].length);
                     // make the list with tha data
-                    listSupport.makeList(data[obj.dataValue]);    
+                    listSupport.makeList(data[obj.dataValue]);  
+                    // save data list  
+                    select.dataList = data[obj.dataValue];
                 } else {
                     // all data types
                     if(obj.dataValue === 'all') {
@@ -1590,6 +1705,8 @@ var objects = {
                         listSupport.makeSupport(allData.length);
                         // make the list with tha data
                         listSupport.makeList(allData);    
+                        // save data list
+                        select.dataList = allData;
                     }
                 }
             }            
@@ -1605,6 +1722,17 @@ var objects = {
         });
 
         // the select's methods
+        select.setValue = function(val) {
+            select.value = val;
+            console.trace(val);
+            
+            if (val === '') {
+                eventMe.emit('deSelected');
+            } else if (select.dataList.includes(val)) {
+                eventMe.emit('selected', val);
+            }
+            listSupport.hide();
+        },
         select.show = function(){
             select.element.rect.show();
             select.element.downsign.show();
@@ -1697,6 +1825,9 @@ var objects = {
             initialize: true,
         };
 
+        // save default values
+        objects.dialogDefaultData[obj.name] = {visible: separator.visible};        
+
         if(obj.direction == 'x') 
         {    
             if(obj.length < 10 || obj.length > this.width - 20){ obj.length = 300; }
@@ -1762,6 +1893,9 @@ var objects = {
             conditions: objects.conditionsParser(obj.conditions),
             initialize: true,
         };
+        
+        // save default values
+        objects.dialogDefaultData[obj.name] = {visible: slider.visible, value: slider.value, enabled: slider.enabled};
 
          // data to int
          let dataLeft = parseInt(obj.left);
@@ -1844,6 +1978,14 @@ var objects = {
         });
         
         // the slider's methods
+        slider.setValue = function(val) {
+            slider.value = val;
+            if (val >= 0 && val <= 1) {
+                let newPos = (dataLeft + (dataWidth * val)) - 6;
+                // move triangle to position
+                triangle.translate(newPos - triangle.getBBox().x, 0);
+            }
+        },
         slider.show = function() {
             slider.element.show();
             //  emit event only if already intialized
