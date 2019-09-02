@@ -9,25 +9,47 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EmilianHossu/electron-r-gui.git"
+    "url": "git+https://github.com/roda/R-GUI-DialogCreator.git"
   },
-  "author": "Emilian Adrian Hossu",
+  "author": "RODA",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/EmilianHossu/electron-r-gui/issues"
+    "url": "https://github.com/roda/R-GUI-DialogCreator/issues"
   },
-  "homepage": "https://github.com/EmilianHossu/electron-r-gui#readme",
+  "homepage": "https://github.com/roda/R-GUI-DialogCreator#readme",
   "devDependencies": {
     "electron": "^5.0.2",
     "electron-builder": "^20.41.0",
+    "electron-notarize": "^0.1.1",
     "electron-rebuild": "^1.8.5",
     "eslint": "^5.16.0"
   },
   "build": {
-    "appId": "r.gui.app",
-    "productName": "R GUI",
+    "appId": "r.gui.dialog.creator",
+    "productName": "RGUIDialogCreator",
     "directories": {
-      "output": "build"
+      "output": "build/output"
+    },
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": "default",
+      "icon": "build/icon.icns",
+      "type": "distribution",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico",
+      "legalTrademarks": "MIT Licence"
+    },
+    "linux": {
+      "target": "deb",
+      "maintainer": "RODA",
+      "icon": "build/icon.png",
+      "category": "Development / Science"
     }
   },
   "dependencies": {

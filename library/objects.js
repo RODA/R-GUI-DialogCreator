@@ -1092,7 +1092,7 @@ var objects = {
             initialize: true,
         };
 
-        label.element = this.text(obj.left, obj.top, obj.text).attr({'fill': '#000000', "font-size": obj.fontSize, "font-family": objects.fontFamily, 'text-anchor': 'start', "cursor": "default"});
+        label.element = this.text(parseInt(obj.left), parseInt(obj.top) + (obj.fontSize / 2 + 1), obj.text).attr({'fill': '#000000', "font-size": obj.fontSize, "font-family": objects.fontFamily, 'text-anchor': 'start', "cursor": "default"});
      
         // listen for events / changes
         objects.events.on('iSpeak', function(data)
@@ -1443,9 +1443,7 @@ var objects = {
             select.value = data;
             select.selected = true;
             // etmit event - obj value change
-            objects.events.emit('iSpeak', {name: obj.name, status: 'select'});
-            console.log(select);
-            
+            objects.events.emit('iSpeak', {name: obj.name, status: 'select'});            
         });
         eventMe.on('deSelected', function(data) {
             select.objSelected.remove();

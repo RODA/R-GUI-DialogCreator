@@ -58,7 +58,8 @@ var editorElements = {
             
 
             // data.top + 1 fix
-            let dataTop = parseInt(data.top)+1;
+            let dataTop = parseInt(data.top)+6;
+            let dataLeft = parseInt(data.left)+5;
 
             // return Raphael object
             var cb = [];
@@ -73,15 +74,15 @@ var editorElements = {
             var dim = 12;            
 
             // label is to the right
-            xpos += 20;
+            xpos += 25;
             ypos += dim / 2;
             let label = paper.text(xpos, ypos, data.label).attr({"text-anchor": txtanchor, "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
-            let square = paper.rect(parseInt(data.left), dataTop, dim, dim).attr({fill: (data.isChecked === 'true') ? "#97bd6c" : "#eeeeee", "stroke-width": 1, stroke: "#5d5d5d"});
+            let square = paper.rect(dataLeft, dataTop, dim, dim).attr({fill: (data.isChecked === 'true') ? "#97bd6c" : "#eeeeee", "stroke-width": 1, stroke: "#5d5d5d"});
             let checked;
 
             if(data.isChecked === 'true'){
                 checked = paper.path([
-                    ["M", parseInt(data.left) + 0.2*dim, dataTop + 0.3*dim],
+                    ["M", dataLeft + 0.2*dim, dataTop + 0.3*dim],
                     ["l", 0.15*dim*2, 0.2*dim*2],
                     ["l", 0.3*dim*2, -0.45*dim*2]
                 ]).attr({"stroke-width": 2});
@@ -234,8 +235,8 @@ var editorElements = {
             if(data.fontSize < 10 || data.fontSize > 20){ data.fontSize = 14; }
 
             // data.top + 7 fix
-            let dataTop = parseInt(data.top) + 8;
-            let dataLeft = parseInt(data.left);
+            let dataTop = parseInt(data.top) + 12;
+            let dataLeft = parseInt(data.left) + 5;
 
             // return Raphael object
             return paper.text(dataLeft, dataTop, data.text).attr({fill: '#000', 'text-anchor': 'start', "font-size": data.fontSize, "font-family": editorElements.fontFamily});
@@ -276,8 +277,8 @@ var editorElements = {
     {
         if( this.isObject(data) ) 
         {    
-            let dataLeft = parseInt(data.left)+7;
-            let dataTop = parseInt(data.top)+7;
+            let dataLeft = parseInt(data.left)+12;
+            let dataTop = parseInt(data.top)+12;
 
             let label = paper.text(dataLeft + 15, dataTop, data.label).attr({"text-anchor": "start", "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
             
@@ -346,8 +347,8 @@ var editorElements = {
         if( this.isObject(data) ) {
 
             // check for user input
-            if(data.left < 10 || data.left > paper.width - 10){ data.left = 10; }
-            if(data.top < 10 || data.top > paper.height - 10){ data.top = 10; }
+            if(data.left < 15 || data.left > paper.width - 15){ data.left = 15; }
+            if(data.top < 15 || data.top > paper.height - 15){ data.top = 15; }
             
             // return Raphael object
             if(data.direction == 'x') 
