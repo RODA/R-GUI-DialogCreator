@@ -1750,7 +1750,7 @@ var objects = {
                     }
                 }
                 // make the background of the selected value green in the list
-                if( exist && listSupport.listBg.items[exist] !== void 0) {
+                if( exist !== null && listSupport.listBg.items[exist] !== void 0) {
                     listSupport.listBg.items[exist].attr({fill: "#79a74c"});
                 }
             }
