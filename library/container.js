@@ -24,7 +24,6 @@ const container = {
     // update dialog props
     updateProperties: function(obj)
     {
-        console.log(obj);
         // for new props please define in initialization edior.js : make
         for (let prop in obj) 
         {
@@ -35,7 +34,6 @@ const container = {
                 this.properties[prop] = obj[prop];
             }
         }              
-        // this.properties['dependencies'] = 'QCA;';
     },
 
     // Elements 

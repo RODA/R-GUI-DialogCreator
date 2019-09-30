@@ -78,9 +78,7 @@ $(document).ready(function(){
             let el = $(this);
             let key = el.attr('name');
             obj[key] = el.val();
-        });                  
-        console.log(properties);
-        
+        });                          
        editor.update(obj);
     });
     // add dialog syntax
