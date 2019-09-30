@@ -45,7 +45,9 @@ ipcRenderer.on('saveDialogSyntax', (event, args) => {
 
 // load previous saved data
 ipcRenderer.on('openFile', (event, args) => {
-    editor.loadDialogDataFromFile(args);    
+    editor.loadDialogDataFromFile(args);        
+    document.getElementById('updateDialogProps').disabled = false;
+    document.getElementById('dialogSyntax').disabled = false;
 });
 
 $(document).ready(function(){
@@ -68,7 +70,7 @@ $(document).ready(function(){
     
     // update dialog properties
     $('#updateDialogProps').on('click', function() {
-
+        // TODO -- remove the undefine prop
         let properties = $('#dialogProps [id^="dialog"]');
         
         let obj = {};
@@ -77,7 +79,7 @@ $(document).ready(function(){
             let key = el.attr('name');
             obj[key] = el.val();
         });  
-
+                
        editor.update(obj);
     });
     // add dialog syntax
@@ -174,8 +176,6 @@ $(document).ready(function(){
         $('#propertiesList .elprop').hide();
         
         // trigger change for the select element source values
-        console.log(element);
-        
         if(element.dataSource !== void 0) {
             $("#eldataSource" ).trigger("change");
         }

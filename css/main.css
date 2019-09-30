@@ -74,6 +74,19 @@ circle, path {
     align-items: stretch;
     text-align: left;
 }
+.size div {
+    display: inline-block;
+    width: 49%;
+}
+.size .dProp label{
+    width: 78px!important;
+}
+.size .dProp input{
+    width: 80px!important;
+}
+#dialogDependencies::placeholder{
+    color: #a9a9a9;
+}
 #dialogProps label{
     display: inline-block;
     color: #a9a9a9;
@@ -92,7 +105,7 @@ circle, path {
     padding: 2px 5px;
 }
 #dialogProps > div{
-    flex: 1;
+    flex-grow: 1;
 }
 /* see properties for button style */
 #updateDialogProps{

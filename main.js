@@ -238,12 +238,14 @@ function saveDataToFile(arg)
 {
     // save data to file - first try
     dialog.showSaveDialog(editorWindow, {title: 'Save dialog to file', filters: [{name: 'R GUI', extensions: ['dat']}]}, function(filename)
-    {    
-        fs.writeFile(filename, arg, function(err){
-            if(err) { console.log(err); }
-            
-            console.log('Write Successfully');
-        });                     
+    {
+        if (filename) {
+            fs.writeFile(filename, arg, function(err){
+                if(err) { console.log(err); }
+                
+                console.log('Write Successfully');
+            });            
+        }         
     });
 }
 
