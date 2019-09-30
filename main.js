@@ -237,13 +237,12 @@ ipcMain.on('syntaxSaved', (event, args) => {
 function saveDataToFile(arg)
 {
     // save data to file - first try
-    dialog.showSaveDialog(editorWindow, {title: 'Save dialog to file', filters: [{name: 'R GUI', extensions: ['dat']}]}, function(filename)
+    dialog.showSaveDialog(editorWindow, {title: 'Save dialog to file', filters: [{name: 'R GUI', extensions: ['json']}]}, function(filename)
     {
         if (filename) {
             fs.writeFile(filename, arg, function(err){
                 if(err) { console.log(err); }
-                
-                console.log('Write Successfully');
+                // console.log('Write Successfully');
             });            
         }         
     });
@@ -277,7 +276,7 @@ const mainMenuTemplate = [
                 label: 'Load',
                 accelerator: "CommandOrControl+O",
                 click(){
-                    dialog.showOpenDialog(editorWindow, {title: "Load dialog data", filters: [{name: 'R-GUI-DialogCreator', extensions: ['dat']}], properties: ['openFile']}, result => {
+                    dialog.showOpenDialog(editorWindow, {title: "Load dialog data", filters: [{name: 'R-GUI-DialogCreator', extensions: ['json']}], properties: ['openFile']}, result => {
                         if (result !== void 0) {                            
                             fs.readFile(result[0], 'utf-8', (err, data) => {
                                 if (err) {

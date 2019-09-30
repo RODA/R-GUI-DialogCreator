@@ -17,7 +17,7 @@ ipcRenderer.on('newWindow', (event, args) => {
         editor.make();
     }
     document.getElementById('updateDialogProps').disabled = false;
-    document.getElementById('dialogSyntax').disabled = false;
+    document.getElementById('dlgSyntax').disabled = false;
 });
 
 // send data to preview window
@@ -47,7 +47,7 @@ ipcRenderer.on('saveDialogSyntax', (event, args) => {
 ipcRenderer.on('openFile', (event, args) => {
     editor.loadDialogDataFromFile(args);        
     document.getElementById('updateDialogProps').disabled = false;
-    document.getElementById('dialogSyntax').disabled = false;
+    document.getElementById('dlgSyntax').disabled = false;
 });
 
 $(document).ready(function(){
@@ -70,20 +70,21 @@ $(document).ready(function(){
     
     // update dialog properties
     $('#updateDialogProps').on('click', function() {
-        // TODO -- remove the undefine prop
-        let properties = $('#dialogProps [id^="dialog"]');
+
+        let properties = $('#dlgProps [id^="dialog"]');
         
         let obj = {};
         properties.each(function(){
             let el = $(this);
             let key = el.attr('name');
             obj[key] = el.val();
-        });  
-                
+        });                  
+        console.log(properties);
+        
        editor.update(obj);
     });
     // add dialog syntax
-    $('#dialogSyntax').on('click', function() {
+    $('#dlgSyntax').on('click', function() {
         ipcRenderer.send('startSyntaxWindow', editor.getDialogSyntax());
     });
 
@@ -203,7 +204,7 @@ $(document).ready(function(){
     // show dialog props
     editor.editorEvents.on('dialogUpdate', function(props) {
         
-        let properties = $('#dialogProps [id^="dialog"]');
+        let properties = $('#dlgProps [id^="dialog"]');
         
         properties.each(function(){
             let el = $(this);

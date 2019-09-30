@@ -24,13 +24,18 @@ const container = {
     // update dialog props
     updateProperties: function(obj)
     {
-        // for new props please define in initialization raphaelPaper.js : make
+        console.log(obj);
+        // for new props please define in initialization edior.js : make
         for (let prop in obj) 
         {
+            if(prop === 'dependencies' && this.properties[prop].length === 0) {
+                this.properties[prop] = obj[prop];
+            }
             if(this.properties[prop]) {
                 this.properties[prop] = obj[prop];
             }
-        }       
+        }              
+        // this.properties['dependencies'] = 'QCA;';
     },
 
     // Elements 

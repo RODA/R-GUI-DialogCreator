@@ -61,7 +61,7 @@ circle, path {
     padding-top: 35px;
     flex: 5;
 }
-.dialog #dialogProps{
+.dialog #dlgProps{
     padding: 0px 0px 5px 0px;
     background-color: #f0f0f0;
     display: flex;
@@ -69,7 +69,7 @@ circle, path {
     border-left: 1px solid #EEE;
     border-right: 1px solid #EEE;
 }
-#dialogProps .dProp{
+#dlgProps .dProp{
     margin: 3px 0px;
     align-items: stretch;
     text-align: left;
@@ -87,7 +87,7 @@ circle, path {
 #dialogDependencies::placeholder{
     color: #a9a9a9;
 }
-#dialogProps label{
+#dlgProps label{
     display: inline-block;
     color: #a9a9a9;
     width: 80px;
@@ -96,7 +96,7 @@ circle, path {
     cursor: pointer;
     text-align: left;
 }
-#dialogProps input{
+#dlgProps input{
     box-sizing: border-box;
     display: inline-block;
     width: 250px;
@@ -104,14 +104,14 @@ circle, path {
     border: 1px solid #e6e5e5;
     padding: 2px 5px;
 }
-#dialogProps > div{
+#dlgProps > div{
     flex-grow: 1;
 }
 /* see properties for button style */
 #updateDialogProps{
     margin: 0px!important;
 }
-#dialogProps:last-child{
+#dlgProps:last-child{
     margin: 0px;
     display: flex;
     align-items: center;
@@ -138,12 +138,12 @@ circle, path {
     margin: 3px 0px;
     align-items: stretch;
 }
-#propertiesList fieldset,  #dialogProps fieldset{
+#propertiesList fieldset,  #dlgProps fieldset{
     border: 0px;
     margin: 10px 0px;
     padding: 0px;
 }
-#propertiesList fieldset legend, #dialogProps fieldset legend{
+#propertiesList fieldset legend, #dlgProps fieldset legend{
     color: #333333;
     font-weight: 600;
     padding-bottom: 3px;
@@ -152,10 +152,10 @@ circle, path {
     margin-bottom: 10px;
     font-size: 14px;
 }
-#dialogProps fieldset{
+#dlgProps fieldset{
     max-width: 340px;
 }
-#dialogProps fieldset legend{
+#dlgProps fieldset legend{
     text-align: left;
 }
 #propertiesList label{
@@ -176,7 +176,7 @@ circle, path {
 #propertiesList input:disabled, #propertiesList input:read-only{
     background-color: #f0f0f0;
 }
-#updateElProps, #removeElement, #updateDialogProps, #dialogSyntax{
+#updateElProps, #removeElement, #updateDialogProps, #dlgSyntax{
     margin-top: 0px;
     width: 80px;
     height: 30px;
@@ -187,17 +187,17 @@ circle, path {
     border-bottom: 2px solid #BBB;
     border-right: 2px solid #BBB;
 }
-#updateElProps:active, #removeElement:active, #updateDialogProps:active, #dialogSyntax:active{
+#updateElProps:active, #removeElement:active, #updateDialogProps:active, #dlgSyntax:active{
     border-left:2px solid #BBB;
     border-top: 2px solid #BBB;
     border-right:2px solid #d6d6d6;
     border-bottom: 2px solid #d6d6d6;
     transition: all;
 }
-#updateElProps:disabled, #removeElement:disabled, #updateDialogProps:disabled, #dialogSyntax:disabled{
+#updateElProps:disabled, #removeElement:disabled, #updateDialogProps:disabled, #dlgSyntax:disabled{
     color:#aaa;
 }
-#updateElProps:focus, #removeElement:focus, #updateDialogProps:focus, #conditions:focus, #dialogSyntax:focus{
+#updateElProps:focus, #removeElement:focus, #updateDialogProps:focus, #conditions:focus, #dlgSyntax:focus{
     outline: none;
 }
 #properties .buttons{
@@ -209,7 +209,7 @@ circle, path {
 .dialogButtons{
     text-align: right;
 }
-#updateDialogProps, #dialogSyntax{
+#updateDialogProps, #dlgSyntax{
     display: block;
     margin: 5px 0px;
     width: 150px;
