@@ -44,7 +44,7 @@ Of course we can write the condition also like this: ** show == true if checkbox
 
 Example 2 
 
-We have four elements: input1, checkbox1, radio1, radio2 and the condition: **setValue == 'text' if checkbox1 != checked & (radio1 == selected | radio2 == selected);** for the *input1* element.
+We have four elements: input1, checkbox1, radio1, radio2 and the condition: **setValue = 'text' if checkbox1 != checked & (radio1 == selected | radio2 == selected);** for the *input1* element.
 Here we are assigning the value of "text" to input1 only if checkbox1 is not checked and one of the radio1 or radio2 is selected.
 
 

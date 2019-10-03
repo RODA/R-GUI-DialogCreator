@@ -11,6 +11,7 @@ const { dialog } = require('electron');
 let editorWindow;
 let aboutWindow;
 let objectsWindow;
+let conditionsWindow;
 
 // Listen for app to be ready
 app.on('ready', function()
@@ -96,7 +97,7 @@ function createObjectsWindow(arg)
     });
 
     // Open the DevTools.
-    // objectsWindow.webContents.openDevTools();
+    objectsWindow.webContents.openDevTools();
 
     objectsWindow.loadURL(url.format({
         pathname: path.join(__dirname, './windows/objectsWindow.html'),

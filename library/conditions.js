@@ -312,7 +312,7 @@ const conditions = {
             }
         } else {
             // check if element and value exists
-            if(lista[name].value === void 0){
+            if(list[name].value === void 0){
                 return false;
             }
             switch (operator) {
@@ -325,7 +325,7 @@ const conditions = {
                 case '>=':
                     res = (list[name].value >= propertyOrValue) ? true : false;
                     break;
-                case '>=':
+                case '<=':
                     res = (list[name].value <= propertyOrValue) ? true : false;
                     break;
             }
