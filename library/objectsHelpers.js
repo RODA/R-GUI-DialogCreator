@@ -43,8 +43,7 @@ const objectsHelpers = {
         // console.log(commandArgs);
         
         if (commandArgs.length > 0) {    
-            console.log(commandArgs[0]);
-                                
+                               
             newCommand += commandArgs[0]; 
             for (let j = 1; j < commandArgs.length - 1; j++) {
                 let add = true;  

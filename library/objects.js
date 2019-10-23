@@ -124,17 +124,19 @@ var objects = {
         // {name}
         let regex = /({[a-z0-9]+})/g;
         let elements = command.match(regex);
-        for(let i = 0; i < elements.length; i++) {
-            let name = elements[i].substring(1, elements[i].length-1);
-            let elementValue = objectsHelpers.getCommandElementValue(objects.objList, objects.radios, name);
-            // console.log(elementValue);
-            
-            command = objectsHelpers.updateCommand(command, syntax.defaultElements, name, elements[i], elementValue);
-            // previewCommand = previewCommand.replace(elements[i], elementValue);                       
+        if (elements !== null) {
+            for(let i = 0; i < elements.length; i++) {
+                let name = elements[i].substring(1, elements[i].length-1);
+                let elementValue = objectsHelpers.getCommandElementValue(objects.objList, objects.radios, name);
+                // console.log(elementValue);
+                
+                command = objectsHelpers.updateCommand(command, syntax.defaultElements, name, elements[i], elementValue);
+                // previewCommand = previewCommand.replace(elements[i], elementValue);                       
+            }
+            // update dialog comand
+            objects.command = command;        
+            this.events.emit('commandUpdate', command);
         }
-        // update dialog comand
-        objects.command = command;        
-        this.events.emit('commandUpdate', command);
     },
 
     // execute a command trigered by a button
@@ -796,7 +798,7 @@ var objects = {
                 }
                 objects.events.emit('containerData', {name: container.name, data: container.data, selected: []});
             }
-        },   
+        };   
         container.show = function(){
             // container.element.show();
             listSupport.div.style.display = 'block';
@@ -973,7 +975,7 @@ var objects = {
                 .attr({"text-anchor": txtanchor, "font-size": obj.fontsize, "font-family": objects.fontFamily});
                 counter.value = newVal;
             }
-        },
+        };
 
         counter.show = function() {
             for (let i in counter.element){
@@ -1070,7 +1072,7 @@ var objects = {
         elinput.cover.click(function() 
         {
             if(input.enabled) {
-                objectsHelpers.customInput(obj.width - 10, 19, dataLeft+22, dataTop+7, input.value, input.paper, objects.fontSize, objects.fontFamily).then((result) => {
+                objectsHelpers.customInput(obj.width - 10, 19, dataLeft+5, dataTop+2, input.value, input.paper, objects.fontSize, objects.fontFamily).then((result) => {
                     input.setValue(result);                    
                 });
             }
@@ -1575,8 +1577,8 @@ var objects = {
 
             makeSupport: function(noElements) {
                 listSupport.div.style.position = "absolute";
-                listSupport.div.style.top = (dataTop + 29) + 'px';
-                listSupport.div.style.left = (dataLeft + 16) + 'px';
+                listSupport.div.style.top = (dataTop + 26) + 'px';
+                listSupport.div.style.left = (dataLeft - 1) + 'px';
                 listSupport.div.style.width = (dataWidth -1) + 'px';
                 // initial height only visible
                 listSupport.div.style.height = '0px';
@@ -1755,7 +1757,8 @@ var objects = {
                 }
             }
             listSupport.hide();
-        },
+        };
+
         select.show = function(){
             select.element.rect.show();
             select.element.downsign.show();
@@ -2008,7 +2011,8 @@ var objects = {
                 // move triangle to position
                 triangle.translate(newPos - triangle.getBBox().x, 0);
             }
-        },
+        };
+
         slider.show = function() {
             slider.element.show();
             //  emit event only if already intialized

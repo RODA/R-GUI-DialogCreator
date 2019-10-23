@@ -18,7 +18,7 @@ const container = {
         this.syntax = {
             command: '',
             defaultElements: []
-        }
+        };
     },
     
     // update dialog props

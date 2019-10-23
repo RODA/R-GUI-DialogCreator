@@ -15,7 +15,7 @@ var defaultSettings = {
         
     checkbox: { parentId: '', type: 'Checkbox', name: 'checkbox1', label: 'My checkbox', left: '10', top: '10', isChecked: 'false', isEnabled: 'true', isVisible: 'true', elementIds: [], conditions: ''},
     
-    container: { parentId: '', type: 'Container', name: 'container1', objViewClass: 'variable', parentContainer: '', width: 150, height: 200, left: '15', top: '15', isVisible: 'true', isEnabled: 'true', elementIds: [], conditions: ''},
+    container: { parentId: '', type: 'Container', name: 'container1', objViewClass: 'variable', variableType: '', parentContainer: '', width: 150, height: 200, left: '15', top: '15', isVisible: 'true', isEnabled: 'true', elementIds: [], conditions: ''},
     
     counter: { parentId: '', type: 'Counter', name: 'counter1', startval: 1, maxval: 5, width: 25, left: '15', top: '15', isVisible: 'true', isEnabled: 'true', elementIds: [], conditions: ''},
     
