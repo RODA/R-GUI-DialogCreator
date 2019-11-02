@@ -13,11 +13,17 @@ let aboutWindow;
 let objectsWindow;
 let conditionsWindow;
 
+
+// Setting ENVIROMENT
+// process.env.NODE_ENV = 'development';
+process.env.NODE_ENV = 'production';
+
 // Listen for app to be ready
 app.on('ready', function()
 {    
     // Create new window
     editorWindow = new BrowserWindow({
+        title: 'R-GUI-DialogCreator',
         webPreferences:{
             nodeIntegration: true
         },
@@ -251,6 +257,7 @@ function saveDataToFile(arg)
 
 // Create menu template
 const mainMenuTemplate = [
+    // { role: 'fileMenu' }
     {
         label: 'File',
         submenu:[
@@ -273,8 +280,9 @@ const mainMenuTemplate = [
                     });  
                 }
             },
+            { type: "separator" },
             {
-                label: 'Load',
+                label: 'Load dialog',
                 accelerator: "CommandOrControl+O",
                 click(){
                     dialog.showOpenDialog(editorWindow, {title: "Load dialog data", filters: [{name: 'R-GUI-DialogCreator', extensions: ['json']}], properties: ['openFile']}, result => {
@@ -291,7 +299,7 @@ const mainMenuTemplate = [
                 }
             },
             {
-                label: 'Save',
+                label: 'Save dialog',
                 accelerator: "CommandOrControl+S",
                 click(){
                     editorWindow.webContents.send('previewDialog');
@@ -302,15 +310,9 @@ const mainMenuTemplate = [
                     });  
                 }
             },
-            {
-                label: 'Exit',
-                accelerator: "CommandOrControl+Q",
-                click(){
-                    app.quit();
-                }
-            }
         ]
     },
+    // { role: 'editMenu' }
     {
         label: 'Edit',
         submenu:[
@@ -323,6 +325,7 @@ const mainMenuTemplate = [
             { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
         ]
     },
+    // { role: 'infoMenu' }
     {
         label: 'Info',
         submenu:[
@@ -336,6 +339,36 @@ const mainMenuTemplate = [
     },
 
 ];
+
+if (process.platform === 'win32') {
+    mainMenuTemplate[0].push({ type: "separator" });
+    mainMenuTemplate[0].push({
+        label: 'Quit',
+        accelerator: "CommandOrControl+Q",
+        click(){
+            app.quit();
+        }
+    });
+}
+// only electron 5
+app.setName('R-GUI-DialogCreator');
+if (process.platform === 'darwin') {
+    // { role: 'appMenu' }  
+    mainMenuTemplate.unshift({
+        label: app.getName(),
+        submenu: [
+          { role: 'about' },
+          { type: 'separator' },
+          { role: 'services' },
+          { type: 'separator' },
+          { role: 'hide' },
+          { role: 'hideothers' },
+          { role: 'unhide' },
+          { type: 'separator' },
+          { role: 'quit' }
+        ]
+      });
+}
 
 // Add developer tools item if not in production
 if(process.env.NODE_ENV !== 'production'){

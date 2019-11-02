@@ -1,5 +1,5 @@
 {
-  "name": "electron-r-gui",
+  "name": "r-gui-dialog-creator",
   "version": "1.0.0",
   "description": "A R Software GUI in Electron JS",
   "main": "main.js",
