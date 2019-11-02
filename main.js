@@ -341,8 +341,8 @@ const mainMenuTemplate = [
 ];
 
 if (process.platform === 'win32') {
-    mainMenuTemplate[0].push({ type: "separator" });
-    mainMenuTemplate[0].push({
+    mainMenuTemplate[0].submenu.push({ type: "separator" });
+    mainMenuTemplate[0].submenu.push({
         label: 'Quit',
         accelerator: "CommandOrControl+Q",
         click(){
