@@ -12,10 +12,10 @@ body {
     user-select: none;
     overflow: hidden;
 }
-rect{
+rect, path{
     shape-rendering: crispEdges;
 }
-circle, path { 
+circle { 
     shape-rendering: geometricPrecision;
 }
 .container{

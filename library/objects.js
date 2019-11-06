@@ -1555,7 +1555,11 @@ var objects = {
             select.value = data;
             select.selected = true;
             // etmit event - obj value change
-            objects.events.emit('iSpeak', {name: obj.name, status: 'select'});            
+            objects.events.emit('iSpeak', {name: obj.name, status: 'select'});  
+            // hide list
+            listSupport.hide();
+            select.element.downsign.show();
+            select.element.upsign.hide();          
         });
         eventMe.on('deSelected', function(data) {
             if(typeof select.objSelected.remove === "function") {
@@ -1565,6 +1569,10 @@ var objects = {
             select.selected = false;
             // etmit event - obj value change
             objects.events.emit('iSpeak', {name: obj.name, status: 'deselect'});
+            // hide list
+            listSupport.hide();
+            select.element.downsign.show();
+            select.element.upsign.hide();          
         });
 
         const listSupport = {
@@ -1939,7 +1947,7 @@ var objects = {
 
         let v = parseInt(dataWidth) + parseInt(dataLeft);
         
-        let line = this.path("M" + dataLeft + " " + dataTop + "L"+ v +" " + dataTop).attr({stroke: "#000000", "stroke-width": 2});
+        let line = this.path("M" + dataLeft + " " + dataTop + "L"+ v +" " + dataTop).attr({stroke: "#000000", "stroke-width": 1});
         let tLeft = dataLeft + (dataWidth * dataVal);
         let triangle = this.path([
             ["M", tLeft - 6, dataTop + 13],

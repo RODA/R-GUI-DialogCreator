@@ -157,6 +157,9 @@ var editor = {
                 dataSettings.name = container.elementNameReturn(dataSettings.name);
             }   
 
+            // check for wrong values
+            dataSettings = container.cleanValues(dataSettings);
+
             let element = elements['add' + type](this.paper, dataSettings);            
         
             // adn cover, drag and drop and add it to the container
@@ -170,6 +173,7 @@ var editor = {
     // update element on paper
     updateElement: function(data)
     {                
+    
         // we need the old conditions if exists
         let oldEl = container.getElement(data.parentId);
         let oldConditions = (oldEl !== void 0) ? oldEl.conditions : '';
@@ -192,12 +196,15 @@ var editor = {
                 data.name = container.elementNameReturn(data.name);
             }
             
+            // check for wrong values
+           data = container.cleanValues(data);
+            
             let newElement = elements['add' + data.type](this.paper, data);
 
             this.addCoverAndDrag(newElement, data, true);
 
         } else {
-            console.log('eroare proprietati');
+            console.log('Properies error!');
         }
     },
 
@@ -229,6 +236,7 @@ var editor = {
         
         // add to container
        let containerResp = container.addElement(elId, element, data);
+
         // check if we have errors | if true show message
         if(containerResp.error){
             dialog.showMessageBox(editorWindow, {type: "error", message: containerResp.message, title: "Error", buttons: ["OK"]});

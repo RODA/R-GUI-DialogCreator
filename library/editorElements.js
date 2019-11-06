@@ -15,14 +15,14 @@ var editorElements = {
     // The elements
     // ==============================================
     // Add button
-    // TODO add execute and reset
+
     addButton: function(paper, data)
     {
         if( this.isObject(data) ) 
         {    
             // data to int
-            let dataLeft = parseInt(data.left);
-            let dataTop = parseInt(data.top);
+            let dataLeft = isNaN(parseInt(data.left)) ? 15 : parseInt(data.left);
+            let dataTop = isNaN(parseInt(data.top)) ? 15 : parseInt(data.top);
 
             // temporari element to get the button's width
             let labelT = paper.text(dataLeft, dataTop, data.label).attr({"text-anchor": "middle", "font-size": editorElements.fontSize, "font-family": editorElements.fontFamily});
@@ -235,8 +235,8 @@ var editorElements = {
             if(data.fontSize < 10 || data.fontSize > 20){ data.fontSize = 14; }
 
             // data.top + 7 fix
-            let dataTop = parseInt(data.top) + 12;
-            let dataLeft = parseInt(data.left) + 5;
+            let dataTop = parseInt(data.top) + 7;
+            let dataLeft = parseInt(data.left);
 
             // return Raphael object
             return paper.text(dataLeft, dataTop, data.text).attr({fill: '#000', 'text-anchor': 'start', "font-size": data.fontSize, "font-family": editorElements.fontFamily});

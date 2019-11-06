@@ -78,19 +78,12 @@ const container = {
     // Elements helper 
     // ======================================
     // clean / make element data
-        prepareData: function(data)
+    prepareData: function(data)
     {
         let response = { error: false, message: ''};
+        
         // trim & convert to int data
-        for(let i in data)
-        {
-            if( i == 'text' || i == 'label' || i == 'conditions' ) {
-                data[i] = data[i].trim();
-            }
-            if( i == 'width' || i == 'height' || i == 'left' || i == 'top' || i == 'startval' || i == 'maxval' ) {
-                data[i] = parseInt(data[i]);
-            }
-        }
+        this.cleanValues(data);
 
         // check if we already have a dataSet container
         if (data.type == 'Container' && data.objViewClass == 'dataSet') {
@@ -103,6 +96,39 @@ const container = {
 
         return response;
     },
+    // parse to int and trim values
+    cleanValues: function(data)
+    {
+        for(let i in data)
+        {
+            if( i == 'text' || i == 'label' || i == 'conditions' ) {
+                data[i] = data[i].trim();
+            }
+            if(i == 'width' && data.type == 'Container'){
+                data[i] = isNaN(parseInt(data[i])) ? 150 : parseInt(data[i]);
+            }
+            if(i == 'width' && (data.type == 'Input' || data.type == 'Select')){
+                data[i] = isNaN(parseInt(data[i])) ? 120 : parseInt(data[i]);
+            }
+            if(i == 'length' && data.type == 'Slider'){
+                data[i] = isNaN(parseInt(data[i])) ? 200 : parseInt(data[i]);
+            }
+            if(i == 'height' && data.type == 'Container'){
+                data[i] = isNaN(parseInt(data[i])) ? 200 : parseInt(data[i]);
+            }
+            if(i == 'left' || i == 'top'){
+                data[i] = isNaN(parseInt(data[i])) ? 15 : parseInt(data[i]);
+            }
+            if(i == 'startval' && data.type == 'Counter'){
+                data[i] = isNaN(parseInt(data[i])) ? 1 : parseInt(data[i]);
+            }
+            if(i == 'maxval' && data.type == 'Counter'){
+                data[i] = isNaN(parseInt(data[i])) ? 5 : parseInt(data[i]);
+            }
+        }
+        return data;
+    },
+
     // element type container restrinctions
     elementContainerDataSetExists()
     {

@@ -13,10 +13,10 @@ body {
     /* do not autoselect text */
     user-select: none;
 }
-rect{
+rect, path{
     shape-rendering: crispEdges;
 }
-circle, path { 
+circle { 
     shape-rendering: geometricPrecision;
 }
 

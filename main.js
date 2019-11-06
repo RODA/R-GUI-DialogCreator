@@ -37,11 +37,14 @@ app.on('ready', function()
         protocol: 'file:',
         slashes: true
     }));
+    
     // maximize
-    editorWindow.maximize();
+    // editorWindow.maximize();
 
     // Open the DevTools.
-    // editorWindow.webContents.openDevTools()
+    if (process.env.NODE_ENV === 'development') {
+        editorWindow.webContents.openDevTools();
+    }
 
     //Quit app when closed
     editorWindow.on('closed', function(){
@@ -103,7 +106,9 @@ function createObjectsWindow(arg)
     });
 
     // Open the DevTools.
-    objectsWindow.webContents.openDevTools();
+    if (process.env.NODE_ENV === 'development') {
+        objectsWindow.webContents.openDevTools();
+    }
 
     objectsWindow.loadURL(url.format({
         pathname: path.join(__dirname, './windows/objectsWindow.html'),
@@ -147,7 +152,9 @@ function createConditionswWindow(arg)
     });
 
     // Open the DevTools.
-    // conditionsWindow.webContents.openDevTools();
+    if (process.env.NODE_ENV === 'development') {
+        conditionsWindow.webContents.openDevTools();
+    }
 
     conditionsWindow.loadURL(url.format({
         pathname: path.join(__dirname, './windows/editorConditionsWindow.html'),
@@ -204,7 +211,9 @@ function createEditorSyntaxWindow(args)
     });
 
     // Open the DevTools.
-    // editorSyntaxWindow.webContents.openDevTools();
+    if (process.env.NODE_ENV === 'development') {
+        editorSyntaxWindow.webContents.openDevTools();
+    }
 
     editorSyntaxWindow.loadURL(url.format({
         pathname: path.join(__dirname, './windows/editorSyntaxWindow.html'),
@@ -316,13 +325,13 @@ const mainMenuTemplate = [
     {
         label: 'Edit',
         submenu:[
-            { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
-            { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
+            { label: "Undo", accelerator: "CmdOrCtrl+Z", role: "undo" },
+            { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", role: "redo" },
             { type: "separator" },
-            { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
-            { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-            { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-            { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
+            { label: "Cut", accelerator: "CmdOrCtrl+X", role: "cut" },
+            { label: "Copy", accelerator: "CmdOrCtrl+C", role: "copy" },
+            { label: "Paste", accelerator: "CmdOrCtrl+V", role: "paste" },
+            { label: "Select All", accelerator: "CmdOrCtrl+A", role: "selectAll" }
         ]
     },
     // { role: 'infoMenu' }
