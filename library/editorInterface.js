@@ -87,6 +87,8 @@ $(document).ready(function(){
     });
 
     // update element on press enter
+    // TODO only if element selected updateElProps does not exist anymore
+
     $(document).on('keypress',function(e) {
         if(e.which == 13) {
             let aaa = $('#updateElProps').prop('disabled');
@@ -102,27 +104,43 @@ $(document).ready(function(){
                         obj[key] = el.val();
                     }
                 });
-                // send obj for update
-                editor.updateElement(obj);
+                console.log(obj);
+                
+                if(editor.paperExists === true) {
+                    // send obj for update
+                    editor.updateElement(obj);
+                }
             }
         }
     });
     // update an element
-    $('#updateElProps').on('click', function(){
-        // get all proprerties
-        let properties = $('#propertiesList [id^="el"]');
-        // save all properties to obj
-        let obj = {};
-        properties.each(function(){
-            let el = $(this);
-            if(!el.prop('disabled')){
-                let key = el.attr('name').substr(2);
-                obj[key] = el.val();
+    var elementsAddEvent = document.querySelectorAll('#propertiesList [id^="el"]');
+    for(let i = 0; i < elementsAddEvent.length; i++) {
+        elementsAddEvent[i].addEventListener('blur', (event) => {
+            let properties = $('#propertiesList [id^="el"]');
+            // save all properties to obj
+            let obj = {};
+            properties.each(function(){
+                let el = $(this);
+                if(!el.prop('disabled')){
+                    let key = el.attr('name').substr(2);
+                    obj[key] = el.val();
+                }
+            });       
+            if(editor.paperExists === true) {
+                // send obj for update
+                editor.updateElement(obj);
             }
-        });       
-        // send obj for update
-        editor.updateElement(obj);
-    });
+        });
+    }
+    // $('#updateElProps').on('click', function(){
+    //     // get all proprerties
+
+    // });
+ 
+    // function updateElment(){
+        
+    // };
 
     // remove an element
     $("#removeElement").on('click', function(){
