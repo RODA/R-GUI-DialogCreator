@@ -189,7 +189,7 @@ var editor = {
         if(oldConditions !== ''){ data.conditions = oldConditions; }
 
         // checking if we have all properties
-        if( helpers.hasSameProps( this.settings[data.type.toLowerCase()], data )){
+        if( data.type !== void 0 && helpers.hasSameProps( this.settings[data.type.toLowerCase()], data )){
             
             // checking for duplicate names - add to HTML constrain only chars and numbers
             if(data.hasOwnProperty('name')) {
@@ -229,7 +229,7 @@ var editor = {
 
     // add drag and drop functioanlity and update container
     addCoverAndDrag: function(element, data, update)
-    {        
+    {              
         // add element to container
         // make unique ID
         let elId = helpers.makeid();
@@ -256,19 +256,20 @@ var editor = {
         editor.elementList.push(st);
 
         // element mousedown / clicked? get data from container
-        st.mousedown(function() {
-            editor.deselectAll();
+        st.mousedown(function() {                       
+            editor.deselectAll();                      
             st.items[st.items.length - 1].attr({'stroke': '#4D90FE', 'stroke-width': 0.5, 'stroke-opacity': 1, 'stroke-dasharray': ["--"]});
-            editor.editorEvents.emit('getEl', container.getElement(this.data("elId")));                
+            editor.editorEvents.emit('getEl', container.getElement(this.data("elId")));       
         });
-        
+    
         // make element draggable and update container and refresh
         elements.draggable.call(st, editor.editorEvents, container);
 
         // on element update triger interface update
         if(update){            
             st.items[st.items.length - 1].attr({'stroke': '#4D90FE', 'stroke-width': 0.5, 'stroke-opacity': 1, 'stroke-dasharray': ["--"]});
-            editor.editorEvents.emit('getEl', container.getElement(elId));     
+            editor.editorEvents.emit('getEl', container.getElement(elId));   
+            editor.currentSelectedElement = data.name;  
         }
     }, 
 

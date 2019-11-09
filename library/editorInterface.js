@@ -8,6 +8,7 @@ const editor = require("../library/editor");
 // helpers for when enter key is pressed
 let elementSelected = false;
 let enterPressed = false;
+let mouseDown = false;
 
 // new window clicked
 ipcRenderer.on('newWindow', (event, args) => {
@@ -54,12 +55,22 @@ ipcRenderer.on('openFile', (event, args) => {
     document.getElementById('dlgSyntax').disabled = false;
 });
 
-ipcRenderer.on('deselectedElements', (ev, args) => {
+ipcRenderer.on('deselectedElements', (ev, args) => {    
+    if (!mouseDown) {
+        clearProps();
+    }
     elementSelected = false;
 });
 
-$(document).ready(function(){
 
+$(document).ready(function() {
+
+    document.addEventListener('mousedown', () => {
+        mouseDown = true;
+    });
+    document.addEventListener('mouseup', () => {
+        mouseDown = false;
+    });
     // draw available elements
     $('#elementsList').append(editor.drawAvailableElements());
 
@@ -122,10 +133,9 @@ $(document).ready(function(){
     // update element on press enter
     $(document).on('keypress',function(ev) {
         if(ev.which == 13) {
-            enterPressed = true;
             if (elementSelected) 
             {
-                console.log('enter');
+                enterPressed = true;
                 // get all proprerties
                 let properties = $('#propertiesList [id^="el"]');
                 // save all properties to obj
@@ -136,7 +146,7 @@ $(document).ready(function(){
                         let key = el.attr('name').substr(2);
                         obj[key] = el.val();
                     }
-                });
+                });                
                 if(editor.paperExists === true) {
                     // send obj for update
                     editor.updateElement(obj);
@@ -192,6 +202,8 @@ $(document).ready(function(){
     editor.editorEvents.on('getEl', function(element) 
     {
         elementSelected = true;
+        console.log('get element');
+        
         // disable all elements and hide everything | reseting props tab
         $('#propertiesList [id^="el"]').prop('disabled', true);
         $('#propertiesList .elprop').hide();
@@ -215,8 +227,11 @@ $(document).ready(function(){
         }
         // disable update and remove button | force reselection
         $("#removeElement").prop('disabled', false);
-        // trigger change for container
-        $("#elobjViewClass" ).trigger("change");
+        
+        if(element.type === 'Container') {
+            // trigger change for container
+            $("#elobjViewClass" ).trigger("change");
+        }
         
     });
 
@@ -238,21 +253,23 @@ $(document).ready(function(){
         clearProps();
     });
 
-    // clear element props
-    function clearProps()
-    {
-        // clear data form
-        let properties = $('#propertiesList [id^="el"]');
 
-        properties.each(function(){
-            $(this).val('');
-        });
-
-        // hide props list
-        $('#propertiesList').hide();
-        $('#propertiesList .elprop').hide();
-
-        // disable buttons
-        $("#removeElement").prop('disabled', true);
-    }
 });
+
+// clear element props
+function clearProps()
+{
+    // clear data form
+    let properties = $('#propertiesList [id^="el"]');
+
+    properties.each(function(){
+        $(this).val('');
+    });
+
+    // hide props list
+    $('#propertiesList').hide();
+    $('#propertiesList .elprop').hide();
+
+    // disable buttons
+    $("#removeElement").prop('disabled', true);
+}
