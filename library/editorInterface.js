@@ -121,7 +121,7 @@ $(document).ready(function() {
                         obj[key] = el.val();
                     }
                 });       
-                if(editor.paperExists === true) {
+                if(editor.paperExists === true && obj.type !== void 0) {
                     // send obj for update
                     editor.updateElement(obj);
                 }
@@ -131,25 +131,37 @@ $(document).ready(function() {
         });
     }
     // update element on press enter
-    $(document).on('keypress',function(ev) {
+    $(document).on('keyup', function(ev) {
         if(ev.which == 13) {
             if (elementSelected) 
             {
-                enterPressed = true;
-                // get all proprerties
-                let properties = $('#propertiesList [id^="el"]');
-                // save all properties to obj
-                let obj = {};
-                properties.each(function(){
-                    let el = $(this);
-                    if(!el.prop('disabled')){
-                        let key = el.attr('name').substr(2);
-                        obj[key] = el.val();
+                if (document.activeElement.tagName !== 'SELECT') 
+                {
+                    enterPressed = true;
+                    // get all proprerties
+                    let properties = $('#propertiesList [id^="el"]');
+                    // save all properties to obj
+                    let obj = {};
+                    properties.each(function(){
+                        let el = $(this);
+                        if(!el.prop('disabled')){
+                            let key = el.attr('name').substr(2);
+                            obj[key] = el.val();
+                        }
+                    });                
+                    if(editor.paperExists === true) {
+                        // send obj for update
+                        editor.updateElement(obj);
                     }
-                });                
-                if(editor.paperExists === true) {
-                    // send obj for update
-                    editor.updateElement(obj);
+                }
+            }
+        }
+        // remove the element on delete or backspace key
+        if(ev.which == 46 || ev.which == 8) {
+            if (elementSelected) 
+            {
+                if (document.activeElement.tagName === 'BODY'){
+                    removeElement();
                 }
             }
         }
@@ -157,11 +169,7 @@ $(document).ready(function() {
 
     // remove an element
     $("#removeElement").on('click', function(){
-
-        // send element data ID
-        editor.removeElement($("#elparentId").val());
-
-        clearProps();
+        removeElement();
     });
 
     // adding / removing an elements conditions
@@ -202,7 +210,6 @@ $(document).ready(function() {
     editor.editorEvents.on('getEl', function(element) 
     {
         elementSelected = true;
-        console.log('get element');
         
         // disable all elements and hide everything | reseting props tab
         $('#propertiesList [id^="el"]').prop('disabled', true);
@@ -253,6 +260,11 @@ $(document).ready(function() {
         clearProps();
     });
 
+    function removeElement(){
+        // send element data ID
+        editor.removeElement($("#elparentId").val());
+        clearProps();
+    }
 
 });
 
