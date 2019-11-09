@@ -279,6 +279,7 @@ var editor = {
             // last element in the set should be the cover
             editor.elementList[i].items[editor.elementList[i].items.length - 1].attr({'stroke-width': 0, 'stroke-opacity': 0});
         }
+        editorWindow.webContents.send('deselectedElements');
     },
 
     // ======================================================

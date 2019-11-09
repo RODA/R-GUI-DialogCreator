@@ -5,6 +5,10 @@ const { dialog } = require('electron').remote;
 const mainWindow = require('electron').remote.getCurrentWindow();
 const editor = require("../library/editor");
 
+// helpers for when enter key is pressed
+let elementSelected = false;
+let enterPressed = false;
+
 // new window clicked
 ipcRenderer.on('newWindow', (event, args) => {
     if(editor.paperExists === true) {
@@ -50,6 +54,10 @@ ipcRenderer.on('openFile', (event, args) => {
     document.getElementById('dlgSyntax').disabled = false;
 });
 
+ipcRenderer.on('deselectedElements', (ev, args) => {
+    elementSelected = false;
+});
+
 $(document).ready(function(){
 
     // draw available elements
@@ -86,13 +94,38 @@ $(document).ready(function(){
         ipcRenderer.send('startSyntaxWindow', editor.getDialogSyntax());
     });
 
+    // update an element
+    var elementsAddEvent = document.querySelectorAll('#propertiesList [id^="el"]');
+    for(let i = 0; i < elementsAddEvent.length; i++) {
+        elementsAddEvent[i].addEventListener('blur', (ev) => {
+            if (!enterPressed) {            
+                // get all proprerties
+                let properties = $('#propertiesList [id^="el"]');
+                // save all properties to obj
+                let obj = {};
+                properties.each(function(){
+                    let el = $(this);
+                    if(!el.prop('disabled')){
+                        let key = el.attr('name').substr(2);
+                        obj[key] = el.val();
+                    }
+                });       
+                if(editor.paperExists === true) {
+                    // send obj for update
+                    editor.updateElement(obj);
+                }
+            } else {
+                enterPressed = false;
+            }
+        });
+    }
     // update element on press enter
-    // TODO only if element selected updateElProps does not exist anymore
-
-    $(document).on('keypress',function(e) {
-        if(e.which == 13) {
-            let aaa = $('#updateElProps').prop('disabled');
-            if(! aaa ) {
+    $(document).on('keypress',function(ev) {
+        if(ev.which == 13) {
+            enterPressed = true;
+            if (elementSelected) 
+            {
+                console.log('enter');
                 // get all proprerties
                 let properties = $('#propertiesList [id^="el"]');
                 // save all properties to obj
@@ -104,8 +137,6 @@ $(document).ready(function(){
                         obj[key] = el.val();
                     }
                 });
-                console.log(obj);
-                
                 if(editor.paperExists === true) {
                     // send obj for update
                     editor.updateElement(obj);
@@ -113,34 +144,6 @@ $(document).ready(function(){
             }
         }
     });
-    // update an element
-    var elementsAddEvent = document.querySelectorAll('#propertiesList [id^="el"]');
-    for(let i = 0; i < elementsAddEvent.length; i++) {
-        elementsAddEvent[i].addEventListener('blur', (event) => {
-            let properties = $('#propertiesList [id^="el"]');
-            // save all properties to obj
-            let obj = {};
-            properties.each(function(){
-                let el = $(this);
-                if(!el.prop('disabled')){
-                    let key = el.attr('name').substr(2);
-                    obj[key] = el.val();
-                }
-            });       
-            if(editor.paperExists === true) {
-                // send obj for update
-                editor.updateElement(obj);
-            }
-        });
-    }
-    // $('#updateElProps').on('click', function(){
-    //     // get all proprerties
-
-    // });
- 
-    // function updateElment(){
-        
-    // };
 
     // remove an element
     $("#removeElement").on('click', function(){
@@ -186,8 +189,9 @@ $(document).ready(function(){
 
     // Paper Events ========================================
     // show element properties
-    editor.editorEvents.on('getEl', function(element) {
-        
+    editor.editorEvents.on('getEl', function(element) 
+    {
+        elementSelected = true;
         // disable all elements and hide everything | reseting props tab
         $('#propertiesList [id^="el"]').prop('disabled', true);
         $('#propertiesList .elprop').hide();
@@ -210,7 +214,6 @@ $(document).ready(function(){
             }
         }
         // disable update and remove button | force reselection
-        $('#updateElProps').prop('disabled', false);
         $("#removeElement").prop('disabled', false);
         // trigger change for container
         $("#elobjViewClass" ).trigger("change");
@@ -250,7 +253,6 @@ $(document).ready(function(){
         $('#propertiesList .elprop').hide();
 
         // disable buttons
-        $('#updateElProps').prop('disabled', true);
         $("#removeElement").prop('disabled', true);
     }
 });
