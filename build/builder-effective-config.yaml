@@ -1,0 +1,6 @@
+directories:
+  output: build
+  buildResources: build
+appId: r.gui.dialog.creator
+productName: RGUIDialogCreator
+electronVersion: 5.0.7
