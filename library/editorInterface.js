@@ -108,6 +108,33 @@ $(document).ready(function() {
     // update an element
     var elementsAddEvent = document.querySelectorAll('#propertiesList [id^="el"]');
     for(let i = 0; i < elementsAddEvent.length; i++) {
+        // save on enter only if element type not select
+        if (elementsAddEvent[i].tagName !== "SELECT"){
+            elementsAddEvent[i].addEventListener('keyup', (ev) => {
+                if(ev.which == 13) {
+                    if (elementSelected) 
+                    {
+                        enterPressed = true;
+                        // get all proprerties
+                        let properties = $('#propertiesList [id^="el"]');
+                        // save all properties to obj
+                        let obj = {};
+                        properties.each(function(){
+                            let el = $(this);
+                            if(!el.prop('disabled')){
+                                let key = el.attr('name').substr(2);
+                                obj[key] = el.val();
+                            }
+                        });                
+                        if(editor.paperExists === true) {
+                            // send obj for update
+                            editor.updateElement(obj);
+                        }
+                    }
+                }
+            });
+        }
+        // save on blur
         elementsAddEvent[i].addEventListener('blur', (ev) => {
             if (!enterPressed) {            
                 // get all proprerties
@@ -132,30 +159,6 @@ $(document).ready(function() {
     }
     // update element on press enter
     $(document).on('keyup', function(ev) {
-        if(ev.which == 13) {
-            if (elementSelected) 
-            {
-                if (document.activeElement.tagName !== 'SELECT') 
-                {
-                    enterPressed = true;
-                    // get all proprerties
-                    let properties = $('#propertiesList [id^="el"]');
-                    // save all properties to obj
-                    let obj = {};
-                    properties.each(function(){
-                        let el = $(this);
-                        if(!el.prop('disabled')){
-                            let key = el.attr('name').substr(2);
-                            obj[key] = el.val();
-                        }
-                    });                
-                    if(editor.paperExists === true) {
-                        // send obj for update
-                        editor.updateElement(obj);
-                    }
-                }
-            }
-        }
         // remove the element on delete or backspace key
         if(ev.which == 46 || ev.which == 8) {
             if (elementSelected) 
@@ -209,6 +212,8 @@ $(document).ready(function() {
     // show element properties
     editor.editorEvents.on('getEl', function(element) 
     {
+        console.log('aici');
+        
         elementSelected = true;
         
         // disable all elements and hide everything | reseting props tab
