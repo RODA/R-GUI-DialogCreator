@@ -34,7 +34,6 @@ circle {
     padding: 20px 10px 0px 10px;
     background-color: #f0f0f0;
     max-width: 250px;
-    max-width: 250px;
 }
 #paperAvailableElements{
     margin: 0px;
@@ -89,7 +88,7 @@ circle {
 }
 #dlgProps label{
     display: inline-block;
-    color: #a9a9a9;
+    color: #323232;
     width: 80px;
     box-sizing: border-box;
     padding-right: 10px;
@@ -108,7 +107,7 @@ circle {
     flex-grow: 1;
 }
 /* see properties for button style */
-#updateDialogProps{
+#conditions{
     margin: 0px!important;
 }
 #dlgProps:last-child{
@@ -144,7 +143,7 @@ circle {
     padding: 0px;
 }
 #propertiesList fieldset legend, #dlgProps fieldset legend{
-    color: #333333;
+    color: #000000;
     font-weight: 600;
     padding-bottom: 3px;
     border-bottom: 2px solid #FFF;
@@ -160,7 +159,7 @@ circle {
 }
 #propertiesList label{
     display: inline-block;
-    color: #a9a9a9;
+    color: #323232;
     width: 110px;
     box-sizing: border-box;
     padding-right: 10px;
@@ -176,7 +175,7 @@ circle {
 #propertiesList input:disabled, #propertiesList input:read-only{
     background-color: #f0f0f0;
 }
-#updateElProps, #removeElement, #updateDialogProps, #dlgSyntax{
+#removeElement, #conditions, #dlgSyntax{
     margin-top: 0px;
     width: 80px;
     height: 30px;
@@ -187,17 +186,17 @@ circle {
     border-bottom: 2px solid #BBB;
     border-right: 2px solid #BBB;
 }
-#updateElProps:active, #removeElement:active, #updateDialogProps:active, #dlgSyntax:active{
+#removeElement:active, #conditions:active, #dlgSyntax:active{
     border-left:2px solid #BBB;
     border-top: 2px solid #BBB;
     border-right:2px solid #d6d6d6;
     border-bottom: 2px solid #d6d6d6;
     transition: all;
 }
-#updateElProps:disabled, #removeElement:disabled, #updateDialogProps:disabled, #dlgSyntax:disabled{
+#removeElement:disabled, #conditions:disabled, #dlgSyntax:disabled{
     color:#aaa;
 }
-#updateElProps:focus, #removeElement:focus, #updateDialogProps:focus, #conditions:focus, #dlgSyntax:focus{
+#removeElement:focus, #conditions:focus, #conditions:focus, #dlgSyntax:focus{
     outline: none;
 }
 #properties .buttons{
@@ -209,31 +208,10 @@ circle {
 .dialogButtons{
     text-align: right;
 }
-#updateDialogProps, #dlgSyntax{
+#dlgSyntax{
     display: block;
     margin: 5px 0px;
     width: 150px;
-}
-
-/* Conditions */
-#conditions{
-    font-weight: 600;
-    margin-top: 0px;
-    width: 40px;
-    height: 25px;
-    cursor: pointer;
-    background-color: #f0f0f0;
-    border-top: 2px solid #eaeaea;
-    border-left:2px solid #eaeaea;
-    border-bottom: 2px solid #BBB;
-    border-right: 2px solid #BBB;
-}
-#conditions:active{
-    border-left:2px solid #BBB;
-    border-top: 2px solid #BBB;
-    border-right:2px solid #d6d6d6;
-    border-bottom: 2px solid #d6d6d6;
-    transition: all;
 }
 
 @font-face {
