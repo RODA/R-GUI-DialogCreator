@@ -4,7 +4,7 @@ const { BrowserWindow } = require('electron').remote;
 $(document).ready(function(){
     ipcRenderer.on('elementsList', (event, args) => {        
         
-        console.log(args);
+        //console.log(args);
         
         $('#syntax').val(args.syntax.command);        
 
@@ -90,7 +90,7 @@ function addRow(tableID, data) {
         defaultInput.setAttribute('type', 'text');
         defaultInput.setAttribute('name', data.name);
     }
-    console.log(data);
+    //console.log(data);
     
     newCell3.appendChild(defaultInput);
 }

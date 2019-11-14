@@ -21,7 +21,6 @@ ipcRenderer.on('newWindow', (event, args) => {
     }else{
         editor.make();
     }
-    document.getElementById('updateDialogProps').disabled = false;
     document.getElementById('dlgSyntax').disabled = false;
 });
 
@@ -51,7 +50,6 @@ ipcRenderer.on('saveDialogSyntax', (event, args) => {
 // load previous saved data
 ipcRenderer.on('openFile', (event, args) => {
     editor.loadDialogDataFromFile(args);        
-    document.getElementById('updateDialogProps').disabled = false;
     document.getElementById('dlgSyntax').disabled = false;
 });
 
@@ -88,18 +86,35 @@ $(document).ready(function() {
     // this.val.regex(/^[a-z0-9]+$/);
     
     // update dialog properties
-    $('#updateDialogProps').on('click', function() {
-
-        let properties = $('#dlgProps [id^="dialog"]');
+    var propertyAddEvent = document.querySelectorAll('#dlgProps [id^="dialog"]');
+    for(let i = 0; i < propertyAddEvent.length; i++) {
+        propertyAddEvent[i].addEventListener('keyup', (ev) => {
+            if(ev.which == 13) {
+                let properties = $('#dlgProps [id^="dialog"]');
         
-        let obj = {};
-        properties.each(function(){
-            let el = $(this);
-            let key = el.attr('name');
-            obj[key] = el.val();
-        });                          
-       editor.update(obj);
-    });
+                let obj = {};
+                properties.each(function(){
+                    let el = $(this);
+                    let key = el.attr('name');
+                    obj[key] = el.val();
+                });                          
+               editor.update(obj);
+            }
+        });
+        // save on blur
+        propertyAddEvent[i].addEventListener('blur', (ev) => {
+            let properties = $('#dlgProps [id^="dialog"]');
+        
+            let obj = {};
+            properties.each(function(){
+                let el = $(this);
+                let key = el.attr('name');
+                obj[key] = el.val();
+            });                          
+           editor.update(obj);
+        });
+    }
+
     // add dialog syntax
     $('#dlgSyntax').on('click', function() {
         ipcRenderer.send('startSyntaxWindow', editor.getDialogSyntax());
@@ -211,9 +226,7 @@ $(document).ready(function() {
     // Paper Events ========================================
     // show element properties
     editor.editorEvents.on('getEl', function(element) 
-    {
-        console.log('aici');
-        
+    {       
         elementSelected = true;
         
         // disable all elements and hide everything | reseting props tab
