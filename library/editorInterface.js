@@ -197,11 +197,13 @@ $(document).ready(function() {
         ipcRenderer.send('conditionsData', {'id': id, 'name': element.name, 'conditions': element.conditions});
     });
     
-    // hide parent container
-    $('#eldataSource').on("change", () => {
-        if ($('#elobjViewClass option:selected').val() == 'variable') {
+    // hide parent container and variable type
+    $('#elobjViewClass').on('change', function() {        
+        if ($(this).val() == 'variable') {
             $('#parentContainer').show();
-        }else {
+            $('#selectVariableType').show();
+        } else {
+            $('#selectVariableType').hide();
             $('#parentContainer').hide();
         }
     });
