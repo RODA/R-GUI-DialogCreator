@@ -265,6 +265,7 @@ var objects = {
             button.enabled = true;
             button.element.rect.attr({fill: "#FFFFFF", opacity: 1});
             button.element.txt.attr({opacity: 1});
+            button.element.txt.attr({fill: "#000000"});
             button.element.cover.attr({'cursor': 'pointer'});
             //  emit event only if already intialized
             if(!button.initialize) {
