@@ -93,7 +93,7 @@ var editor = {
                 let bgRect = this.paper.rect(0, 0, props.width, props.height).attr({'fill': '#fdfdfd'}).toBack();
                 bgRect.click(editor.deselectAll);
                 this.bgId = bgRect.id;
-                // upSize = true;
+                // upSize = true;                
             }
 
             // update container        

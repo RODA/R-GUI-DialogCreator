@@ -117,7 +117,7 @@ var objects = {
 
     // build the dialog command
     makeCommand: function(syntax)
-    {
+    {        
         let command = syntax.command;
         // let previewCommand = objectsHelpers.updateCommand(command, syntax.defaultElements);
         
@@ -1325,7 +1325,7 @@ var objects = {
         if (helpers.missing(obj.fontsize)) { obj.fontsize = objects.fontSize; } else { obj.fontsize = obj.fontsize + 'px'; }
         
         // data
-        let dataLeft = parseInt(obj.left);
+        let dataLeft = parseInt(obj.left + 7); // we add 7 for the circle radius
         let dataTop = parseInt(obj.top);
         
         // initializing the radioGroup if it does not already exists

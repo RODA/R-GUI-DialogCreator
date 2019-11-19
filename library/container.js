@@ -263,7 +263,7 @@ const container = {
     {        
         // update syntax and elements
         this.syntax.command = data.command;
-        this.syntax.defaultElements = data.elements;       
+        this.syntax.defaultElements = data.defaultElements;       
 
         return true;
     }

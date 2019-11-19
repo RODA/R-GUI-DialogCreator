@@ -432,7 +432,8 @@ var editorElements = {
     // Helpers
     // ==============================================
     // Make element + cover draggable
-    draggable: function(paperEvents, container){
+    draggable: function(paperEvents, container)
+    {
         var me = this,    
             lx = 0,
             ly = 0,
@@ -466,7 +467,11 @@ var editorElements = {
 
                 me.transform('T' + lx + ',' + ly);
             },
-            startFnc = function() {},
+            startFnc = function() {
+                // this is needed for when the paper is resized - elements should update draggable area
+                pw = this.paper.width;
+                ph = this.paper.height;
+            },
             endFnc = function() {
                 ox = lx;
                 oy = ly;

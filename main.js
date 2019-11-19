@@ -15,8 +15,8 @@ let conditionsWindow;
 
 
 // Setting ENVIROMENT
-// process.env.NODE_ENV = 'development';
-process.env.NODE_ENV = 'production';
+process.env.NODE_ENV = 'development';
+// process.env.NODE_ENV = 'production';
 
 // Listen for app to be ready
 app.on('ready', function()
@@ -63,121 +63,135 @@ app.on('ready', function()
 // Handle create about window
 function createAboutWindow()
 {
-    aboutWindow = new BrowserWindow({
-        with:600,
-        height: 400,
-        title: 'About R GUI',
-        parent:editorWindow,
-        center: true,
-        modal: true
-    });
+    // object may be null so no ===
+    if (aboutWindow == void 0 || aboutWindow.isDestroyed()) {
+        aboutWindow = new BrowserWindow({
+            with:600,
+            height: 400,
+            title: 'About R GUI',
+            parent:editorWindow,
+            center: true,
+            modal: true
+        });
 
-    aboutWindow.loadURL(url.format({
-        pathname: path.join(__dirname, './windows/aboutWindow.html'),
-        protocol: "file:",
-        slashes: true
-    }));
-    // Garbage collection handle
-    aboutWindow.on('closed', function(){
-        aboutWindow = null;
-    });
-    aboutWindow.setMenu(null);
+        aboutWindow.loadURL(url.format({
+            pathname: path.join(__dirname, './windows/aboutWindow.html'),
+            protocol: "file:",
+            slashes: true
+        }));
+        // Garbage collection handle
+        aboutWindow.on('closed', function(){
+            aboutWindow = null;
+        });
+        aboutWindow.setMenu(null);
+    } else {
+        aboutWindow.focus();
+    }
 }
 
 // Handle create preview window
 function createObjectsWindow(arg)
 {
     let dialogData = JSON.parse(arg);
+    
+    // object may be null so no ===
+    if (objectsWindow == void 0 || objectsWindow.isDestroyed()) {
+        // create window but do not show it - waiting for data
+        // https://stackoverflow.com/questions/51789711/how-to-send-data-between-parent-and-child-window-in-electron
+        objectsWindow = new BrowserWindow({
+            webPreferences:{
+                nodeIntegration: true
+            },
 
-    // create window but do not show it - waiting for data
-    // https://stackoverflow.com/questions/51789711/how-to-send-data-between-parent-and-child-window-in-electron
-    objectsWindow = new BrowserWindow({
-        webPreferences:{
-            nodeIntegration: true
-        },
+            // added extra space for title bar and scrollbars
+            width: parseInt(dialogData.properties.width) + 40,
+            height: parseInt(dialogData.properties.height) + 185,
+            title: dialogData.properties.title,
+            autoHideMenuBar: true,
+            parent: editorWindow,
+            resizable: false,
+            show: false,
+            // modal: true
+        });
 
-        // added extra space for title bar and scrollbars
-        width: parseInt(dialogData.properties.width) + 40,
-        height: parseInt(dialogData.properties.height) + 185,
-        title: dialogData.properties.title,
-        autoHideMenuBar: true,
-        parent: editorWindow,
-        resizable: false,
-        show: false,
-        // modal: true
-    });
+        // Open the DevTools.
+        if (process.env.NODE_ENV === 'development') {
+            objectsWindow.webContents.openDevTools();
+        }
 
-    // Open the DevTools.
-    if (process.env.NODE_ENV === 'development') {
-        objectsWindow.webContents.openDevTools();
+        objectsWindow.loadURL(url.format({
+            pathname: path.join(__dirname, './windows/objectsWindow.html'),
+            protocol: "file:",
+            slashes: true
+        }));
+        // Garbage collection handle
+        objectsWindow.on('closed', function(){
+            objectsWindow = null;
+            
+        });
+        // when data is ready show window
+        objectsWindow.once("show", () => {
+            objectsWindow.webContents.send('dialogCreated', dialogData);
+        });
+        // when window is ready send data
+        objectsWindow.once("ready-to-show", ()=>{
+            objectsWindow.show();
+        });
+
+        objectsWindow.setMenu(null);
+    } else {
+        objectsWindow.focus();
     }
-
-    objectsWindow.loadURL(url.format({
-        pathname: path.join(__dirname, './windows/objectsWindow.html'),
-        protocol: "file:",
-        slashes: true
-    }));
-    // Garbage collection handle
-    objectsWindow.on('closed', function(){
-        objectsWindow = null;
-        
-    });
-    // when data is ready show window
-    objectsWindow.once("show", () => {
-        objectsWindow.webContents.send('dialogCreated', dialogData);
-    });
-    // when window is ready send data
-    objectsWindow.once("ready-to-show", ()=>{
-        objectsWindow.show();
-    });
-
-    objectsWindow.setMenu(null);
 }
 
 // =================================================
 // Handle create conditions window
 function createConditionswWindow(arg)
-{   
-    // create window but do not show it - waiting for data
-    // https://stackoverflow.com/questions/51789711/how-to-send-data-between-parent-and-child-window-in-electron
-    conditionsWindow = new BrowserWindow({
-        webPreferences:{
-            nodeIntegration: true
-        },
-        width: 640,
-        height: 310,
-        title: toProperCase(arg.name) + ' condtitions',
-        autoHideMenuBar: true,
-        parent: editorWindow,
-        resizable: false,
-        show: false,
-    });
+{
+    // object may be null so no ===
+    if (conditionsWindow == void 0 || conditionsWindow.isDestroyed()) {
 
-    // Open the DevTools.
-    if (process.env.NODE_ENV === 'development') {
-        conditionsWindow.webContents.openDevTools();
+        conditionsWindow = new BrowserWindow({
+            webPreferences:{
+                nodeIntegration: true
+            },
+            width: 640,
+            height: 310,
+            title: toProperCase(arg.name) + ' condtitions',
+            autoHideMenuBar: true,
+            parent: editorWindow,
+            resizable: false,
+            show: false,
+        });
+
+        // Open the DevTools.
+        if (process.env.NODE_ENV === 'development') {
+            conditionsWindow.webContents.openDevTools();
+        }
+
+        conditionsWindow.loadURL(url.format({
+            pathname: path.join(__dirname, './windows/editorConditionsWindow.html'),
+            protocol: "file:",
+            slashes: true
+        }));
+        // Garbage collection handle
+        conditionsWindow.on('closed', function(){
+            conditionsWindow = null;
+            
+        });
+        // when data is ready show window
+        conditionsWindow.once("show", () => {
+            conditionsWindow.webContents.send('conditionsData', arg);
+        });
+        // when window is ready send data
+        conditionsWindow.once("ready-to-show", ()=>{
+            conditionsWindow.show();
+        });
+        // no menu
+        conditionsWindow.setMenu(null);
+    } else {
+        conditionsWindow.focus();
     }
-
-    conditionsWindow.loadURL(url.format({
-        pathname: path.join(__dirname, './windows/editorConditionsWindow.html'),
-        protocol: "file:",
-        slashes: true
-    }));
-    // Garbage collection handle
-    conditionsWindow.on('closed', function(){
-        conditionsWindow = null;
-        
-    });
-    // when data is ready show window
-    conditionsWindow.once("show", () => {
-        conditionsWindow.webContents.send('conditionsData', arg);
-    });
-    // when window is ready send data
-    conditionsWindow.once("ready-to-show", ()=>{
-        conditionsWindow.show();
-    });
-    // no menu
-    conditionsWindow.setMenu(null);
 }
 // lunch the conditions window
 ipcMain.on('conditionsData', (event, args) => {
@@ -197,46 +211,51 @@ ipcMain.on('conditionsValid', (event, args) => {
 // Handle create syntax window
 function createEditorSyntaxWindow(args)
 {   
-    // create window but do not show it - waiting for data
-    // https://stackoverflow.com/questions/51789711/how-to-send-data-between-parent-and-child-window-in-electron
-    editorSyntaxWindow = new BrowserWindow({
-        webPreferences:{
-            nodeIntegration: true
-        },
-        width: 800,
-        height: 600,
-        title: 'Dialog\'s syntax',
-        autoHideMenuBar: true,
-        parent: editorWindow,
-        resizable: false,
-        show: false,
-    });
+    // object may be null so no ===
+    if (editorSyntaxWindow == void 0 || editorSyntaxWindow.isDestroyed()) {
+        // create window but do not show it - waiting for data
+        // https://stackoverflow.com/questions/51789711/how-to-send-data-between-parent-and-child-window-in-electron
+        editorSyntaxWindow = new BrowserWindow({
+            webPreferences:{
+                nodeIntegration: true
+            },
+            width: 800,
+            height: 600,
+            title: 'Dialog\'s syntax',
+            autoHideMenuBar: true,
+            parent: editorWindow,
+            resizable: false,
+            show: false,
+        });
 
-    // Open the DevTools.
-    if (process.env.NODE_ENV === 'development') {
-        editorSyntaxWindow.webContents.openDevTools();
+        // Open the DevTools.
+        if (process.env.NODE_ENV === 'development') {
+            editorSyntaxWindow.webContents.openDevTools();
+        }
+
+        editorSyntaxWindow.loadURL(url.format({
+            pathname: path.join(__dirname, './windows/editorSyntaxWindow.html'),
+            protocol: "file:",
+            slashes: true
+        }));
+        // Garbage collection handle
+        editorSyntaxWindow.on('closed', function(){
+            editorSyntaxWindow = null;
+            
+        });
+        // when data is ready show window
+        editorSyntaxWindow.once("show", () => {
+            editorSyntaxWindow.webContents.send('elementsList', args);
+        });
+        // when window is ready send data
+        editorSyntaxWindow.once("ready-to-show", ()=>{
+            editorSyntaxWindow.show();
+        });
+        // no menu
+        editorSyntaxWindow.setMenu(null);
+    } else {
+        editorSyntaxWindow.focus();
     }
-
-    editorSyntaxWindow.loadURL(url.format({
-        pathname: path.join(__dirname, './windows/editorSyntaxWindow.html'),
-        protocol: "file:",
-        slashes: true
-    }));
-    // Garbage collection handle
-    editorSyntaxWindow.on('closed', function(){
-        editorSyntaxWindow = null;
-        
-    });
-    // when data is ready show window
-    editorSyntaxWindow.once("show", () => {
-        editorSyntaxWindow.webContents.send('elementsList', args);
-    });
-    // when window is ready send data
-    editorSyntaxWindow.once("ready-to-show", ()=>{
-        editorSyntaxWindow.show();
-    });
-    // no menu
-    editorSyntaxWindow.setMenu(null);
 }
 // lunch the conditions window
 ipcMain.on('startSyntaxWindow', (event, args) => {   

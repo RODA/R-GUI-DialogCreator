@@ -32,10 +32,10 @@ const objectsHelpers = {
     },
     // updateCommand - remove elements
     updateCommand: function(command, defaultElements, elName, elNameFull, elValue) 
-    {
+    {        
         // type comparison fix
-        elValue = (elValue === true) ? 'true' : elValue;
-        elValue = (elValue === false) ? 'false' : elValue;
+        elValue = (elValue === true) ? 'TRUE' : elValue;
+        elValue = (elValue === false) ? 'FALSE' : elValue;
 
         let commandArgs = [];
         let newCommand = '';
