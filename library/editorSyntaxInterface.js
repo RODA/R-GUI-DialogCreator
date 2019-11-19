@@ -106,10 +106,10 @@ function createSelect(name, options){
 
         let val = options[i];
         if(options[i] == 'checked'){
-            val = true;
+            val = 'TRUE';
         }
         if(options[i] == 'unchecked'){
-            val = false;
+            val = 'FALSE';
         }
         
         option.value = val;

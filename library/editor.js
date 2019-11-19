@@ -116,20 +116,30 @@ var editor = {
     // load data from file - uses makeFromFile
     loadDialogDataFromFile: function(data)
     {
-        let loadData = JSON.parse(data);
-        // check for valid paper
-        if(this.paper.setSize) {
-            // alert paper override
-            dialog.showMessageBox(editorWindow, {type: "question", message: "Override curent dialog?", title: "Override", buttons: ["No", "Yes"]}, (response) => {
-                if (response) {
-                    editor.remove();
-                    this.makeFromFile(loadData);
+        try {
+            let loadData = JSON.parse(data);
+            if(loadData.properties !== void 0 && loadData.elements !== void 0 && loadData.syntax !== void 0) {
+        
+                // check for valid paper
+                if(this.paper.setSize) {
+                    // alert paper override
+                    dialog.showMessageBox(editorWindow, {type: "question", message: "Override curent dialog?", title: "Override", buttons: ["No", "Yes"]}, (response) => {
+                        if (response) {
+                            editor.remove();
+                            this.makeFromFile(loadData);
+                        } else {
+                            return;
+                        }
+                    });
                 } else {
-                    return;
+                    this.makeFromFile(loadData);
                 }
-            });
-        } else {
-            this.makeFromFile(loadData);
+            } else {
+                dialog.showMessageBox(editorWindow, {type: "error", message: "The provided file is not valid.", title: "Invalid file", buttons: ["OK"]});
+            }
+        }
+        catch(error) {
+            dialog.showMessageBox(editorWindow, {type: "error", message: "Error opening file.", title: "Error", buttons: ["OK"]});
         }
     },
 
