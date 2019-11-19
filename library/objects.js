@@ -551,8 +551,8 @@ var objects = {
                 let svgHeight = (obj.height < noElements * 25 + 11) ? noElements * 25 + 10 : obj.height - 2;
 
                 listSupport.div.style.position = "absolute";
-                listSupport.div.style.top = (dataTop + 4) + 'px';
-                listSupport.div.style.left = (dataLeft + 16) + 'px';
+                listSupport.div.style.top = (dataTop) + 'px';
+                listSupport.div.style.left = (dataLeft) + 'px';
                 // listSupport.div.style.backgroundColor = '#FF0000';
                 listSupport.div.style.width = (divWidth + 1) + 'px';
                 listSupport.div.style.height = (obj.height - 1) + 'px';
