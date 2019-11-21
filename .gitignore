@@ -4,3 +4,4 @@ build/output
 .jshintrc
 package-lock.json
 .jshintrc
+.DS_Store
