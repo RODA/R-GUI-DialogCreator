@@ -114,6 +114,7 @@ var editor = {
     },
 
     // load data from file - uses makeFromFile
+    // check for valid files
     loadDialogDataFromFile: function(data)
     {
         try {

@@ -42,7 +42,7 @@ $(document).ready(function(){
         });
 
         // send data to container and wait for response
-        ipcRenderer.send('saveDialogSyntax', {command: syntax, elements: isDefault});
+        ipcRenderer.send('saveDialogSyntax', {command: syntax, defaultElements: isDefault});
     });
     // if syntax saved close window
     ipcRenderer.on('syntaxSaved', (event, args) => {
