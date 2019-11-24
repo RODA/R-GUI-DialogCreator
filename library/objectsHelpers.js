@@ -36,11 +36,13 @@ const objectsHelpers = {
         // type comparison fix
         elValue = (elValue === true) ? 'TRUE' : elValue;
         elValue = (elValue === false) ? 'FALSE' : elValue;
+        elValue = (elValue === 0) ? '0' : elValue;
 
         let commandArgs = [];
         let newCommand = '';
         commandArgs = this.getCommandArgs(command);            
         // console.log(commandArgs);
+        console.log(elValue);
         
         if (commandArgs.length > 0) {    
                                
