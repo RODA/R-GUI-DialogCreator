@@ -42,7 +42,7 @@ const objectsHelpers = {
         let newCommand = '';
         commandArgs = this.getCommandArgs(command);            
         // console.log(commandArgs);
-        console.log(elValue);
+        // console.log(elValue);
         
         if (commandArgs.length > 0) {    
                                
