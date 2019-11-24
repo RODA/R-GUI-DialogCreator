@@ -13,7 +13,7 @@ let aboutWindow;
 let objectsWindow;
 let conditionsWindow;
 let editorSyntaxWindow;
-
+let userManualWindow;
 
 // Setting ENVIROMENT
 // process.env.NODE_ENV = 'development';
@@ -286,6 +286,34 @@ function saveDataToFile(arg)
     });
 }
 
+// Handle create about window
+function createUserManualWindow()
+{
+    // object may be null so no ===
+    if (userManualWindow == void 0 || userManualWindow.isDestroyed()) {
+        userManualWindow = new BrowserWindow({
+            with:800,
+            height: 600,
+            title: 'User manual',
+            parent:editorWindow,
+            center: true,
+        });
+
+        userManualWindow.loadURL(url.format({
+            pathname: path.join(__dirname, './windows/userManual/userManualWindow.html'),
+            protocol: "file:",
+            slashes: true
+        }));
+        // Garbage collection handle
+        userManualWindow.on('closed', function(){
+            userManualWindow = null;
+        });
+        userManualWindow.setMenu(null);
+    } else {
+        userManualWindow.focus();
+    }
+}
+
 // Create menu template
 const mainMenuTemplate = [
     // { role: 'fileMenu' }
@@ -364,6 +392,12 @@ const mainMenuTemplate = [
                 label: 'About',
                 click(){
                     createAboutWindow();
+                }
+            },
+            {
+                label: 'User manual',
+                click(){
+                    createUserManualWindow();
                 }
             }
         ]

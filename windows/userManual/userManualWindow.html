@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <style>
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <link rel="stylesheet" href="css/github-markdown.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <style>	.markdown-body {box-sizing: border-box;min-width: 200px;max-width: 980px;margin: 0 auto;padding: 45px;	}	@media (max-width: 767px) {.markdown-body {	padding: 15px;}	}</style>
+</head>
+<body class="markdown-body">
+<h1 id="r-gui-dialogcreator">R GUI DialogCreator</h1>
+<h2 id="table-of-contents">Table of Contents</h2>
+<p><a href="#application-description">Application description</a></p>
+<p><a href="#main-window">Main window</a></p>
+<p><a href="#available-elements">Available Elements</a></p>
+<p><a href="#applications-menu">Application's menu</a></p>
+<ul>
+<li><a href="#the-electron-menu">The "Electron" menu</a></li>
+<li><a href="#the-file-menu">The "File" menu</a></li>
+<li><a href="#the-edit-menu">The "Edit" menu</a></li>
+<li><a href="#the-info-menu">The "Info" menu</a></li>
+</ul>
+<p><a href="#new-dialog">New Dialog</a></p>
+<ul>
+<li><a href="#properties">Properties</a></li>
+<li><a href="#syntax">Syntax</a></li>
+</ul>
+<p><a href="#elements">Elements</a></p>
+<ul>
+<li><a href="#elements-condition-writing">Elements condition writing</a></li>
+<li><a href="#button-element">Button element</a></li>
+<li><a href="#checkbox-element">Checkbox element</a></li>
+<li><a href="#container-element">Container element</a></li>
+<li><a href="#counter-element">Counter element</a></li>
+<li><a href="#input-element">Input element</a></li>
+<li><a href="#label-element">Label element</a></li>
+<li><a href="#radio-element">Radio element</a></li>
+<li><a href="#select-element">Select element</a></li>
+<li><a href="#separator-element">Separator element</a></li>
+<li><a href="#slider-element">Slider element</a></li>
+</ul>
+<p><a href="#preview-window">Preview window</a></p>
+<p><a href="#architecture">Architecture</a></p>
+<p><a href="#writing-conditions-step-by-step-example">Writing conditions step by step example</a></p>
+<p><a href="#dialog-syntax-writing-example">Dialog syntax writing example</a></p>
+<h2 id="application-description">Application description</h2>
+<p>R GUI DialogCreator is an ElectronJS based application which can be used to create highly customized dialogs for specific functions in R packages.</p>
+<p>After installing and opening the application, the following main window can be seen.</p>
+<h2 id="main-window">Main window</h2>
+<p><img src="images/mainWindowEmpty.png" title="Main Window - empty" alt="Main Window Empty" /></p>
+<p>The main window is organized into four sections. The left side contains the list of the available elements that can be added to the dialog, the bottom side contains the dialog's properties, the middle part (here colored in gray) is going to host the actual dialog, and finally the right side contains the properties of the selected elements, which can be seen after selecting an element.</p>
+<h2 id="available-elements">Available Elements</h2>
+<p>On the left side of the main window you can find a list of available elements.</p>
+<p><img src="images/availableElements.png" title="Available elements on MacOS" alt="available elements mac" />       <img src="images/availableElementsWindows.png" title="Available elements on Windows" alt="available elements mac" /></p>
+<p>To add an element, first you must create a dialog otherwise you will get a notification.</p>
+<p><img src="images/noDialog.png" title="No dialog to add element" alt="add element first new dialog" /></p>
+<p>After creating a dialog we can click on any of the elements to add them to the dialog. The elements can be moved using the "drag and drop" method or by setting their left and top position in the elements properties.</p>
+<p><img src="images/elementPosition.png" title="Element position" alt="element position" />       <img src="images/selectedElement.png" title="Selected element" alt="selected element" /></p>
+<p>While drag and drop an element, the left and top positions will be saved automatically.</p>
+<p>The dialog selected element is going to be highlighted through a blue dashed border.</p>
+<h2 id="applications-menu">Application's menu</h2>
+<h3 id="the-electron-menu">The "Electron" menu</h3>
+<p>Appears only on Mac Os and is specific to this system.</p>
+<p><img src="images/electronMacOs.png" title="Electron menu" alt="electron menu" /></p>
+<h3 id="the-file-menu">The "File" menu</h3>
+<p>It is different from a system to another. On a MacOs the "Quit" option can be found in the "Electron" menu. On Windows and Linux the "Quit" option can be found in this menu.</p>
+<p><img src="images/fileMenu.png" title="File menu on MacOS" alt="file menu" />       <img src="images/fileMenuWindows.png" title="File menu on Windows" alt="file menu on windows" /></p>
+<p>From the "File" menu you can create a new dialog, preview the current dialog, load a dialog that was previously saved or save the current dialog.</p>
+<p>If you are trying to load a dialog and another is already open you will get a notification asking if you would like to override the current one.</p>
+<p><img src="images/overrideDialog.png" title="override dialog" alt="override dialog" /></p>
+<h3 id="the-edit-menu">The "Edit" menu</h3>
+<p>Again it is system specific. On a MacOs there are two more system specific options (the "Start Dictation" and the "Emoji &amp; Symbols").</p>
+<p><img src="images/editMenu.png" title="edit menu on macos" alt="edit menu on macos" />       <img src="images/editMenuWindows.png" title="edit menu on windows" alt="edit menu on windows" /></p>
+<h3 id="the-info-menu">The "Info" menu</h3>
+<p>You can find the "About" and "User Manual" sections.</p>
+<p><img src="images/infoMenu.png" title="info menu" alt="info menu" /></p>
+<h2 id="new-dialog">New Dialog</h2>
+<p>A new dialog can be created by clicking on the top menu File / New or by the combination of keys Cmd + N (on MacOS systems) or Ctrl + N (on Windows and Linux systems).</p>
+<p><img src="images/mainWindowNewDialog.png" title="new dialog" alt="main window new dialog" /></p>
+<p>After creating a dialog we can now access the dialog's properties.</p>
+<p>The dialog's properties are populated with default values immediately after creating the dialog.</p>
+<p><img src="images/dialogProperties.png" title="dialog properties" alt="dialog properties" /></p>
+<h3 id="properties">Properties</h3>
+<p>The dialog's properties consist in:</p>
+<ul>
+<li>The name of the dialog it is used by the R-GUI-MainApp when importing the dialog. Only letters and numbers can be used, and users are advised to make it as specific as possible. The name should be unique from dialog to dialog.</li>
+<li>The title of the dialog. This can be whatever the user wants and can also be the same for multiple dialogs.</li>
+</ul>
+<p><img src="images/dialogTitle.png" title="dialog title on windows" alt="dialog title on windows" />       <img src="images/dialogTitle2.png" title="dialog title on macos" alt="dialog title on macos" /></p>
+<ul>
+<li>The dialog's size, by default, 640 by 480 pixels.</li>
+<li>The name(s) of the R package(s) that are necessary for the command produced by the dialog to work. If multiple packages are needed, they should be separated by semicolons. As everything in R, these package names are case sensitive.</li>
+</ul>
+<p>Updates are saved when the enter key is pressed or by moving the focus to a different element.</p>
+<h2 id="syntax">Syntax</h2>
+<p>The "Syntax" window users can write the function for which the dialog is built and set the defaults for all the elements. For example: if a checkbox is checked or unchecked.</p>
+<p>Also here if you press the "Syntax" button, the dialog's syntax window will open.</p>
+<p><img src="images/dialogSyntax.png" title="dialog syntax" alt="dialog syntax" /></p>
+<h2 id="elements">Elements</h2>
+<p><img src="images/elements.png" title="elements" alt="elements" /></p>
+<p>There are available only ten types of elements. These are: button, checkbox, container (can be used for datasets or variables), counter, input, label, radio, select, separator and slider.</p>
+<p>All elements have in common the "Name (ID)" field in the General section.</p>
+<p><img src="images/nameID.png" title="element name/id" alt="element id" /></p>
+<p>This field is used as a unique identifier for elements and can be filled only with lowercase letters and numbers without any spaces.</p>
+<h3 id="elements-condition-writing">Elements condition writing</h3>
+<p>All elements have a section for writing conditions</p>
+<p><img src="images/conditionsButton.png" title="conditions button" alt="element conditions button" /></p>
+<p>After clicking the conditions button a new window is going to open, the element's conditions window.</p>
+<p><img src="images/conditionsWindow.png" title="conditions window" alt="conditions window" /></p>
+<p>Here you can write conditions for the dialog's elements, every element has its own conditions. In the above example the conditions window would be for an element called "Button1".</p>
+<p>Writing a condition can be done like this: "show if checkbox1 == checked;". Adding this condition to an element would make the element visible when a checkbox element with the name (id) "checkbox1" is checked. Every condition is made from two parts separated by an "if", that ends with a semicolon. For example: (the left side) if (the right side);</p>
+<p>The | (pipe), &amp; and () can be used to write complex conditions. For example: setValue = ‘1' if element1 == checked | (element2 == checked &amp; element3 == selected);</p>
+<p>Be careful to not invalidate your condition. If you would have another condition for the same element that would say something like: setValue = 0 if element1 != checked; the second part of the first condition would never run.</p>
+<h4 id="left-side-of-the-if-statement">Left side of the if statement</h4>
+<p>Here we have methods (what we want to do to an element) and these are:</p>
+<p><strong>setValue:</strong></p>
+<p>For example: setValue = 'some value' if element == condition; (the ending semicolon is mandatory)</p>
+<p>You can set a value to the following elements:</p>
+<ul>
+<li><strong>Sliders:</strong> you can set values between 0 and 1</li>
+<li><strong>Select:</strong> the element must contain the value you are trying to set. The value name is case sensitive;</li>
+<li><strong>Input:</strong> you can set any string or numeric value;</li>
+<li><strong>Counter:</strong> you can only set a numeric value between the counter's values</li>
+</ul>
+<p><strong>check, uncheck:</strong> Can be used only for elements of checkbox type</p>
+<p><strong>select, deselect:</strong> Can be used with elements of radio box type</p>
+<p><strong>show, hide:</strong> Can be used with all elements</p>
+<p><strong>enable, disable:</strong> Can be used with all elements except Label and Separator.</p>
+<h4 id="right-side-of-the-if-statement">Right side of the if statement</h4>
+<p>Here we have conditions and properties, like an element's status (visible, checked, selected, enabled, value)</p>
+<p>You can write conditions based on these operators:</p>
+<ul>
+<li><code>==</code> and <code>!=</code> for checked, selected, visible, enabled, value (like: 5, 'some value')</li>
+<li><code>&gt;=</code> and <code>&lt;=</code> for numerical values</li>
+</ul>
+<p><code>|</code> and <code>&amp;</code> for expressions (like: "element1 == checked &amp; element2 != checked")</p>
+<p><code>()</code> parentheses for grouping expressions</p>
+<h4 id="conditions-examples">Conditions examples</h4>
+<p>Element1, type input, conditions:</p>
+<p>      setValue == ‘some value' if radio1 == selected &amp; counter1 &gt;= 4; show if checkbox1 == checked;</p>
+<p>Element2, type checkbox, conditions:</p>
+<p>      check if counter1 == 3 &amp; radio3 != selected; enable if counter1 == 2 | checkbox2 !=checked;</p>
+<h3 id="button-element">Button element</h3>
+<p><img src="images/buttonElement.png" title="button element" alt="button element" /></p>
+<p>Clicking on the Button in the Available elements list will add a new button to the dialog.</p>
+<p>Changes to an element's properties can saved by pressing the "Enter" key or just clicking outside the element's modified property.</p>
+<p>A button can be visible or hidden in the dialog, it can also be enabled or disabled, in this case you cannot click the button anymore.</p>
+<p>The button element has two options for the click event:</p>
+<p><img src="images/buttonOnClick.png" title="button element on click" alt="button element on click" /></p>
+<p>The first option "Run Command" sends the dialog's function/command to R for execution and the second option "Reset Dialog" resets all the elements in the dialog to their initial values / status.</p>
+<p>The Button element can be removed from the dialog by clicking the "Remove" button or by selecting the element and pressing the "Delete" or "Backspace" key. The action cannot be undone.</p>
+<h3 id="checkbox-element">Checkbox element</h3>
+<p><img src="images/checkboxElement.png" title="checkebox element" alt="checkebox element" /></p>
+<p>Clicking on the Checkbox in the Available elements list will add a new checkbox to the dialog.</p>
+<p>The checkbox element can be used as a true / false switch when writing the syntax.</p>
+<p>It can be set initially to be checked or unchecked, depending on what it is used for.</p>
+<p>The Checkbox element can be removed from the dialog by clicking the "Remove" button or by selecting the element and pressing the "Delete" or "Backspace" key. The action cannot be undone.</p>
+<h3 id="container-element">Container element</h3>
+<p><img src="images/containerElement.png" title="container element" alt="container element" /></p>
+<p>Clicking on the Container in the Available elements list will add a new container to the dialog.</p>
+<p>The container element can have a custom width and height. The defaults are 150px by 200px.</p>
+<p><img src="images/containerDimension.png" title="container element dimensions" alt="container element dimensions" /></p>
+<p>The container element has the property of "Object class" which sets the container's type: Variable or Data Set.</p>
+<p><img src="images/containerType.png" title="container element type" alt="container element type" /></p>
+<p>A dialog can have only one Data Set container and multiple Variable containers.</p>
+<p>When adding a Variable container you have to set the parent container from which the container will take its data. Also for Variable container you can specify the type of selectable variables. These types are: <em>numeric, calibrated, binary, character, factor and date</em>.</p>
+<p>The Container element can be removed from the dialog by clicking the "Remove" button or by selecting the element and pressing the "Delete" or "Backspace" key. The action cannot be undone.</p>
+<h3 id="counter-element">Counter element</h3>
+<p><img src="images/counterElement.png" title="counter element" alt="counter element" /></p>
+<p>Clicking on the Counter in the Available elements list will add a new counter to the dialog.</p>
+<p>For the counter element a custom width can be set. The default one is 25px.</p>
+<p>The counter element has a Start val and a Max val. These numbers can only be unsigned integer numbers (no float numbers), meaning negative and positive numbers are accepted.</p>
+<p>The Counter element can be removed from the dialog by clicking the "Remove" button or by selecting the element and pressing the "Delete" or "Backspace" key. The action cannot be undone.</p>
+<h3 id="input-element">Input element</h3>
+<p><img src="images/inputElement.png" title="input element" alt="input element" /></p>
+<p>Clicking on the Input in the Available elements list will add a new input to the dialog.</p>
+<p>The input element can have a custom width. The default one is 120px.</p>
+<p>The input element can have an initial value or no value.</p>
+<p>The Input element can be removed from the dialog by clicking the "Remove" button or by selecting the element and pressing the "Delete" or "Backspace" key. The action cannot be undone.</p>
+<h3 id="label-element">Label element</h3>
+<p><img src="images/labelElement.png" title="label element" alt="label element" /></p>
+<p>Clicking on the Label in the Available elements list will add a new label to the dialog.</p>
+<p>For the label element a custom font size can be set, from 10px to 20px. The default value is 13px.</p>
+<p>The Label element can be removed from the dialog by clicking the "Remove" button or by selecting the element and pressing the "Delete" or "Backspace" key. The action cannot be undone.</p>
+<h3 id="radio-element">Radio element</h3>
+<p><img src="images/radioElement.png" title="radio element" alt="radio element" /></p>
+<p>Clicking on the Radio in the Available elements list will add a new radiobox to the dialog.</p>
+<p>The Radio elements have the default Radio Group of "radiogroup1". Radio elements should be grouped using the Radio Group property. When elements are grouped, only one element from the group can be selected at any time.</p>
+<p>The Radio element can be removed from the dialog by clicking the "Remove" button or by selecting the element and pressing the "Delete" or "Backspace" key. The action cannot be undone.</p>
+<h3 id="select-element">Select element</h3>
+<p><img src="images/selectElement.png" title="select element" alt="select element" /></p>
+<p>Clicking on the Select in the Available elements list will add a new select to the dialog.</p>
+<p>The Select element can have a custom width. The default is 120px.</p>
+<p>The Select element has a "Data source" property which can be set to Custom or From R.</p>
+<p><img src="images/selectDataSource.png" title="select element data source" alt="select element data source" /></p>
+<p>When setting the Data source property to Custom you have to set the elements, separated by commas.</p>
+<p>When the Data source is set to From R you can choose which data type to load: All, Data Frames, Lists, Matrices or Vectors.</p>
+<p><img src="images/selectFromR.png" title="select element from R" alt="select element from R" /></p>
+<p>The Select element can have only one value selected at one time.</p>
+<p><img src="images/selectPreview.png" title="select element preview" alt="select element preview" /></p>
+<p>The Select element can be removed from the dialog by clicking the "Remove" button or by selecting the element and pressing the "Delete" or "Backspace" key. The action cannot be undone.</p>
+<h3 id="separator-element">Separator element</h3>
+<p><img src="images/separatorElement.png" title="separator element" alt="separator element" /></p>
+<p>Clicking on the Separator in the Available elements list will add a new separator to the dialog.</p>
+<p>The Separator has a default length of 300px that can be changed from 50px to the width/height of the dialog.</p>
+<p>The separator element has a property called "Direction" which sets the Horizontal or Vertical direction.</p>
+<p><img src="images/separatorDirection.png" title="separator element direction" alt="separator element direction" /></p>
+<p>The Separator element can be removed from the dialog by clicking the "Remove" button or by selecting the element and pressing the "Delete" or "Backspace" key. The action cannot be undone.</p>
+<h3 id="slider-element">Slider element</h3>
+<p><img src="images/sliderElement.png" title="slider element" alt="slider element" /></p>
+<p>Clicking on the Slider in the Available elements list will add a new slider to the dialog.</p>
+<p>The Slider element length can be set from 50px to the width of the dialog. The default value is 200px.</p>
+<p>The value of the element can be set from 0 to 1 incremented by 0.1. The default value is 0.5.</p>
+<p>The Slider element can be removed from the dialog by clicking the "Remove" button or by selecting the element and pressing the "Delete" or "Backspace" key. The action cannot be undone.</p>
+<h2 id="preview-window">Preview window</h2>
+<p>The preview window can be accessed from the menu: File / Preview.</p>
+<p><img src="images/previewWindow.png" title="preview window" alt="preview window" /></p>
+<p>Here you can see how the elements interact and how the dialog's syntax is built (the R command).</p>
+<p>The preview dialog uses mockup data for generating the preview.</p>
+<h2 id="architecture">Architecture</h2>
+<p><img src="images/dialogCreatorArchitecture.png" title="dialog creator architecture" alt="dialog creator architecture" /></p>
+<p>The application is build with ElectronJS for cross platform compatibility.</p>
+<p>On top of the ElectronJS Framework an element library was written for creating all the available elements for the dialogs. For all elements custom functionally was developed and for designing the elements the SVG technology and the RaphaelJS library was used.</p>
+<p>For the export of the dialogs, the JSON format was chosen over a proprietary language as of the JSON multiple compatibility......</p>
+<h2 id="writing-conditions-step-by-step-example">Writing conditions step by step example</h2>
+<p>We will start the example with two elements and add more elements as we go along so we can write more complex conditions.</p>
+<p>After opening the application a new dialog will be created by pressing ctrl+n (Windows/Linux)/ cmd+n (MacOs) or selecting from the menu: File / New.</p>
+<p>Two elements are going to be added to the dialog, a button and a checkbox, from the available element list on the left of the window.</p>
+<p><img src="images/conditions/twoElements.png" title="2 elements" alt="2 elements" /></p>
+<p>First, the button1 (My Button) element will be enabled when the checkbox1 (My checkbox) is checked and disabled when checkbox1 is unchecked.</p>
+<p>To add this conditions, the button1 element must be selected and the Conditions button pressed.</p>
+<p>A new window will open and the conditions will be typed in.</p>
+<p>Conditions:</p>
+<ul>
+<li>enable if checkbox1 == checked;</li>
+<li>disable if checkbox1 != checked;</li>
+</ul>
+<p><img src="images/conditions/conditions1.png" title="my button conditions" alt="my button conditions" /></p>
+<p>The Save &amp; Close button should be pressed in order to save the conditions.</p>
+<p>When pressing the button the conditions should be valid otherwise an error message will be shown.</p>
+<p><img src="images/conditions/conditions1-error.png" title="my button conditions error" alt="my button conditions error" /></p>
+<p>Here the first condition does not end with ‘semicolon', so an error is shown and the conditions are not saved.</p>
+<p>To test the conditions the preview window should be opened. To do this the combination of ctrl+p (Windows/Linux), cmd+p (MacOs) keys can be pressed or from the menu selected File / Preview.</p>
+<p><img src="images/conditions/preview1.png" title="preview testing conditions 1" alt="preview testing conditions 1" /></p>
+<p>Opening the preview window it can be observed that "My button" is not disabled althought "My checkbox" is not checked. This is normal functionality as the user should set initial state of the elements.</p>
+<p>So after checking and unchecking "My Checkbox", the button should be disabled</p>
+<p><img src="images/conditions/preview2.png" title="preview testing conditions 2" alt="preview testing conditions 2" /></p>
+<p>and re-enabled when "My checkbox " is checked again.</p>
+<p><img src="images/conditions/preview3.png" title="preview testing conditions 3" alt="preview testing conditions 3" /></p>
+<p>Second, three radio and one counter elements will be added to the dialog.</p>
+<p><img src="images/conditions/sixElements.png" title="six elements" alt="six elements" /></p>
+<p>Conditions will be written such as:</p>
+<p>Button1 (My Button) is going to be enabled only if checkbox1 is checked and radio1 selected or counter1's value is 3. Button1 (My Button) is going to be disabled when checkbox1 is unchecked and radio2 is selected. Button1 (My Button) is going to be hidden when counter1's value is 5 and visible otherwise.</p>
+<p><img src="images/conditions/conditions2.png" title="my button second conditions" alt="my button second conditions" /></p>
+<ul>
+<li>enable if checkbox1 == checked &amp; (radio1 == selected | counter1 == 3);</li>
+<li>disable if checkbox1 != checked &amp; radio2 == selected;</li>
+<li>show if counter1 != 5;</li>
+<li>hide if counter1 == 5;</li>
+</ul>
+<p>Counter1 will have the value of 2 when radio3 will be selected and 1 otherwise;</p>
+<p><img src="images/conditions/conditions3.png" title="counter conditions" alt="counter conditions" /></p>
+<ul>
+<li>setValue = 3 if radio3 == selected;</li>
+<li>setValue = 1 if radio3 != selected;</li>
+</ul>
+<p>Conditions can be tested by opening the preview window.</p>
+<p><img src="images/conditions/preview4.png" title="preview testing conditions 4" alt="preview testing conditions 4" /></p>
+<p>counter1 value 5 and My Button hidden</p>
+<p><img src="images/conditions/preview5.png" title="preview testing conditions 5" alt="preview testing conditions 5" /></p>
+<p>radio3 selected and My Button's value 3</p>
+<p><img src="images/conditions/preview6.png" title="preview testing conditions 6" alt="preview testing conditions 6" /></p>
+<p>radio2 selected and My checkbox unchecked - My Button disabled</p>
+<p><strong>The Preview Window:</strong></p>
+<p><img src="images/conditions/preview7.png" title="preview testing conditions 7 dialog" alt="preview testing conditions 7 dialog" /></p>
+<h2 id="dialog-syntax-writing-example">Dialog syntax writing example</h2>
+<p>In this example the calibrate function from the <a href="https://cran.r-project.org/web/packages/QCA/QCA.pdf">QCA package</a> was used to show how a command is built.</p>
+<p><strong>The function is:</strong> <code>calibrate(x, type = "fuzzy", method = "direct", thresholds = NA, logistic = TRUE, idm = 0.95, ecdf = FALSE, below = 1, above = 1)</code></p>
+<p>A new dialog was created with the dimensions of 515px by 390px.</p>
+<p>For every function parameter, one or multiple elements were created:</p>
+<p>For the <strong>"x"</strong> parameter a container of <strong>"Object class"</strong> data set was created:</p>
+<p><img src="images/syntax/emptyContainer.png" title="syntax empty container" alt="syntax empty container" /></p>
+<p>For the <strong>"type"</strong> parameter the following elements were created: a label (<em>named Type</em>), a separator and two radios (Fuzzy and Crisp). The label and the separator are only for design.</p>
+<p><img src="images/syntax/typeElements.png" title="syntax type parameter" alt="syntax type parameter" />       <img src="images/syntax/typeElementProps.png" title="syntax radio group" alt="syntax radio group" /></p>
+<p>The radios are named fuzzy and crisp (with the same name for the labels) and both are part of the radio group with the name <em>Type</em>. The fuzzy radio was set as selected.</p>
+<p>For the <strong>"method"</strong> parameter the following elements were created: a label (named Method), a separator and three radios (Direct, Indirect, TFR)</p>
+<p><img src="images/syntax/methodElements.png" title="syntax method parameter" alt="syntax method parameter" /></p>
+<p>Again the radio elements are part of the same group with the name Method. The Direct radio was set as selected.</p>
+<p>For the <strong>"thresholds"</strong> parameter two elements were used: a label (named Thresholds) and an input.</p>
+<p><img src="images/syntax/thresholdElements.png" title="syntax tresholds parameter" alt="syntax tresholds parameter" /></p>
+<p>For the input the "NA" value was set.</p>
+<p>For the <strong>"logistic"</strong> parameter a checkbox element was used.</p>
+<p><img src="images/syntax/logisticElement.png" title="syntax logistic parameter" alt="syntax logistic parameter" /></p>
+<p>The checkbox was set as checked.</p>
+<p>For the <strong>"idm"</strong> parameter the following elements were created: a label (named idm) and a slider.</p>
+<p><img src="images/syntax/idmElements.png" title="syntax idm parameter" alt="syntax idm parameter" />       <img src="images/syntax/idmValue.png" title="syntax idm parameter value" alt="syntax idm parameter value" /></p>
+<p>For the slider the value of 0.95 was set.</p>
+<p>For the <strong>"ecdf"</strong> parameter a checkbox element was used.</p>
+<p><img src="images/syntax/ecdfElement.png" title="syntax ecdf parameter" alt="syntax ecdf parameter" /></p>
+<p>The checkbox was left unchecked.</p>
+<p>For the <strong>"below"</strong> and <strong>"above"</strong> parameters the following elements were created: two labels (named <em>Below and Above</em>) and two counters.</p>
+<p><img src="images/syntax/belowAboveElements.png" title="syntax above and below parameter" alt="syntax above and below parameter" /></p>
+<p>For both counters the value of 1 was set.</p>
+<p>Two more separators were added for design purposes only. And two buttons: one for resetting the dialog to its default values and one for running the command.</p>
+</body>
+</html>
