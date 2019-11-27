@@ -16,8 +16,8 @@ let editorSyntaxWindow;
 let userManualWindow;
 
 // Setting ENVIROMENT
-process.env.NODE_ENV = 'development';
-// process.env.NODE_ENV = 'production';
+// process.env.NODE_ENV = 'development';
+process.env.NODE_ENV = 'production';
 
 // Listen for app to be ready
 app.on('ready', function()

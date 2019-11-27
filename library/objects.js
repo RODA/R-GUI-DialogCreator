@@ -1839,6 +1839,11 @@ var objects = {
             select.disable();
         }  
 
+        // set the first element as default
+        if(select.dataList.length > 0) {
+            select.setValue(select.dataList[0]);
+        }
+
         // set to false - we have initialized the element
         select.initialize = false;
 
