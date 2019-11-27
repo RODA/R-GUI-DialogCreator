@@ -184,7 +184,8 @@ var editor = {
     // update element on paper
     updateElement: function(data)
     {                
-    
+        console.log(data);
+        
         // we need the old conditions if exists
         let oldEl = container.getElement(data.parentId);
         let oldConditions = (oldEl !== void 0) ? oldEl.conditions : '';

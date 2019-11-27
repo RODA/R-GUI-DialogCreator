@@ -124,54 +124,9 @@ $(document).ready(function() {
     var elementsAddEvent = document.querySelectorAll('#propertiesList [id^="el"]');
     for(let i = 0; i < elementsAddEvent.length; i++) {
         // save on enter only if element type not select
-        if (elementsAddEvent[i].tagName !== "SELECT"){
-            elementsAddEvent[i].addEventListener('keyup', (ev) => {
-                if(ev.which == 13) {
-                    if (elementSelected) 
-                    {
-                        enterPressed = true;
-                        // get all proprerties
-                        let properties = $('#propertiesList [id^="el"]');
-                        // save all properties to obj
-                        let obj = {};
-                        properties.each(function(){
-                            let el = $(this);
-                            if(!el.prop('disabled')){
-                                let key = el.attr('name').substr(2);
-                                obj[key] = el.val();
-                            }
-                        });                
-                        if(editor.paperExists === true) {
-                            // send obj for update
-                            editor.updateElement(obj);
-                        }
-                    }
-                }
-            });
-        }
-        // save on blur
-        elementsAddEvent[i].addEventListener('blur', (ev) => {
-            if (!enterPressed) {            
-                // get all proprerties
-                let properties = $('#propertiesList [id^="el"]');
-                // save all properties to obj
-                let obj = {};
-                properties.each(function(){
-                    let el = $(this);
-                    if(!el.prop('disabled')){
-                        let key = el.attr('name').substr(2);
-                        obj[key] = el.val();
-                    }
-                });       
-                if(editor.paperExists === true && obj.type !== void 0) {
-                    // send obj for update
-                    editor.updateElement(obj);
-                }
-            } else {
-                enterPressed = false;
-            }
-        });
+        saveCapabilities(elementsAddEvent[i]);        
     }
+    
     // update element on press enter
     $(document).on('keyup', function(ev) {
         // remove the element on delete or backspace key
@@ -223,6 +178,8 @@ $(document).ready(function() {
             val += '<option value="vector">Vectors</option></select>';
         }
         $('#selectSourceChange').html(val);
+        // add save capabilities
+        saveCapabilities(document.getElementById('eldataValue'));
     });
 
     // Paper Events ========================================
@@ -304,4 +261,56 @@ function clearProps()
 
     // disable buttons
     $("#removeElement").prop('disabled', true);
+}
+
+// add save capabilities to an element
+function saveCapabilities(element)
+{
+    if (element.tagName !== "SELECT"){
+        element.addEventListener('keyup', (ev) => {
+            if(ev.which == 13) {
+                if (elementSelected) 
+                {
+                    enterPressed = true;
+                    // get all proprerties
+                    let properties = $('#propertiesList [id^="el"]');
+                    // save all properties to obj
+                    let obj = {};
+                    properties.each(function(){
+                        let el = $(this);
+                        if(!el.prop('disabled')){
+                            let key = el.attr('name').substr(2);
+                            obj[key] = el.val();
+                        }
+                    });                
+                    if(editor.paperExists === true) {
+                        // send obj for update
+                        editor.updateElement(obj);
+                    }
+                }
+            }
+        });
+    }
+    // save on blur
+    element.addEventListener('blur', (ev) => {
+        if (!enterPressed) {            
+            // get all proprerties
+            let properties = $('#propertiesList [id^="el"]');
+            // save all properties to obj
+            let obj = {};
+            properties.each(function(){
+                let el = $(this);
+                if(!el.prop('disabled')){
+                    let key = el.attr('name').substr(2);
+                    obj[key] = el.val();
+                }
+            });       
+            if(editor.paperExists === true && obj.type !== void 0) {
+                // send obj for update
+                editor.updateElement(obj);
+            }
+        } else {
+            enterPressed = false;
+        }
+    });
 }
