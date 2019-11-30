@@ -11,9 +11,9 @@ var defaultSettings = {
 
     // elements -----------------------------------------------------------
 
-    button: { parentId: '', type: 'Button', name: 'button1', label: "My Button", left: '15', top: '15', isVisible: 'true', isEnabled: 'true', onClick: 'run', elementIds: [], conditions: ''},
+    button: { parentId: '', type: 'Button', name: 'button1', label: "button", left: '15', top: '15', isVisible: 'true', isEnabled: 'true', onClick: 'run', elementIds: [], conditions: ''},
         
-    checkbox: { parentId: '', type: 'Checkbox', name: 'checkbox1', label: 'My checkbox', left: '10', top: '10', isChecked: 'false', isEnabled: 'true', isVisible: 'true', elementIds: [], conditions: ''},
+    checkbox: { parentId: '', type: 'Checkbox', name: 'checkbox1', label: 'checkbox', left: '10', top: '10', isChecked: 'false', isEnabled: 'true', isVisible: 'true', elementIds: [], conditions: ''},
     
     container: { parentId: '', type: 'Container', name: 'container1', objViewClass: 'variable', variableType: '', parentContainer: '', width: 150, height: 200, left: '15', top: '15', isVisible: 'true', isEnabled: 'true', elementIds: [], conditions: ''},
     
@@ -21,13 +21,13 @@ var defaultSettings = {
     
     input: { parentId: '', type: 'Input', name: 'input1', 'width': 120, left: '15', top: '15', isVisible: 'true', isEnabled: 'true', value: '', elementIds: [], conditions: ''},
     
-    label: { parentId: '', type: 'Label', name: 'label1', text: 'My label', left: '10', top: '10', fontSize: 13, isVisible: 'true', elementIds: [], conditions: ''},
+    label: { parentId: '', type: 'Label', name: 'label1', text: 'label', left: '10', top: '10', fontSize: 13, isVisible: 'true', elementIds: [], conditions: ''},
     
     // plot: { parentId: '', type: 'Plot', name: 'plot1', width: 250, height: 220, left: '15', top: '15', isVisible: 'true', isEnabled: 'true', elementIds: [], conditions: ''},
     
-    radio: { parentId: '', type: 'Radio', name: 'radio1', radioGroup: 'radiogroup1', label: 'My radiobox', left: '10', top: '10', isSelected: 'false', isEnabled: 'true', isVisible: 'true', elementIds: [], conditions: ''},
+    radio: { parentId: '', type: 'Radio', name: 'radio1', radioGroup: 'radiogroup1', label: 'radiobox', left: '10', top: '10', isSelected: 'false', isEnabled: 'true', isVisible: 'true', elementIds: [], conditions: ''},
 
-    select: { parentId: '', type: 'Select', name: 'select1', 'width': 120, label: "My Select", left: '15', top: '15', isVisible: 'true', isEnabled: 'true', dataSource: 'custom', dataValue: '', elementIds: [], conditions: ''},
+    select: { parentId: '', type: 'Select', name: 'select1', 'width': 120, label: "select", left: '15', top: '15', isVisible: 'true', isEnabled: 'true', dataSource: 'custom', dataValue: '', elementIds: [], conditions: ''},
     
     separator: { parentId: '', type: 'Separator', name: 'separator1', direction: 'x', left: '10', top: '10', length: 300, isVisible: 'true', elementIds: [], conditions: ''},
 
