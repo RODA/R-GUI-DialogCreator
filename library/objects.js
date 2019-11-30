@@ -916,14 +916,14 @@ var objects = {
             ["l", 12, 0],
             ["l", -6, 12],
             ["z"]
-        ]).attr({fill: "#79a74c", "stroke-width": 1, stroke: "#5d5d5d"});
+        ]).attr({fill: "#eeeeee", "stroke-width": 1, stroke: "#5d5d5d"});
         
         elCounter.upsign = this.path([
             ["M", dataLeft + obj.width / 2, dataTop + 6],
             ["l", 12, 0],
             ["l", -6, -12],
             ["z"]
-        ]).attr({fill: "#79a74c", "stroke-width": 1, stroke: "#5d5d5d"});
+        ]).attr({fill: "#eeeeee", "stroke-width": 1, stroke: "#5d5d5d"});
         
         // listen for events / changes - must be declared before thee emit events
         objects.events.on('iSpeak', function(data)
@@ -1000,8 +1000,8 @@ var objects = {
         counter.enable = function() {
             counter.enabled = true;
             counter.element.textvalue.attr({fill: '#000000'});
-            counter.element.upsign.attr({fill: '#79a74c', stroke: "#5d5d5d"});
-            counter.element.downsign.attr({fill: '#79a74c', stroke: "#5d5d5d"});
+            counter.element.upsign.attr({fill: '#eeeeee', stroke: "#5d5d5d"});
+            counter.element.downsign.attr({fill: '#eeeeee', stroke: "#5d5d5d"});
             counter.element.up.attr({'cursor': 'pointer'});
             counter.element.down.attr({'cursor': 'pointer'});
             //  emit event only if already intialized
@@ -1960,7 +1960,7 @@ var objects = {
             ["l", 12, 0],
             ["l", -6, -12],
             ["z"]
-        ]).attr({fill: "#79a74c", "stroke-width": 1, stroke: "#5d5d5d"});
+        ]).attr({fill: "#eeeeee", "stroke-width": 1, stroke: "#5d5d5d"});
     
         let lastX = 0;
         let absoluteX = 0;
@@ -2047,7 +2047,7 @@ var objects = {
             // first element in set is the line            
             slider.element.items[0].attr({stroke: "#5d5d5d"});
             // second element in the set is teh circle
-            slider.element.items[1].attr({fill: "#79a74c", "cursor": "pointer", "stroke": "#5d5d5d", "stroke-width": 1});
+            slider.element.items[1].attr({fill: "#eeeeee", "cursor": "pointer", "stroke": "#5d5d5d", "stroke-width": 1});
             //  emit event only if already intialized
             if(!slider.initialize) {
                 objects.events.emit('iSpeak', {name: slider.name, status: 'enable'});

@@ -156,14 +156,14 @@ var editorElements = {
                 ["l", 12, 0],
                 ["l", -6, 12],
                 ["z"]
-            ]).attr({fill: "#79a74c", "stroke-width": 1, stroke: "#5d5d5d"});
+            ]).attr({fill: "#eeeeee", "stroke-width": 1, stroke: "#5d5d5d"});
             
             let upsign = paper.path([
                 ["M", dataLeft + parseInt(data.width) / 2, dataTop + 6],
                 ["l", 12, 0],
                 ["l", -6, -12],
                 ["z"]
-            ]).attr({fill: "#79a74c", "stroke-width": 1, stroke: "#5d5d5d"});
+            ]).attr({fill: "#eeeeee", "stroke-width": 1, stroke: "#5d5d5d"});
             
             // let down = paper.rect(dataLeft - 22, dataTop - 6, 15, 15)
             //     .attr({fill: "#fff", opacity: 0, stroke: "#000", "stroke-width": 1, cursor: "pointer"});
@@ -410,7 +410,7 @@ var editorElements = {
                 ["l", 12, 0],
                 ["l", -6, -12],
                 ["z"]
-            ]).attr({fill: "#79a74c", "stroke-width": 1, stroke: "#5d5d5d"});
+            ]).attr({fill: "#eeeeee", "stroke-width": 1, stroke: "#5d5d5d"});
     
 
             if(data.isEnabled === 'false')
