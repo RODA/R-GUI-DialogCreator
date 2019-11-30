@@ -90,7 +90,7 @@ const container = {
             if(this.elementContainerDataSetExists()){
                 data.objViewClass = 'variable';
                 response.error = true;
-                response.message = 'You can have only one Data Set Container per dialog.';
+                response.message = 'You can have only one Dataset Container per dialog.';
             }
         }
 
