@@ -16,17 +16,19 @@ let editorSyntaxWindow;
 let userManualWindow;
 
 // Setting ENVIROMENT
-// process.env.NODE_ENV = 'development';
-process.env.NODE_ENV = 'production';
+process.env.NODE_ENV = 'development';
+// process.env.NODE_ENV = 'production';
 
 // Listen for app to be ready
 app.on('ready', function()
-{    
+{
     // Create new window
     editorWindow = new BrowserWindow({
         title: 'R-GUI-DialogCreator',
         webPreferences:{
-            nodeIntegration: true
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: true,
+            nodeIntegration: false
         },
         width: 1200,
         height: 800,
@@ -40,7 +42,12 @@ app.on('ready', function()
         protocol: 'file:',
         slashes: true
     }));
-    
+
+    // Add debug log for did-finish-load
+    editorWindow.webContents.on('did-finish-load', () => {
+        // console.log('[main] editorWindow did-finish-load');
+    });
+
     // maximize
     // editorWindow.maximize();
 
@@ -51,13 +58,19 @@ app.on('ready', function()
 
     //Quit app when closed
     editorWindow.on('closed', function(){
-        app.quit(); 
+        app.quit();
     });
 
     // Build menu from template
     const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
     // Insert menu
     Menu.setApplicationMenu(mainMenu);
+
+    // DEBUG: Log all IPC messages sent to editorWindow
+    const origSend = editorWindow.webContents.send;
+    editorWindow.webContents.send = function(channel, ...args) {
+        return origSend.apply(this, [channel, ...args]);
+    };
 
 });
 
@@ -67,7 +80,12 @@ function createAboutWindow()
     // object may be null so no ===
     if (aboutWindow == void 0 || aboutWindow.isDestroyed()) {
         aboutWindow = new BrowserWindow({
-            with:600,
+            webPreferences:{
+                preload: path.join(__dirname, 'preload.js'),
+                contextIsolation: true,
+                nodeIntegration: false
+            },
+            width:600,
             height: 400,
             title: 'About R GUI',
             parent:editorWindow,
@@ -94,16 +112,14 @@ function createAboutWindow()
 function createObjectsWindow(arg)
 {
     let dialogData = JSON.parse(arg);
-    
-    // object may be null so no ===
     if (objectsWindow == void 0 || objectsWindow.isDestroyed()) {
-        // create window but do not show it - waiting for data
-        // https://stackoverflow.com/questions/51789711/how-to-send-data-between-parent-and-child-window-in-electron
         objectsWindow = new BrowserWindow({
             webPreferences:{
-                nodeIntegration: true
+                preload: path.join(__dirname, 'preload.js'),
+                contextIsolation: false,
+                nodeIntegration: true,
+                enableRemoteModule: true
             },
-
             // added extra space for title bar and scrollbars
             width: parseInt(dialogData.properties.width) + 40,
             height: parseInt(dialogData.properties.height) + 185,
@@ -112,7 +128,6 @@ function createObjectsWindow(arg)
             parent: editorWindow,
             resizable: false,
             show: false,
-            // modal: true
         });
 
         // Open the DevTools.
@@ -128,7 +143,7 @@ function createObjectsWindow(arg)
         // Garbage collection handle
         objectsWindow.on('closed', function(){
             objectsWindow = null;
-            
+
         });
         // when data is ready show window
         objectsWindow.once("show", () => {
@@ -154,7 +169,9 @@ function createConditionswWindow(arg)
 
         conditionsWindow = new BrowserWindow({
             webPreferences:{
-                nodeIntegration: true
+                preload: path.join(__dirname, 'preload.js'),
+                contextIsolation: true,
+                nodeIntegration: false
             },
             width: 640,
             height: 310,
@@ -178,7 +195,7 @@ function createConditionswWindow(arg)
         // Garbage collection handle
         conditionsWindow.on('closed', function(){
             conditionsWindow = null;
-            
+
         });
         // when data is ready show window
         conditionsWindow.once("show", () => {
@@ -197,28 +214,30 @@ function createConditionswWindow(arg)
 // lunch the conditions window
 ipcMain.on('conditionsData', (event, args) => {
     createConditionswWindow(args);
-}); 
+});
 // send condition for validation to container
 ipcMain.on('conditionsCheck', (event, args) => {
     editorWindow.webContents.send('conditionsCheck', args);
-}); 
+});
 // send back the response
 ipcMain.on('conditionsValid', (event, args) => {
     conditionsWindow.webContents.send('conditionsValid', args);
-}); 
+});
 // =================================================
 
 // =================================================
 // Handle create syntax window
 function createEditorSyntaxWindow(args)
-{   
+{
     // object may be null so no ===
     if (editorSyntaxWindow == void 0 || editorSyntaxWindow.isDestroyed()) {
         // create window but do not show it - waiting for data
         // https://stackoverflow.com/questions/51789711/how-to-send-data-between-parent-and-child-window-in-electron
         editorSyntaxWindow = new BrowserWindow({
             webPreferences:{
-                nodeIntegration: true
+                preload: path.join(__dirname, 'preload.js'),
+                contextIsolation: true,
+                nodeIntegration: false
             },
             width: 800,
             height: 600,
@@ -242,7 +261,7 @@ function createEditorSyntaxWindow(args)
         // Garbage collection handle
         editorSyntaxWindow.on('closed', function(){
             editorSyntaxWindow = null;
-            
+
         });
         // when data is ready show window
         editorSyntaxWindow.once("show", () => {
@@ -259,17 +278,17 @@ function createEditorSyntaxWindow(args)
     }
 }
 // lunch the conditions window
-ipcMain.on('startSyntaxWindow', (event, args) => {   
+ipcMain.on('startSyntaxWindow', (event, args) => {
     createEditorSyntaxWindow(args);
-}); 
+});
 // send syntax to container
-ipcMain.on('saveDialogSyntax', (event, args) => {   
+ipcMain.on('saveDialogSyntax', (event, args) => {
     editorWindow.webContents.send('saveDialogSyntax', args);
-}); 
+});
 // send back the response
 ipcMain.on('syntaxSaved', (event, args) => {
     editorSyntaxWindow.webContents.send('syntaxSaved', args);
-}); 
+});
 // =================================================
 
 function saveDataToFile(arg)
@@ -281,8 +300,8 @@ function saveDataToFile(arg)
             fs.writeFile(filename, arg, function(err){
                 if(err) { console.log(err); }
                 // console.log('Write Successfully');
-            });            
-        }         
+            });
+        }
     });
 }
 
@@ -292,7 +311,12 @@ function createUserManualWindow()
     // object may be null so no ===
     if (userManualWindow == void 0 || userManualWindow.isDestroyed()) {
         userManualWindow = new BrowserWindow({
-            with:800,
+            webPreferences:{
+                preload: path.join(__dirname, 'preload.js'),
+                contextIsolation: true,
+                nodeIntegration: false
+            },
+            width:800,
             height: 600,
             title: 'User manual',
             parent:editorWindow,
@@ -336,7 +360,7 @@ const mainMenuTemplate = [
                         if(arg != false){
                             createObjectsWindow(arg);
                         }
-                    });  
+                    });
                 }
             },
             { type: "separator" },
@@ -344,9 +368,10 @@ const mainMenuTemplate = [
                 label: 'Load dialog',
                 accelerator: "CommandOrControl+O",
                 click(){
-                    dialog.showOpenDialog(editorWindow, {title: "Load dialog data", filters: [{name: 'R-GUI-DialogCreator', extensions: ['json']}], properties: ['openFile']}, result => {
-                        if (result !== void 0) {                            
-                            fs.readFile(result[0], 'utf-8', (err, data) => {
+                    dialog.showOpenDialog(editorWindow, {title: "Load dialog data", filters: [{name: 'R-GUI-DialogCreator', extensions: ['json']}], properties: ['openFile']})
+                    .then(result => {
+                        if (!result.canceled && result.filePaths && result.filePaths[0]) {
+                            fs.readFile(result.filePaths[0], 'utf-8', (err, data) => {
                                 if (err) {
                                     dialog.showMessageBox(editorWindow, {type: 'error', title: 'Could not open the file!', buttons: ['OK']});
                                 } else {
@@ -366,7 +391,7 @@ const mainMenuTemplate = [
                         if(arg != false){
                             saveDataToFile(arg);
                         }
-                    });  
+                    });
                 }
             },
         ]
@@ -418,7 +443,7 @@ if (process.platform === 'win32') {
 // only electron 5
 app.setName('R-GUI-DialogCreator');
 if (process.platform === 'darwin') {
-    // { role: 'appMenu' }  
+    // { role: 'appMenu' }
     mainMenuTemplate.unshift({
         label: app.getName(),
         submenu: [
@@ -444,7 +469,7 @@ if(process.env.NODE_ENV !== 'production'){
                 label: "Toggle DevTools",
                 accelerator: "CommandOrControl+I",
                 click(item, focusedWindow){
-                    focusedWindow.toggleDevTools();        
+                    focusedWindow.toggleDevTools();
                 }
             },
             {
@@ -454,7 +479,7 @@ if(process.env.NODE_ENV !== 'production'){
     });
 }
 
-// Helpers 
+// Helpers
 // ========
 function toProperCase(str) {
     let first = str[0].toUpperCase();

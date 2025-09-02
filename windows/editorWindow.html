@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="../css/main.css">
-    <!-- <script src="../plugins/jquery.min.js"></script> -->
-    <script>window.$ = window.jQuery = require('jquery')</script>
-    <script>window.Raphael = require('raphael');</script>
-    <!-- <script src="../plugins//Raphael.InlineTextEditing-master/raphael.inline_text_editing.js"></script>
-    <script src="../plugins//raphael-paragraph/raphael-paragraph.js"></script> -->
-    <!-- <script src="../library/container.js"></script> -->
+    <script src="../plugins/jquery.min.js"></script>
+    <script src="../plugins/Raphael/raphael.min.js"></script>
+    <script src="../library/defaultSettings.js"></script>
+    <script src="../library/helpers.js"></script>
+    <script src="../library/conditions.js"></script>
+    <script src="../library/container.js"></script>
+    <script src="../library/editorElements.js"></script>
+    <script src="../library/editor.js"></script>
     <script src="../library/editorInterface.js"></script>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
 </head>
 <body>
     <div class="container">
@@ -96,7 +99,7 @@
                     <div class="elprop" style="display:none;">
                         <label for="eltop">Top</label>
                         <input type="text" name="eltop" id="eltop"/>
-                    </div>                    
+                    </div>
                     <div class="elprop" style="display:none;">
                         <label for="elwidth">Width</label>
                         <input type="text" name="elwidth" id="elwidth"/>
@@ -105,7 +108,7 @@
                         <label for="elheight">Height</label>
                         <input type="text" name="elheight" id="elheight"/>
                     </div>
-                    
+
                     <!-- Container Type -->
                     <div class="elprop" style="display:none;">
                         <label for="elobjViewClass">Object class</label>
@@ -200,7 +203,7 @@
                             <option value="true">Yes</option>
                             <option value="false">No</option>
                         </select>
-                    </div>                    
+                    </div>
                     <!-- select -->
                     <div class="elprop" style="display:none;">
                         <label for="eldataSource">Data source</label>
@@ -208,12 +211,12 @@
                             <option value="custom">Custom</option>
                             <option value="fromR">From R</option>
                         </select>
-                    </div>                    
-                    <div class="elprop" style="display:none;" id="selectSourceChange"></div>                     
+                    </div>
+                    <div class="elprop" style="display:none;" id="selectSourceChange"></div>
                     <div class="elprop" id="selectVariableType">
                         <label for="elvariableType">Variable type</label>
                         <input type="text" name="elvariableType" id="elvariableType"/>
-                    </div>                    
+                    </div>
                 </fieldset>
                 <fieldset>
                     <legend>Actions</legend>

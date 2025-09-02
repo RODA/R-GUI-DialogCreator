@@ -9,13 +9,14 @@ const objectsWindow = require('electron').remote.getCurrentWindow();
 const defaultSettings = require('./defaultSettings');
 const helpers = require("./helpers");
 const objectsHelpers = require("./objectsHelpers");
-const conditions = require('./conditions');
 
+// Remove Node.js require for './conditions' for browser context
+var conditions = window.conditions;
 
 const mockupData = require('./objectsMockup');
 
 var objects = {
-    
+
     // default styles
     fontFamily: defaultSettings.fontFamily,
     fontSize: defaultSettings.fontSize,
@@ -33,15 +34,15 @@ var objects = {
     command: '',
 
     // create the main window & Raphael paper
-    makeDialog: function(container) 
-    {       
+    makeDialog: function(container)
+    {
         if (((container.properties === void 0) == false) && helpers.hasSameProps(defaultSettings.dialog, container.properties)) {
-         
+
             // save data for laer use
             if(!this.reseted) {
                 this.dialogData = container;
             }
-        
+
             let props = container.properties;
             // create a new raphael paper
             this.paper = Raphael('paper', props.width, props.height);
@@ -54,7 +55,7 @@ var objects = {
                 this.makeObject(container.elements[key]);
             }
         }
-        
+
         if(container.syntax !== void 0 && container.syntax.command != '') {
             this.makeCommand(container.syntax);
         }
@@ -74,42 +75,42 @@ var objects = {
     },
 
     // create an object based on it's type
-    makeObject: function(obj) 
+    makeObject: function(obj)
     {
-        
+
         let elType = obj.type.toLowerCase();
         switch(elType) {
-            case "button": 
+            case "button":
                 this.button.call(this.paper, obj, elType);
                 break;
             case "checkbox":
                 this.checkBox.call(this.paper, obj, elType);
                 break;
-            case "container": 
+            case "container":
                 this.container.call(this.paper, obj, elType);
                 break;
-            case "counter": 
+            case "counter":
                 this.counter.call(this.paper, obj, elType);
                 break;
             case "input":
                 this.input.call(this.paper, obj, elType);
                 break;
-            case "label": 
+            case "label":
                 this.label.call(this.paper, obj, elType);
                 break;
-            case "plot": 
+            case "plot":
                 this.plot.call(this.paper, obj, elType);
                 break;
-            case "radio": 
+            case "radio":
                 this.radio.call(this.paper, this.radios, obj, elType);
                 break;
-            case "select": 
+            case "select":
                 this.select.call(this.paper, obj, elType, new EventEmitter(), ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5', 'Item 6']);
                 break;
-            case "separator": 
+            case "separator":
                 this.separator.call(this.paper, obj, elType);
                 break;
-            case "slider": 
+            case "slider":
                 this.slider.call(this.paper, obj, elType);
                 break;
         }
@@ -117,10 +118,10 @@ var objects = {
 
     // build the dialog command
     makeCommand: function(syntax)
-    {        
+    {
         let command = syntax.command;
         // let previewCommand = objectsHelpers.updateCommand(command, syntax.defaultElements);
-        
+
         // {name}
         let regex = /({[a-z0-9]+})/g;
         let elements = command.match(regex);
@@ -129,21 +130,21 @@ var objects = {
                 let name = elements[i].substring(1, elements[i].length-1);
                 let elementValue = objectsHelpers.getCommandElementValue(objects.objList, objects.radios, name);
                 // console.log(elementValue);
-                
+
                 command = objectsHelpers.updateCommand(command, syntax.defaultElements, name, elements[i], elementValue);
-                // previewCommand = previewCommand.replace(elements[i], elementValue);                       
+                // previewCommand = previewCommand.replace(elements[i], elementValue);
             }
             // update dialog comand
-            objects.command = command;        
+            objects.command = command;
             this.events.emit('commandUpdate', command);
         }
     },
 
     // execute a command trigered by a button
     executeCommand: function()
-    {        
+    {
         objects.events.on('iSpeakButton', function(data)
-        {            
+        {
             if (data.type == "run"){
                 //TODO -- trigger command execution - / dialog name
                 // objects.events.emit('iSpeakRun', objects.container.properties.name);
@@ -151,7 +152,7 @@ var objects = {
                 dialog.showMessageBox(objectsWindow, {type: "question", message: "Are you sure you want to reset the dialog?", title: "Reset dialog", buttons: ["No", "Yes"]}, (response) => {
                     if (response) {
                         for (let element in objects.dialogDefaultData) {
-                            
+
                             if ( objects.objList[element] !== void 0) {
                                 // reinitalizing do not emit events
                                 objects.objList[element].initialize = true;
@@ -189,9 +190,9 @@ var objects = {
         objects.events.emit('keyTriggered', {key: theKey, status: theStatus});
     },
 
-    // Elements 
+    // Elements
     // =================================================================
-    
+
     // the button element
     button: function(obj, type)
     {
@@ -222,10 +223,10 @@ var objects = {
         elButton.txt = this.text(dataLeft+10, dataTop + ((Math.round(lBBox.height) / 2) + 5), obj.label).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily});
 
         elButton.cover = this.rect(dataLeft, dataTop, Math.round(lBBox.width)+20, Math.round(lBBox.height) + 10).attr({fill: "#FFFFFF", stroke: "none", "fill-opacity": 0, "cursor": "pointer"});
-        elButton.cover.click(function() 
+        elButton.cover.click(function()
         {
-            // if enable emit event with command (run or reset)      
-            if(button.enabled) {            
+            // if enable emit event with command (run or reset)
+            if(button.enabled) {
                 objects.events.emit('iSpeakButton', {name: button.name, type: button.click});
             }
         });
@@ -284,7 +285,7 @@ var objects = {
         };
 
         // initialize
-        if(button.visible) { 
+        if(button.visible) {
             button.show();
         } else {
             button.hide();
@@ -293,7 +294,7 @@ var objects = {
             button.enable();
         } else {
             button.disable();
-        }        
+        }
         // set to false - we have initialized the element
         button.initialize = false;
 
@@ -302,8 +303,8 @@ var objects = {
     },
 
     // the checkbox element
-    checkBox: function(obj, type) 
-    {    
+    checkBox: function(obj, type)
+    {
         // return if the received object is not corect;
         if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
 
@@ -316,7 +317,7 @@ var objects = {
         if (helpers.missing(obj.pos)) { obj.pos = 3; }
         if (helpers.missing(obj.dim)) { obj.dim = 12; }
         if (helpers.missing(obj.fontsize)) { obj.fontsize = objects.fontSize; }
-        
+
         let checkBox = {
             name: obj.name,
             visible: (obj.isVisible == 'true') ? true : false,
@@ -329,8 +330,8 @@ var objects = {
         // save default values
         objects.dialogDefaultData[obj.name] = {visible: checkBox.visible, checked: checkBox.checked, enabled: checkBox.enabled};
 
-        var cbElement = {};     
-    
+        var cbElement = {};
+
         // checkbox label - position
         var txtanchor = "start";
         var xpos = parseInt(obj.left);
@@ -356,15 +357,15 @@ var objects = {
         }
         // the label
         cbElement.label = this.text(xpos, ypos, obj.label).attr({"text-anchor": txtanchor, "font-size": (obj.fontsize + "px"), "font-family": objects.fontFamily, "cursor": "default"});
-        // the box        
+        // the box
         cbElement.box = this.rect(parseInt(obj.left), parseInt(obj.top), obj.dim, obj.dim).attr({fill: (checkBox.checked ? "#97bd6c" : "#eeeeee"), "stroke-width": 1, stroke: "#5d5d5d"});
-        // the checked 
+        // the checked
         cbElement.chk = this.path([
             ["M", parseInt(obj.left) + 0.2*obj.dim, parseInt(obj.top) + 0.3*obj.dim],
             ["l", 0.15*obj.dim*2, 0.2*obj.dim*2],
             ["l", 0.3*obj.dim*2, -0.45*obj.dim*2]
         ]).attr({"stroke-width": 2});
-        
+
         // the cover needs to be drawn last, to cover all other drawings (for click events)
         cbElement.cover = this.rect(parseInt(obj.left), parseInt(obj.top), obj.dim, obj.dim)
             .attr({fill: "#fff", opacity: 0, cursor: "pointer"})
@@ -375,7 +376,7 @@ var objects = {
                     checkBox.checked = !checkBox.checked;
                     // the cover
                     this.checked = checkBox.checked;
-                    
+
                     if (checkBox.checked) {
                         // the element is checked
                         cbElement.box.attr({fill: "#97bd6c"});
@@ -389,11 +390,11 @@ var objects = {
                     }
                 }
             });
-        
+
         cbElement.cover.checked = true;
 
         checkBox.element = cbElement;
-        
+
         // listen for events / changes
         objects.events.on('iSpeak', function(data)
         {
@@ -401,7 +402,7 @@ var objects = {
                 objects.conditionsChecker(data, checkBox);
             }
         });
-        
+
         // Checkbox's properties
         checkBox.enable = function() {
             checkBox.enabled = true;
@@ -446,7 +447,7 @@ var objects = {
             checkBox.element.chk.hide();
             checkBox.element.cover.checked = false;
             //  emit event only if already intialized
-            if(!checkBox.initialize) {            
+            if(!checkBox.initialize) {
                 objects.events.emit('iSpeak', {name: obj.name, status: 'uncheck'});
             }
         };
@@ -454,7 +455,7 @@ var objects = {
         checkBox.show = function() {
             checkBox.element.cover.show();
             checkBox.element.box.show();
-            
+
             if (checkBox.checked) {
                 checkBox.element.chk.show();
             } else {
@@ -478,7 +479,7 @@ var objects = {
             }
         };
 
-        // Initialize      
+        // Initialize
         if (checkBox.checked) {
             checkBox.check();
         } else {
@@ -520,10 +521,10 @@ var objects = {
             // multiple items can be selected
             value: [],
             shiftKey: false,
-            data: {}, 
+            data: {},
             listLength: 0
         };
-        
+
         // save default values
         objects.dialogDefaultData[obj.name] = {visible: container.visible, value: container.value, enabled: container.enabled};
 
@@ -580,9 +581,9 @@ var objects = {
 
                 // append div to original|main paper
                 document.getElementById('paper').appendChild(listSupport.div);
-                
+
                 // save paper referance for later use
-                listSupport.paper = newPaper;               
+                listSupport.paper = newPaper;
             }
         };
 
@@ -597,14 +598,14 @@ var objects = {
         objects.events.on('containerData', function(data) // new data
         {
             if(obj.name != data.name){
-                container.data = (data.data === void 0) ? data : data.data;                
+                container.data = (data.data === void 0) ? data : data.data;
                 if (container.type === 'dataSet' && data.name === void 0) {
                     container.makeDataSetList(data);
                 } else if (container.type === 'variable' && container.parent == data.name) { // variable container and triggered by dataSet container
                     container.makeVarialeSetList(data);
                 }
             }
-        });        
+        });
         objects.events.on('keyTriggered', function(data) // key pressed
         {
             if(data.key === 'Shift') {
@@ -621,19 +622,19 @@ var objects = {
         let listLength = 0;
 
         // on click element
-        let elClicked = function() {             
+        let elClicked = function() {
             // active only if container is enable
             if(container.enabled)
             {
                 let isOn = this.data('clicked');
-                let valueName = this.data('elName');            
-                let position = this.data('position');            
-                
+                let valueName = this.data('elName');
+                let position = this.data('position');
+
                 // if shift key presed | only vor variables
                 if(container.shiftKey && container.type == 'variable') {
                     // if we have already selected at least an element
                     if ( selectedElementsList.length > 0) {
-                                
+
                         let first = selectedElementsList[0];
                         selectedElementsList.length = 0;
                         container.value.length = 0;
@@ -650,7 +651,7 @@ var objects = {
                                 bg[i].attr({opacity: 1});
                                 selectedElementsList.push(i);
                                 container.value.push(cover[i].data('elName'));
-                            }   
+                            }
                         } else if (position < first) {
                             for(let i = position; i <= first; i++) {
                                 cover[i].data('clicked', 1);
@@ -672,7 +673,7 @@ var objects = {
                         selectedElementsList.push(position);
                     }
                 } else {
-                    
+
                     if(!isOn) {
                         // save|add the name of the selected
                         if(container.type === 'variable') {
@@ -681,7 +682,7 @@ var objects = {
                         } else {
                             // for dataFrames you can select only one value
                             container.value = [valueName];
-                            selectedElementsList = [position]; 
+                            selectedElementsList = [position];
                             for(let i = 0; i < listLength; i++) {
                                 cover[i].data('clicked', 0);
                                 bg[i].attr({opacity: 0});
@@ -702,10 +703,10 @@ var objects = {
                             selectedElementsList.length = 0;
                         }
                     }
-                    // something selected / deselected 
-                }     
-                objects.events.emit('containerData', {name: container.name, data: container.data, selected: container.value});            
-                objects.events.emit('iSpeak', {name: container.name, status: container.value});            
+                    // something selected / deselected
+                }
+                objects.events.emit('containerData', {name: container.name, data: container.data, selected: container.value});
+                objects.events.emit('iSpeak', {name: container.name, status: container.value});
             }
         };
         // dataSet list
@@ -716,11 +717,11 @@ var objects = {
 
             // make paper for list
             listSupport.makeSupport(list.length);
-            let newPaper = listSupport.paper;           
+            let newPaper = listSupport.paper;
 
             listLength = list.length;
             container.listLength = list.length;
-            
+
             let position = 15;
             // populate the list
             for(let i = 0; i < list.length; i++) {
@@ -732,7 +733,7 @@ var objects = {
                                 .data('elName', list[i])
                                 .data('position', i);
                 position += 25;
-            }         
+            }
 
             // add click events for elements
             for(let i = 0; i < cover.length; i++) {
@@ -741,14 +742,14 @@ var objects = {
         };
         // variable list
         container.makeVarialeSetList = function(data)
-        {           
+        {
             // get dataframes
             let list = [];
             for (let i = 0; i < data.selected.length; i++) {
                 list.push(data.data[data.selected[i]]);
             }
             // level one array
-            list = list.flat(list.length);            
+            list = list.flat(list.length);
             listLength = list.length;
             container.listLength = list.length;
 
@@ -766,7 +767,7 @@ var objects = {
             } else {
                 listSupport.makeSupport(listLength);
                 let newPaper = listSupport.paper;
-                
+
                 let position = 15;
                 // populate the list
                 for(let i = 0; i < listLength; i++) {
@@ -779,13 +780,13 @@ var objects = {
                                     .data('position', i);
                     // listSet.push( txt[i], cover[i] );
                     position += 25;
-                }         
+                }
 
                 // add click events for elements
                 for(let i = 0; i < cover.length; i++) {
                     cover[i].click(elClicked);
-                }       
-            }     
+                }
+            }
         };
 
         // the container's properties
@@ -799,7 +800,7 @@ var objects = {
                 }
                 objects.events.emit('containerData', {name: container.name, data: container.data, selected: []});
             }
-        };   
+        };
         container.show = function(){
             // container.element.show();
             listSupport.div.style.display = 'block';
@@ -819,7 +820,7 @@ var objects = {
         container.enable = function() {
             container.enabled = true;
             container.element.attr({fill: "#FFFFFF"});
-            
+
             for(let i = 0; i < listLength; i++) {
                 cover[i].attr({'cursor':'pointer'});
                 txt[i].attr({fill: "#000000"});
@@ -848,7 +849,7 @@ var objects = {
             }
 
             listSupport.div.style.backgroundColor = '#cccccc';
-            
+
             //  emit event only if already intialized
             if(!container.initialize) {
                 objects.events.emit('iSpeak', {name: container.name, status: 'disable'});
@@ -856,7 +857,7 @@ var objects = {
         };
 
         // initialize
-        if(container.visible) { 
+        if(container.visible) {
             container.show();
         } else {
             container.hide();
@@ -865,17 +866,17 @@ var objects = {
             container.enable();
         } else {
             container.disable();
-        }               
+        }
 
         // set to false - we have initialized the element
         container.initialize = false;
 
         // add the element to the main list
-        objects.objList[obj.name] = container;     
+        objects.objList[obj.name] = container;
     },
 
     // the counter element
-    counter: function(obj, type) 
+    counter: function(obj, type)
     {
         // return if the received object is not corect;
         if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
@@ -894,44 +895,44 @@ var objects = {
         };
 
         // save default values
-        objects.dialogDefaultData[obj.name] = {visible: counter.visible, value: counter.value, enabled: counter.enabled};        
+        objects.dialogDefaultData[obj.name] = {visible: counter.visible, value: counter.value, enabled: counter.enabled};
 
         // obj properties
         if (helpers.missing(obj.fontsize)) { obj.fontsize = objects.fontSize; } else { obj.fontsize = obj.fontsize + "px"; }
         if (helpers.missing(obj.width)) { obj.width = 20; }
-        
-        let elCounter = {};      
-        
+
+        let elCounter = {};
+
         // data to int
         let dataLeft = parseInt(obj.left) + 22;
         let dataTop = parseInt(obj.top) ;
-        
+
         let txtanchor = "middle";
-        
+
         elCounter.textvalue = this.text(dataLeft, dataTop, "" + obj.startval)
             .attr({"text-anchor": txtanchor, "font-size": obj.fontsize, "font-family": objects.fontFamily});
-        
+
         elCounter.downsign = this.path([
             ["M", dataLeft - 12 - obj.width / 2, dataTop - 6],
             ["l", 12, 0],
             ["l", -6, 12],
             ["z"]
         ]).attr({fill: "#eeeeee", "stroke-width": 1, stroke: "#5d5d5d"});
-        
+
         elCounter.upsign = this.path([
             ["M", dataLeft + obj.width / 2, dataTop + 6],
             ["l", 12, 0],
             ["l", -6, -12],
             ["z"]
         ]).attr({fill: "#eeeeee", "stroke-width": 1, stroke: "#5d5d5d"});
-        
+
         // listen for events / changes - must be declared before thee emit events
         objects.events.on('iSpeak', function(data)
         {
             if(obj.name != data.name){
                 objects.conditionsChecker(data, counter);
             }
-        }); 
+        });
 
         elCounter.down = this.rect((dataLeft - (obj.width / 2)) - 14, dataTop - 7, 15, 15)
             .attr({fill: "#fff", opacity: 0,cursor: "pointer"})
@@ -945,7 +946,7 @@ var objects = {
                     }
                 }
             });
-        
+
         elCounter.up = this.rect((dataLeft + (obj.width / 2)) - 2, dataTop - 7, 15, 15)
             .attr({fill: "#fff", opacity: 0, cursor: "pointer"})
             .click(function() {
@@ -959,10 +960,10 @@ var objects = {
                 }
             });
 
-        counter.element = elCounter;   
+        counter.element = elCounter;
 
         // the counter's methods
-        counter.setValue = function(val) 
+        counter.setValue = function(val)
         {
             let newVal = parseInt(val);
             // check for valid value and limits
@@ -1021,7 +1022,7 @@ var objects = {
                 objects.events.emit('iSpeak', {name: counter.name, status: 'disable'});
             }
         };
-                
+
         // initialize
         if(counter.visible) {
             counter.show();
@@ -1032,14 +1033,14 @@ var objects = {
             counter.enable();
         } else {
             counter.disable();
-        }        
+        }
 
         // set to false - we have initialized the element
         counter.initialize = false;
 
         // add the element to the main list
         objects.objList[obj.name] = counter;
-    }, 
+    },
 
     // the input element
     input: function(obj, type)
@@ -1070,14 +1071,14 @@ var objects = {
         elinput.rect = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#ffffff", "stroke": "#5d5d5d", "stroke-width": 1});
 
         elinput.cover = this.rect(dataLeft, dataTop, obj.width, 25).attr({fill: "#ffffff", stroke: "none", opacity: 0, "cursor": "text"});
-        elinput.cover.click(function() 
+        elinput.cover.click(function()
         {
             if(input.enabled) {
                 objectsHelpers.customInput(obj.width - 10, 19, dataLeft+5, dataTop+2, input.value, input.paper, objects.fontSize, objects.fontFamily).then((result) => {
-                    input.setValue(result);                    
+                    input.setValue(result);
                 });
             }
-        }); 
+        });
 
         input.element = elinput;
 
@@ -1090,22 +1091,22 @@ var objects = {
         });
 
         // the input's methods
-        input.setValue = function(val) 
-        {    
-            // remove previous element 
+        input.setValue = function(val)
+        {
+            // remove previous element
             if(typeof input.element.txt === 'object' && typeof input.element.txt.remove === "function") {
-                input.element.txt.remove();                
+                input.element.txt.remove();
             }
             // check if the new text is bigger then the input an trim if so
             let newValDim = objectsHelpers.getTextDim(input.paper, val, objects.fontSize, objects.fontFamily);
-            
+
             let newText = (newValDim.width < input.width) ? val :  objectsHelpers.limitTextOnWidth(val, input.width, input.paper, objects.fontSize, objects.fontFamily) + '...';
             input.element.txt = input.paper.text(dataLeft+5, dataTop + 12, newText).attr({"text-anchor": "start", "font-size": objects.fontSize, "font-family": objects.fontFamily});
             // make it editable
             input.element.txt.click(function(){
                 if(input.enabled) {
                     objectsHelpers.customInput(obj.width - 10, 19, dataLeft+22, dataTop+7, input.value, input.paper, objects.fontSize, objects.fontFamily).then((result) => {
-                        input.setValue(result);                    
+                        input.setValue(result);
                     });
                 }
             });
@@ -1146,7 +1147,7 @@ var objects = {
                 objects.events.emit('iSpeak', {name: input.name, status: 'enable'});
             }
         };
-        input.disable = function() {            
+        input.disable = function() {
             input.enabled = false;
             input.element.rect.attr({fill: "#cccccc", stroke: "#848484"});
             if(typeof input.element.txt === 'object'){
@@ -1162,8 +1163,8 @@ var objects = {
         // initialize
         if(obj.value.trim() != '') {
             input.setValue.call(this, obj.value);
-        }       
-        if(input.visible) { 
+        }
+        if(input.visible) {
             input.show();
         } else {
             input.hide();
@@ -1172,15 +1173,15 @@ var objects = {
             input.enable();
         } else {
             input.disable();
-        } 
-        
+        }
+
         // set to false - we have initialized the element
         input.initialize = false;
 
         // add the element to the main list
         objects.objList[obj.name] = input;
-    },       
-   
+    },
+
     // the label element
     label: function(obj, type)
     {
@@ -1199,15 +1200,15 @@ var objects = {
         objects.dialogDefaultData[obj.name] = {visible: label.visible};
 
         label.element = this.text(parseInt(obj.left), parseInt(obj.top) + (obj.fontSize / 2 + 1), obj.text).attr({'fill': '#000000', "font-size": obj.fontSize, "font-family": objects.fontFamily, 'text-anchor': 'start', "cursor": "default"});
-     
+
         // listen for events / changes
         objects.events.on('iSpeak', function(data)
-        {            
+        {
             if(obj.name != data.name){
                 objects.conditionsChecker(data, label);
             }
         });
-        
+
         // the lable's methods
         label.show = function() {
             this.element.show();
@@ -1253,18 +1254,18 @@ var objects = {
     //         initialize: true,
     //     };
 
-        
+
     //     plot.element.rect = this.rect(obj.left, obj.top, obj.width, obj.height).attr({fill: "#ffffff", "stroke": "#d6d6d6", "stroke-width": 1});
     //     plot.element.text = this.text(obj.left + 20, obj.top + 20, 'This is a plot').attr({'fill': '#000000', "font-size": obj.fontSize, "font-family": objects.fontFamily, 'text-anchor': 'start', "cursor": "default"});
 
     //     // listen for events / changes
     //     objects.events.on('iSpeak', function(data)
-    //     {            
+    //     {
     //         if(obj.name != data.name){
     //             objects.conditionsChecker(data, plot);
     //         }
     //     });
-        
+
     //     // the lable's methods
     //     plot.show = function() {
     //         this.element.rect.show();
@@ -1298,7 +1299,7 @@ var objects = {
     // },
 
     // the radio element
-    radio: function(radios, obj, type) 
+    radio: function(radios, obj, type)
     {
         // return if the received object is not corect;
         if(!helpers.hasSameProps(defaultSettings[type], obj)) { return false; }
@@ -1315,19 +1316,19 @@ var objects = {
         };
 
         // save default values
-        objects.dialogDefaultData[obj.name] = {visible: radio.visible, selected: radio.selected, enabled: radio.enabled};        
+        objects.dialogDefaultData[obj.name] = {visible: radio.visible, selected: radio.selected, enabled: radio.enabled};
 
         // add the element to the main list
-        objects.objList[obj.name] = radio;  
+        objects.objList[obj.name] = radio;
 
         if (helpers.missing(obj.size)) { obj.size = 7; }
         if (helpers.missing(obj.vertspace)) { obj.vertspace = 25; }
         if (helpers.missing(obj.fontsize)) { obj.fontsize = objects.fontSize; } else { obj.fontsize = obj.fontsize + 'px'; }
-        
+
         // data
         let dataLeft = parseInt(obj.left + 7); // we add 7 for the circle radius
         let dataTop = parseInt(obj.top);
-        
+
         // initializing the radioGroup if it does not already exists
         if(radios[obj.radioGroup] == void 0){
             radios[obj.radioGroup] = {};
@@ -1340,7 +1341,7 @@ var objects = {
         let tColor = (obj.isEnabled == 'true') ? "#000000" : "#848484";
         me.label = this.text(dataLeft + 15, dataTop, obj.label).attr({"text-anchor": "start", "font-size": obj.fontsize, "font-family": objects.fontFamily, fill:tColor, cursor:"default"});
         me.circle = this.circle(dataLeft, dataTop, obj.size).attr({fill: cColor, "stroke": "#5d5d5d", "stroke-width": 1});
-    
+
         // selected - initial hide - new Raphael SET
         me.fill = this.set();
         // the interior green circle
@@ -1352,7 +1353,7 @@ var objects = {
         me.fill.hide();
 
         me.cover =  this.circle(dataLeft, dataTop, obj.size + 2).attr({fill: "#ffffff", opacity:0, "cursor": "pointer"});
-        me.cover.click(function() 
+        me.cover.click(function()
         {
             if(radio.enabled) {
                 let rList = Object.keys(radios[obj.radioGroup]);
@@ -1360,7 +1361,7 @@ var objects = {
                 {
                     if(rList[i] == me.name) {
                         radios[obj.radioGroup][rList[i]].fill.show();
-                        objects.objList[rList[i]].selected = true;       
+                        objects.objList[rList[i]].selected = true;
                         objects.events.emit('iSpeak', {name: radios[obj.radioGroup][rList[i]].name, status: 'select'});
                     } else {
                         radios[obj.radioGroup][rList[i]].fill.hide();
@@ -1378,7 +1379,7 @@ var objects = {
                 objects.conditionsChecker(data, radio);
             }
         });
-        
+
         // the radio's methods
         radio.show = function() {
             me.label.show();
@@ -1397,7 +1398,7 @@ var objects = {
             me.circle.hide();
             me.fill.hide();
             //  emit event only if already intialized
-            if(!radio.initialize) {            
+            if(!radio.initialize) {
                 objects.events.emit('iSpeak', {name: radio.name, status: 'hide'});
             }
         };
@@ -1409,7 +1410,7 @@ var objects = {
             // me.fill[0].attr({fill: "#97bd6c"});
             me.fill[1].attr({fill: "#000000"});
             //  emit event only if already intialized
-            if(!radio.initialize) {            
+            if(!radio.initialize) {
                 objects.events.emit('iSpeak', {name: radio.name, status: 'enable'});
             }
         };
@@ -1421,7 +1422,7 @@ var objects = {
             // me.fill[0].attr({fill: "#97bd6c"});
             me.fill[1].attr({fill: "#848484"});
             //  emit event only if already intialized
-            if(!radio.initialize) {            
+            if(!radio.initialize) {
                 objects.events.emit('iSpeak', {name: radio.name, status: 'disable'});
             }
         };
@@ -1429,7 +1430,7 @@ var objects = {
             radio.selected = true;
             me.fill.show();
             //  emit event only if already intialized
-            if(!radio.initialize) {            
+            if(!radio.initialize) {
                 objects.events.emit('iSpeak', {name: radio.name, status: 'select'});
             }
         };
@@ -1437,7 +1438,7 @@ var objects = {
             radio.selected = false;
             me.fill.hide();
             //  emit event only if already intialized
-            if(!radio.initialize) {            
+            if(!radio.initialize) {
                 objects.events.emit('iSpeak', {name: radio.name, status: 'deselect'});
             }
         };
@@ -1452,12 +1453,12 @@ var objects = {
             radio.enable();
         } else {
             radio.disable();
-        }        
+        }
         if(radio.selected) {
             radio.select();
         } else {
             radio.deselect();
-        }        
+        }
 
         // set to false - we have initialized the element
         radio.initialize = false;
@@ -1490,13 +1491,13 @@ var objects = {
         // data to int
         let dataLeft = parseInt(obj.left);
         let dataTop = parseInt(obj.top);
-        
+
         // not widther than 350
         obj.width = (obj.width > 350) ? 350 : obj.width;
         let dataWidth = parseInt(obj.width);
 
         // draw visibel rectangle
-        select.element.rect = this.rect(dataLeft, dataTop, dataWidth, 25).attr({fill: "#FFFFFF", "stroke": "#5d5d5d", "stroke-width": 1});  
+        select.element.rect = this.rect(dataLeft, dataTop, dataWidth, 25).attr({fill: "#FFFFFF", "stroke": "#5d5d5d", "stroke-width": 1});
         // Open / close element list
         select.element.downsign = this.path([
             ["M", dataLeft + dataWidth - 15 , dataTop + 8],
@@ -1510,10 +1511,10 @@ var objects = {
             ["l", -4, -8],
             ["z"]
         ]).attr({fill: "#5d5d5d", "stroke-width": 0}).hide();
-        
-        select.element.showList = this.rect(dataLeft, dataTop, dataWidth, 25).attr({fill: "#79a74c", "opacity": 0, "cursor": "pointer"});        
+
+        select.element.showList = this.rect(dataLeft, dataTop, dataWidth, 25).attr({fill: "#79a74c", "opacity": 0, "cursor": "pointer"});
         select.element.showList.click(function() {
-            if(select.enabled && typeof listSupport.paper.setSize === "function") {                                
+            if(select.enabled && typeof listSupport.paper.setSize === "function") {
                 if(listSupport.listSet[0] !== void 0 && listSupport.listSet[0].data('visible')) {
                     listSupport.hide();
 
@@ -1534,7 +1535,7 @@ var objects = {
                     // add scrollbar
                     listSupport.div.id = 'container-' + obj.name;
                     listSupport.div.className = 'scrollbarStyle';
-                    
+
                     let newHeight = listSupport.height;
                     if (listSupport.height > 125) {
                         newHeight = 125;
@@ -1545,26 +1546,26 @@ var objects = {
             }
         });
 
-        // show / hide selected    
+        // show / hide selected
         // ===============================================================================
         eventMe.on('selected', function(data) {
             // check if we have an element | if yes remove it
             if(typeof select.objSelected.remove === "function") {
-                select.objSelected.remove();                
+                select.objSelected.remove();
             }
             select.objSelected = select.paper.text(dataLeft+10, dataTop+12, data).attr({"text-anchor": "start",fill: "#000000", "font-size": objects.fontSize, "font-family": objects.fontFamily});
             select.value = data;
             select.selected = true;
             // etmit event - obj value change
-            objects.events.emit('iSpeak', {name: obj.name, status: 'select'});  
+            objects.events.emit('iSpeak', {name: obj.name, status: 'select'});
             // hide list
             listSupport.hide();
             select.element.downsign.show();
-            select.element.upsign.hide();          
+            select.element.upsign.hide();
         });
         eventMe.on('deSelected', function(data) {
             if(typeof select.objSelected.remove === "function") {
-                select.objSelected.remove();                
+                select.objSelected.remove();
             }
             select.value = '';
             select.selected = false;
@@ -1573,7 +1574,7 @@ var objects = {
             // hide list
             listSupport.hide();
             select.element.downsign.show();
-            select.element.upsign.hide();          
+            select.element.upsign.hide();
         });
 
         const listSupport = {
@@ -1603,15 +1604,15 @@ var objects = {
             makeList: function(list) {
                 // The select's element list
                 // ===============================================================================
-                let selectElements = listSupport.paper.rect(0, 0, dataWidth, list.length * 25).attr({fill: "#FFFFFF", stroke: "#5d5d5d", "stroke-width": 0}); 
+                let selectElements = listSupport.paper.rect(0, 0, dataWidth, list.length * 25).attr({fill: "#FFFFFF", stroke: "#5d5d5d", "stroke-width": 0});
                 selectElements.hide();
                 selectElements.data('visible', 0);
-                selectElements.toFront();   
+                selectElements.toFront();
 
-                listSupport.listSet = listSupport.paper.set();                
+                listSupport.listSet = listSupport.paper.set();
                 listSupport.listSet.push(selectElements);
                 // new set for background
-                listSupport.listBg = listSupport.paper.set();                
+                listSupport.listBg = listSupport.paper.set();
 
                 let position = 10;
                 let bg = [];
@@ -1619,14 +1620,14 @@ var objects = {
                 let cover = [];
 
                 // on click element
-                let elClicked = function() { 
+                let elClicked = function() {
                     let isOn = this.data('clicked');
                     let pos = this.data('position');
                     for(let j = 0; j < cover.length; j++) {
                         cover[j].data('clicked', 0);
                         bg[j].attr({fill: "#ffffff"});
                     }
-                    
+
                     if(!isOn) {
                         this.data('clicked', 1);
                         bg[pos].attr({fill: "#79a74c"});
@@ -1637,18 +1638,18 @@ var objects = {
                     }
                 };
                 // on element over
-                let elIn = function() { 
+                let elIn = function() {
                     if(!this.data('clicked')){
                         bg[this.data('position')].attr({fill: "#79a74c"});
                     }
                 };
                 // on element out
-                let elOut = function() { 
+                let elOut = function() {
                     if(!this.data('clicked')){
                         bg[this.data('position')].attr({fill: "#ffffff"});
-                    }                                             
+                    }
                 };
-                
+
                 // populate the list
                 for(let i = 0; i < list.length; i++) {
                     bg[i] = listSupport.paper.rect(0 , position-10, dataWidth - 5, 25).attr({fill: "#ffffff", stroke: 0});
@@ -1664,20 +1665,20 @@ var objects = {
                     listSupport.listSet.push(txt[i], cover[i]);
                     listSupport.listBg.push(bg[i]);
                     position += 25;
-                } 
+                }
             },
 
             show: function(){
                 this.div.style.display = 'block';
-                if (typeof this.listSet.show == 'function') { 
-                    this.listSet.show(); 
+                if (typeof this.listSet.show == 'function') {
+                    this.listSet.show();
                     listSupport.listSet[0].data('visible', 1);
                 }
             },
             hide: function(){
                 this.div.style.display = 'none';
-                if (typeof this.listSet.hide == 'function') { 
-                    this.listSet.hide(); 
+                if (typeof this.listSet.hide == 'function') {
+                    this.listSet.hide();
                     listSupport.listSet[0].data('visible', 0);
                 }
             }
@@ -1693,8 +1694,8 @@ var objects = {
             if (Array.isArray(list) && list.length != 0) {
                 listSupport.makeSupport(list.length);
                 // make the list with tha data
-                listSupport.makeList(list);  
-                // save data list  
+                listSupport.makeList(list);
+                // save data list
                 select.dataList = list;
             }
         }
@@ -1706,8 +1707,8 @@ var objects = {
                 if(data[obj.dataValue] !== void 0 && data[obj.dataValue].length > 0) {
                     listSupport.makeSupport(data[obj.dataValue].length);
                     // make the list with tha data
-                    listSupport.makeList(data[obj.dataValue]);  
-                    // save data list  
+                    listSupport.makeList(data[obj.dataValue]);
+                    // save data list
                     select.dataList = data[obj.dataValue];
                 } else {
                     // all data types
@@ -1715,25 +1716,25 @@ var objects = {
                         let allData = [];
                         let keys = Object.keys(data);
                         for(let i = 0; i < keys.length; i++) {
-                            allData = allData.concat(data[keys[i]]);                            
-                        }                        
+                            allData = allData.concat(data[keys[i]]);
+                        }
                         listSupport.makeSupport(allData.length);
                         // make the list with tha data
-                        listSupport.makeList(allData);    
+                        listSupport.makeList(allData);
                         // save data list
                         select.dataList = allData;
                     }
                 }
-            }            
+            }
         });
 
         // listen for events / changes
         objects.events.on('iSpeak', function(data)
         {
-            
+
             if(obj.name != data.name){
                 objects.conditionsChecker(data, select);
-            }            
+            }
         });
 
         // the select's methods
@@ -1745,7 +1746,7 @@ var objects = {
                 eventMe.emit('selected', val);
             }
             // the position of the selected value if it exists
-            let exist = null; 
+            let exist = null;
             // clear bg and deselect all
             if (listSupport.listSet.length > 0) {
                 for(let j = 0; j < listSupport.listSet.length; j++) {
@@ -1810,7 +1811,7 @@ var objects = {
                 objects.events.emit('iSpeak', {name: select.name, status: 'enable'});
             }
         };
-        select.disable = function() {            
+        select.disable = function() {
             select.enabled = false;
             select.element.rect.attr({fill: "#cccccc", stroke: "#848484"});
             select.element.downsign.show();
@@ -1828,7 +1829,7 @@ var objects = {
         };
 
         // initialize
-        if(select.visible) { 
+        if(select.visible) {
             select.show();
         } else {
             select.hide();
@@ -1837,7 +1838,7 @@ var objects = {
             select.enable();
         } else {
             select.disable();
-        }  
+        }
 
         // set the first element as default
         if(select.dataList.length > 0) {
@@ -1866,14 +1867,14 @@ var objects = {
         };
 
         // save default values
-        objects.dialogDefaultData[obj.name] = {visible: separator.visible};        
+        objects.dialogDefaultData[obj.name] = {visible: separator.visible};
 
-        if(obj.direction == 'x') 
-        {    
+        if(obj.direction == 'x')
+        {
             if(obj.length < 10 || obj.length > this.width - 20){ obj.length = 300; }
             let v = parseInt(obj.length) + parseInt(obj.left);
             separator.element = this.path("M" + obj.left + " " + obj.top + "L"+ v +" " + obj.top).attr({stroke: "#5d5d5d"});
-        } else if(obj.direction == 'y') 
+        } else if(obj.direction == 'y')
         {
             if(obj.length < 10 || obj.length > this.height - 20){ obj.length = 300; }
             let v = parseInt(obj.length) + parseInt(obj.top);
@@ -1887,12 +1888,12 @@ var objects = {
                 objects.conditionsChecker(data, separator);
             }
         });
-        
+
         // the separator's methods
         separator.show = function() {
             this.element.show();
             //  emit event only if already intialized
-            if(!separator.initialize) {            
+            if(!separator.initialize) {
                 objects.events.emit('iSpeak', {name: obj.name, status: 'show'});
             }
         };
@@ -1913,7 +1914,7 @@ var objects = {
 
         // set to false - we have initialized the element
         separator.initialize = false;
-        
+
         // add the element to the main list
         objects.objList[obj.name] = separator;
     },
@@ -1933,7 +1934,7 @@ var objects = {
             conditions: objects.conditionsParser(obj.conditions),
             initialize: true,
         };
-        
+
         // save default values
         objects.dialogDefaultData[obj.name] = {visible: slider.visible, value: slider.value, enabled: slider.enabled};
 
@@ -1952,7 +1953,7 @@ var objects = {
         else if(dataWidth > paper.width - 30) { dataWidth = paper.width - 30; dataLeft = 15;}
 
         let v = parseInt(dataWidth) + parseInt(dataLeft);
-        
+
         let line = this.path("M" + dataLeft + " " + dataTop + "L"+ v +" " + dataTop).attr({stroke: "#000000", "stroke-width": 1});
         let tLeft = dataLeft + (dataWidth * dataVal);
         let triangle = this.path([
@@ -1961,7 +1962,7 @@ var objects = {
             ["l", -6, -12],
             ["z"]
         ]).attr({fill: "#eeeeee", "stroke-width": 1, stroke: "#5d5d5d"});
-    
+
         let lastX = 0;
         let absoluteX = 0;
 
@@ -1973,15 +1974,15 @@ var objects = {
                     if (absoluteX + dx > dataLeft + dataWidth) {
                         newX = dataLeft + dataWidth - absoluteX - lastX;
                     }
-                    
+
                     if (absoluteX + dx < dataLeft) {
                         newX = dataLeft - absoluteX - lastX;
                     }
-                    
+
                     triangle.translate(newX, 0);
                     // transform() does not work the same as translate() ... !!
                     // triangle.transform('T' + newX + ',' + 0);
-        
+
                     if (absoluteX + dx < dataLeft) {
                         lastX = dataLeft - absoluteX;
                     }
@@ -1996,8 +1997,8 @@ var objects = {
                 absoluteX = getBB.x + getBB.width / 2;
             },
             function end(){
-                if (slider.enabled) {        
-                    slider.value = ((absoluteX + lastX) - dataLeft) / dataWidth; 
+                if (slider.enabled) {
+                    slider.value = ((absoluteX + lastX) - dataLeft) / dataWidth;
                     // say that the value has changed
                     objects.events.emit('iSpeak', {name: slider.name, status: 'value'});
                 }
@@ -2016,7 +2017,7 @@ var objects = {
                 objects.conditionsChecker(data, slider);
             }
         });
-        
+
         // the slider's methods
         slider.setValue = function(val) {
             slider.value = val;
@@ -2030,7 +2031,7 @@ var objects = {
         slider.show = function() {
             slider.element.show();
             //  emit event only if already intialized
-            if(!slider.initialize) {            
+            if(!slider.initialize) {
                 objects.events.emit('iSpeak', {name: slider.name, status: 'show'});
             }
         };
@@ -2044,7 +2045,7 @@ var objects = {
 
         slider.enable = function() {
             slider.enabled = true;
-            // first element in set is the line            
+            // first element in set is the line
             slider.element.items[0].attr({stroke: "#5d5d5d"});
             // second element in the set is teh circle
             slider.element.items[1].attr({fill: "#eeeeee", "cursor": "pointer", "stroke": "#5d5d5d", "stroke-width": 1});
@@ -2055,7 +2056,7 @@ var objects = {
         };
         slider.disable = function() {
             slider.enabled = false;
-            // first element in set is the line 
+            // first element in set is the line
             slider.element.items[0].attr({stroke: '#cccccc'});
             // second element in the set is teh circle
             slider.element.items[1].attr({fill: "#cccccc", "stroke": "#cccccc", 'cursor': 'default'});
@@ -2075,11 +2076,11 @@ var objects = {
             slider.enable();
         } else {
             slider.disable();
-        }        
+        }
 
         // set to false - we have initialized the element
         slider.initialize = false;
-        
+
         // add the element to the main list
         objects.objList[obj.name] = slider;
     },
@@ -2088,19 +2089,19 @@ var objects = {
     conditionsParser: function(str)
     {
         let isOK = conditions.parseConditions(str);
-                        
+
         if(!isOK.error) {
             return {conditions: isOK.result, elements: isOK.elements};
         }
         return {conditions: [], elements: []};
     },
     conditionsChecker: function(data, element)
-    {                
+    {
         // check condition only if the element that "speak" is affecting us
         if(element.conditions.elements.includes(data.name)){
             conditions.checkConditions(data, element, objects.objList);
         }
     },
-};  
+};
 
 module.exports = objects;

@@ -1,17 +1,15 @@
-const conditions = require("./conditions");
+var container = {
 
-const container = {
-
-    properties: {}, 
+    properties: {},
     elements: {},
     syntax: {
         command: '',
         defaultElements: []
     },
- 
+
     // Dialog =======================================
     // dialog properties: name, title, width, height
-    initialize: function(obj) 
+    initialize: function(obj)
     {
         this.properties = Object.assign({},obj);
         this.elements = {};
@@ -20,12 +18,12 @@ const container = {
             defaultElements: []
         };
     },
-    
+
     // update dialog props
     updateProperties: function(obj)
     {
         // for new props please define in initialization edior.js : make
-        for (let prop in obj) 
+        for (let prop in obj)
         {
             if(prop === 'dependencies' && this.properties[prop].length === 0) {
                 this.properties[prop] = obj[prop];
@@ -33,13 +31,13 @@ const container = {
             if(this.properties[prop]) {
                 this.properties[prop] = obj[prop];
             }
-        }              
+        }
     },
 
-    // Elements 
+    // Elements
     // ======================================
     // add/save an element
-    addElement: function(parentID, element, data) 
+    addElement: function(parentID, element, data)
     {
         data.parentId = parentID;
 
@@ -53,16 +51,16 @@ const container = {
 
         // we are modifying the data object here
         let isDataOK = this.prepareData(data);
-        
+
         // add/save element
-        this.elements[parentID] = Object.assign({}, data);  
+        this.elements[parentID] = Object.assign({}, data);
 
         // check if we have errors | if true show message
         if(isDataOK.error){
             return isDataOK;
         }
         // everythig is okay
-        return {error: false, message: ''};   
+        return {error: false, message: ''};
     },
     // remove element from container
     removeElement: function(elID)
@@ -71,17 +69,17 @@ const container = {
     },
     // return an element by ID
     getElement: function(elId)
-    {       
+    {
         return this.elements[elId];
     },
 
-    // Elements helper 
+    // Elements helper
     // ======================================
     // clean / make element data
     prepareData: function(data)
     {
         let response = { error: false, message: ''};
-        
+
         // trim & convert to int data
         this.cleanValues(data);
 
@@ -132,12 +130,12 @@ const container = {
     // element type container restrinctions
     elementContainerDataSetExists()
     {
-        for( let el in this.elements) {            
+        for( let el in this.elements) {
             if( this.elements[el].type == 'Container' && this.elements[el].objViewClass == 'dataSet'){
                 return true;
             }
         }
-        return false;    
+        return false;
     },
     // return new element name
     elementNameReturn: function(elName)
@@ -156,7 +154,7 @@ const container = {
     {
         let numberIs = [];
         let nameArray = name.split('');
-        
+
         while(nameArray.length > 0){
             let elIs = nameArray.pop();
             if(!isNaN(parseInt(elIs))){
@@ -177,19 +175,19 @@ const container = {
         let no = (newNumberIs != '') ? parseInt(newNumberIs) + 1 : '1';
         let newTxt = (toRemove > 0) ? name.slice(0, -toRemove) : name;
 
-        return(newTxt + no);  
+        return(newTxt + no);
     },
     // check if an element with the same name exists an make list with names
     elementNameList(name)
-    {          
+    {
         let namesList = [];
         let exists = false;
-        for( let el in this.elements) {            
+        for( let el in this.elements) {
             namesList.push(this.elements[el].name);
             if( this.elements[el].name == name){
                 exists = true;
             }
-        }        
+        }
         if(exists) {
             return namesList;
         }
@@ -197,23 +195,24 @@ const container = {
     },
     // validate conditions and add them to the element
     validateConditions : function(data)
-    {      
+    {
         // if empty string -  remove conditions and save
         if(data.conditions === ''){
             this.elements[data.id].conditions = '';
             return true;
-        }    
+        }
         // we received the data
         if(data.id !== void 0 & data.conditions != void 0 & data.name != void 0)
         {
             // let's check if we have the element
             if(this.elements[data.id] !== void 0){
                 // TO DO - parse conditions before adding them
+                console.trace('Validating conditions for element: ', data);
                 let isOK = conditions.parseConditions(data.conditions);
-                
+
                 // console.log(JSON.stringify(isOK));
                 // console.log(isOK);
-                
+
                 if(!isOK.error) {
                     this.elements[data.id].conditions = data.conditions;
                     // data saved - return true
@@ -228,7 +227,7 @@ const container = {
     // Syntax ======================================
     // get all the elements for the dialog syntax
     dataForSyntax: function()
-    {        
+    {
         let noElements = Object.keys(this.elements);
         let response = { syntax: this.syntax, elements: []};
         let radioGroups = {};
@@ -257,16 +256,16 @@ const container = {
 
         return response;
     },
-    
+
     // save dialog syntax
     saveSyntax: function(data)
-    {        
+    {
         // update syntax and elements
         this.syntax.command = data.command;
-        this.syntax.defaultElements = data.defaultElements;       
+        this.syntax.defaultElements = data.defaultElements;
 
         return true;
     }
 };
 
-module.exports = container;
+window.container = container;

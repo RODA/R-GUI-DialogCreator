@@ -35,4 +35,5 @@ var defaultSettings = {
 
 };
 
-module.exports = defaultSettings;
+// Remove module.exports for browser use
+window.defaultSettings = defaultSettings;

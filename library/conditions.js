@@ -1,4 +1,6 @@
-const helpers = require("./helpers");
+// Remove Node.js require and module.exports for browser context
+// const helpers = require("./helpers");
+var helpers = window.helpers;
 const conditions = {
     // operators
     operators: ['==', '!=', '>=', '<='],
@@ -8,6 +10,8 @@ const conditions = {
     // entry point for parsing an element's condition string
     parseConditions: function(str)
     {
+        console.log('parseConditions start', str);
+
         // clear array every time
         // who is affecting the element
         this.elements.length = 0;
@@ -18,40 +22,42 @@ const conditions = {
         if(conditions[conditions.length - 1] == '') {
             conditions.pop();
         }
-        
+
         // if we do no have conditions or there was an error we exit
         if(conditions.length == 0) { return { error: true, result: {}}; }
-    
+
         let result = {};
-    
+
         for(let i=0; i < conditions.length; i++)
         {
             // we are spliting the condion in two parts based on if
             let ifC = conditions[i].split('if');
-            
+
             // we have an error - wrong format no | method if conditions |
             if(ifC.length != 2){ return { error: true, result: {}}; }
-            
+
             // recursiv parse each condition | ifC[1] is the right side of if
-            obj = this.conditionParserRecursion(ifC[1].trim()); 
-            
+            obj = this.conditionParserRecursion(ifC[1].trim());
+
             // there was an error parsing the conditions
             if(obj === void 0){ return { error: true, result: {}}; }
 
-            result[ifC[0].trim()] = obj; 
+            result[ifC[0].trim()] = obj;
         }
 
         // if there are no errors, return results and a copy of elements
+        console.log('parseConditions end', { error: false, result: result, elements: this.elements.slice() });
         return { error: false, result: result, elements: this.elements.slice() };
     },
 
     // parse the right side of the if statement
-    conditionParserRecursion: function(condition) 
+    conditionParserRecursion: function(condition)
     {
-        let response = [];
+        console.log("conditionParserRecursion start", condition)
+        let result = [];
         let p1 = condition.match(/\(/g);
         let p2 = condition.match(/\)/g);
-        
+
         // get the position of the first level of parantheses if there are any
         let positions = [];
         if(p1 !== null & p2 !== null) {
@@ -62,7 +68,7 @@ const conditions = {
                 // something wrong - probably the parentheses pairs do not match
                 return false;
             }
-        } 
+        }
 
         // parsing
         let substrings = [];
@@ -84,12 +90,12 @@ const conditions = {
         } else {
             substrings[0] = condition.trim();
         }
-        
+
         // parsing substrings
         for (let i = 0; i < substrings.length; i++) {
             if (substrings[i][0] == "(") {
                 // call ourself on the string without the external ()
-                response.push(this.conditionParserRecursion(substrings[i].substring(1, substrings[i].length - 1)));
+                result.push(this.conditionParserRecursion(substrings[i].substring(1, substrings[i].length - 1)));
             }
             else {
                 if (substrings[i] != "") {
@@ -104,60 +110,62 @@ const conditions = {
                             cPush.push(conditionByLogical[j]);
                         }
                     }
-                    response.push(cPush);
+                    result.push(cPush);
                 }
             }
         }
-        return response;
+        console.log("conditionParserRecursion end", result)
+        return result;
     },
 
     // entry point for checking an elements conditions
-    // weHave - who triggerd the check, 
-    // element - what conditions we are checking, 
+    // weHave - who triggerd the check,
+    // element - what conditions we are checking,
     // list - contains a referance to all the elements of the dialog
     checkConditions: function(weHave, element, list)
     {
+        console.log("checkConditions start", weHave, element, list);
         // geting only the conditions | skiping elements
         let conditions = element.conditions.conditions;
 
         // methods to apply
         methods = Object.keys(conditions);
-        for(let i in methods){
+        for (let i in methods) {
             let mtd = methods[i];
             // recursively checking the conditions (left side of if - now an array)
             let respArray = [];
             let isOK = false;
-            if(conditions[mtd] !== void 0) {
+            if (conditions[mtd] !== void 0) {
                 respArray = this.conditionCheckRecursion(conditions[mtd], list);
                 // get the array's depth for flatening the array
                 let depth = helpers.getArrayDepth(respArray);
-                
+
                 isOK = this.textConditionTest(respArray.flat(depth).join(' '));
             }
-                                
+
             // if conditions are meet, try to apply the 'method'
-            if(isOK) {
+            if (isOK) {
                 let asg = mtd.split('=');
                 let mtdIs = asg[0].trim();
                 let valueIs = (asg[1] != void 0) ? helpers.removeExternalQuotes(asg[1].trim()) : true;
-                
-                if ( list[valueIs] !== void 0 && list[valueIs].value !== void 0){
+
+                if ( list[valueIs] !== void 0 && list[valueIs].value !== void 0) {
                     valueIs = list[valueIs].value;
-                } 
+                }
 
                 // check if valid method
-                if ( typeof list[element.name][mtdIs] === 'function') 
-                {
+                if ( typeof list[element.name][mtdIs] === 'function') {
                     // call the method with the value
+                    console.log("checkConditions end with function", element.name, "mtdIs: " + mtdIs, "valueIs: " + valueIs);
                     list[element.name][mtdIs](valueIs);
                 }
             }
-        }        
+        }
     },
 
     // recursiv condition checker
     conditionCheckRecursion: function(conditions, list)
-    {        
+    {
         // the condition here is an array with string or array keys
         let response = [];
         for(let i = 0; i < conditions.length; i++) {
@@ -173,35 +181,37 @@ const conditions = {
                     response.push(this.conditionCheckRecursion(conditions[i], list));
                 } else {
                     // validate condition
+                    console.log("conditionCheckRecursion", conditions[i], list);
                     response.push(this.validateCondition(conditions[i], list));
                 }
             } else {
                 // it is an logical perator
                 response.push(conditions[i]);
-            }  
+            }
         }
-        return response;    
+        return response;
     },
 
-    // Helpers 
+    // Helpers
     // =======================================
     // get the position of the () in the string
     getPositions: function(str)
-    {    
+    {
+        console.log("getPositions start", str);
         // get the position of the ( in the string
         let regex1 = /\(/gi;
         let result;
-        let indices1 = [];     
+        let indices1 = [];
         while((result = regex1.exec(str))){
             indices1.push(result.index);
         }
         // get the position of the ) in the string
         let regex2 = /\)/gi;
-        let indices2 = [];     
+        let indices2 = [];
         while((result = regex2.exec(str))){
             indices2.push(result.index);
         }
-    
+
         // make array of pair parentheses
         let response = [];
         let first = 0;
@@ -213,6 +223,7 @@ const conditions = {
                 first = i + 1;
             }
         }
+        console.log("getPositions end", response);
         return response;
     },
 
@@ -255,6 +266,7 @@ const conditions = {
     // Note - operator with one char -- do we need it?
     operatorsParser: function(str)
     {
+        console.log("operatorsParser start", str);
         str = str.trim();
         let counter = 0;
         let operatorFound = '';
@@ -264,7 +276,7 @@ const conditions = {
                 operatorFound = this.operators[i];
             }
         }
-        
+
         // we have an error -> there should be only one operator
         if ( counter > 1 ) { return void 0; }
 
@@ -279,25 +291,27 @@ const conditions = {
             this.elements.push(element);
         }
 
+        console.log("operatorsParser end", [element, operatorFound, a[1].trim()]);
         return [element, operatorFound, a[1].trim()];
     },
 
     // validate a condition
     validateCondition: function(condition, list)
     {
+        console.log('validateCondition start', condition, list);
         // a condition mist have exactly 3 elements | name, operator, property(value)
         if(condition.length != 3){
             return false;
         }
 
         let res = false;
-        let name = condition[0]; 
-        let operator = condition[1]; 
-        let propertyOrValue = condition[2]; 
+        let name = condition[0];
+        let operator = condition[1];
+        let propertyOrValue = condition[2];
 
         // is it a valid property?
         if(this.availableProperties.includes(propertyOrValue))
-        {    
+        {
             // check if element and property exists
             if(list[name] === void 0 && list[name][propertyOrValue] === void 0){
                 return false;
@@ -329,7 +343,7 @@ const conditions = {
                     res = (list[name].value <= propertyOrValue) ? true : false;
                     break;
             }
-        }                
+        }
         // in case of wrong values
         if(res) {
             return true;
@@ -344,4 +358,5 @@ const conditions = {
     }
 };
 
-module.exports = conditions;
+// Remove module.exports for browser use
+window.conditions = conditions;

@@ -1,19 +1,22 @@
-// In renderer process (web page).
-const { ipcRenderer } = require('electron');
-const { dialog } = require('electron').remote;
-// get current window for making dialogs modals
-const mainWindow = require('electron').remote.getCurrentWindow();
-const editor = require("../library/editor");
+// Remove deprecated remote usage and use window.electron.ipcRenderer from preload.js
+// const editor = require("../library/editor");
+// Instead, use a <script> tag in HTML to load editor.js and access it as window.editor
+let mainWindow = null;
+window.addEventListener('DOMContentLoaded', () => {
+    mainWindow = window;
+});
 
 // helpers for when enter key is pressed
 let elementSelected = false;
 let enterPressed = false;
 let mouseDown = false;
 
+// Use window.editor, which should be loaded globally by a <script> tag in HTML
+
 // new window clicked
-ipcRenderer.on('newWindow', (event, args) => {
+window.electron.ipcRenderer.on('newWindow', (event, args) => {
     if(editor.paperExists === true) {
-        let confirm = dialog.showMessageBox(mainWindow, {type: "question", message: "Are you sure?", title: "Create new dialog", buttons: ["No", "Yes"]});
+        let confirm = window.electron.dialog.showMessageBox(mainWindow, {type: "question", message: "Are you sure?", title: "Create new dialog", buttons: ["No", "Yes"]});
         if(confirm){
             editor.remove();
             editor.make();
@@ -25,35 +28,36 @@ ipcRenderer.on('newWindow', (event, args) => {
 });
 
 // send data to preview window
-ipcRenderer.on('previewDialog', (event, args) => {
+window.electron.ipcRenderer.on('previewDialog', (event, args) => {
     if(editor.paperExists === true) {
         let container = editor.returnContainer();
-        ipcRenderer.send('containerData', container);
+        console.log(container);
+        window.electron.ipcRenderer.send('containerData', container);
     } else {
-        dialog.showMessageBox(mainWindow, {type: "info", message: "Please create a new dialog first.", title: "No dialog", buttons: ["OK"]});
-        ipcRenderer.send('containerData', false);
+        window.electron.dialog.showMessageBox(mainWindow, {type: "info", message: "Please create a new dialog first.", title: "No dialog", buttons: ["OK"]});
+        window.electron.ipcRenderer.send('containerData', false);
     }
 });
 
 // verify element's conditions and respond
-ipcRenderer.on('conditionsCheck', (event, args) => {
+window.electron.ipcRenderer.on('conditionsCheck', (event, args) => {
     let valid = editor.getConditionStatus(args);
-    ipcRenderer.send('conditionsValid', valid);
+    window.electron.ipcRenderer.send('conditionsValid', valid);
 });
 
 // save syntax data
-ipcRenderer.on('saveDialogSyntax', (event, args) => {    
+window.electron.ipcRenderer.on('saveDialogSyntax', (event, args) => {
     let valid = editor.saveDialogSyntax(args);
-    ipcRenderer.send('syntaxSaved', valid);
+    window.electron.ipcRenderer.send('syntaxSaved', valid);
 });
 
 // load previous saved data
-ipcRenderer.on('openFile', (event, args) => {
-    editor.loadDialogDataFromFile(args);        
+window.electron.ipcRenderer.on('openFile', (event, args) => {
+    editor.loadDialogDataFromFile(args);
     document.getElementById('dlgSyntax').disabled = false;
 });
 
-ipcRenderer.on('deselectedElements', (ev, args) => {    
+window.electron.ipcRenderer.on('deselectedElements', (ev, args) => {
     if (!mouseDown) {
         clearProps();
     }
@@ -80,58 +84,58 @@ $(document).ready(function() {
     // Elements name (id) only leters and numbers and max 15 chars
     $('#elname').on("change paste keyup", function() {
         let newVal = $(this).val().replace(/[^a-z0-9]/g,'');
-        newVal = (newVal.length < 15) ? newVal : newVal.slice(0, 15);  
+        newVal = (newVal.length < 15) ? newVal : newVal.slice(0, 15);
         $(this).val(newVal);
-     });
+    });
     // this.val.regex(/^[a-z0-9]+$/);
-    
+
     // update dialog properties
     var propertyAddEvent = document.querySelectorAll('#dlgProps [id^="dialog"]');
     for(let i = 0; i < propertyAddEvent.length; i++) {
         propertyAddEvent[i].addEventListener('keyup', (ev) => {
             if(ev.which == 13) {
                 let properties = $('#dlgProps [id^="dialog"]');
-        
+
                 let obj = {};
                 properties.each(function(){
                     let el = $(this);
                     let key = el.attr('name');
                     obj[key] = el.val();
-                });                          
-               editor.update(obj);
+                });
+                editor.update(obj);
             }
         });
         // save on blur
         propertyAddEvent[i].addEventListener('blur', (ev) => {
             let properties = $('#dlgProps [id^="dialog"]');
-        
+
             let obj = {};
             properties.each(function(){
                 let el = $(this);
                 let key = el.attr('name');
                 obj[key] = el.val();
-            });                          
-           editor.update(obj);
+            });
+            editor.update(obj);
         });
     }
 
     // add dialog syntax
     $('#dlgSyntax').on('click', function() {
-        ipcRenderer.send('startSyntaxWindow', editor.getDialogSyntax());
+        window.electron.ipcRenderer.send('startSyntaxWindow', editor.getDialogSyntax());
     });
 
     // update an element
     var elementsAddEvent = document.querySelectorAll('#propertiesList [id^="el"]');
     for(let i = 0; i < elementsAddEvent.length; i++) {
         // save on enter only if element type not select
-        saveCapabilities(elementsAddEvent[i]);        
+        saveCapabilities(elementsAddEvent[i]);
     }
-    
+
     // update element on press enter
     $(document).on('keyup', function(ev) {
         // remove the element on delete or backspace key
         if(ev.which == 46 || ev.which == 8) {
-            if (elementSelected) 
+            if (elementSelected)
             {
                 if (document.activeElement.tagName === 'BODY'){
                     removeElement();
@@ -149,11 +153,11 @@ $(document).ready(function() {
     $('#conditions').on('click', function(){
         let id = $('#elparentId').val();
         let element = editor.getElementFromContainer(id);
-        ipcRenderer.send('conditionsData', {'id': id, 'name': element.name, 'conditions': element.conditions});
+        window.electron.ipcRenderer.send('conditionsData', {'id': id, 'name': element.name, 'conditions': element.conditions});
     });
-    
+
     // hide parent container and variable type
-    $('#elobjViewClass').on('change', function() {        
+    $('#elobjViewClass').on('change', function() {
         if ($(this).val() == 'variable') {
             $('#parentContainer').show();
             $('#selectVariableType').show();
@@ -184,14 +188,14 @@ $(document).ready(function() {
 
     // Paper Events ========================================
     // show element properties
-    editor.editorEvents.on('getEl', function(element) 
-    {       
+    editor.editorEvents.on('getEl', function(element)
+    {
         elementSelected = true;
-        
+
         // disable all elements and hide everything | reseting props tab
         $('#propertiesList [id^="el"]').prop('disabled', true);
         $('#propertiesList .elprop').hide();
-        
+
         // trigger change for the select element source values
         if(element.dataSource !== void 0) {
             $("#eldataSource" ).trigger("change");
@@ -200,7 +204,7 @@ $(document).ready(function() {
         // update props tab
         for( let key in element){
             if($('#el' + key).length > 0){
-                
+
                 // show main element
                 $('#propertiesList').show();
 
@@ -211,25 +215,25 @@ $(document).ready(function() {
         }
         // disable update and remove button | force reselection
         $("#removeElement").prop('disabled', false);
-        
+
         if(element.type === 'Container') {
             // trigger change for container
             $("#elobjViewClass" ).trigger("change");
         }
-        
+
     });
 
     // show dialog props
     editor.editorEvents.on('dialogUpdate', function(props) {
-        
+
         let properties = $('#dlgProps [id^="dialog"]');
-        
+
         properties.each(function(){
             let el = $(this);
             let key = el.attr('name');
             el.val(props[key]);
-        });        
-        
+        });
+
     });
 
     // new dialog - clear elements prop
@@ -269,7 +273,7 @@ function saveCapabilities(element)
     if (element.tagName !== "SELECT"){
         element.addEventListener('keyup', (ev) => {
             if(ev.which == 13) {
-                if (elementSelected) 
+                if (elementSelected)
                 {
                     enterPressed = true;
                     // get all proprerties
@@ -282,7 +286,7 @@ function saveCapabilities(element)
                             let key = el.attr('name').substr(2);
                             obj[key] = el.val();
                         }
-                    });                
+                    });
                     if(editor.paperExists === true) {
                         // send obj for update
                         editor.updateElement(obj);
@@ -293,7 +297,7 @@ function saveCapabilities(element)
     }
     // save on blur
     element.addEventListener('blur', (ev) => {
-        if (!enterPressed) {            
+        if (!enterPressed) {
             // get all proprerties
             let properties = $('#propertiesList [id^="el"]');
             // save all properties to obj
@@ -304,7 +308,7 @@ function saveCapabilities(element)
                     let key = el.attr('name').substr(2);
                     obj[key] = el.val();
                 }
-            });       
+            });
             if(editor.paperExists === true && obj.type !== void 0) {
                 // send obj for update
                 editor.updateElement(obj);

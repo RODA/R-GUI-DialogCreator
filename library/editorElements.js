@@ -495,4 +495,4 @@ var editorElements = {
     }
 };
 
-module.exports = editorElements;
+window.editorElements = editorElements;

@@ -1,4 +1,3 @@
-
 var helpers = {
 
     //https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
@@ -67,4 +66,5 @@ var helpers = {
 
 };
 
-module.exports = helpers;
+// Remove module.exports for browser use
+window.helpers = helpers;

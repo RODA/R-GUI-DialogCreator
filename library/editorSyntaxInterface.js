@@ -1,5 +1,4 @@
-const { ipcRenderer } = require('electron');
-const { BrowserWindow } = require('electron').remote;
+const ipcRenderer = window.electron ? window.electron.ipcRenderer : null;
 
 $(document).ready(function(){
     ipcRenderer.on('elementsList', (event, args) => {        
@@ -45,14 +44,15 @@ $(document).ready(function(){
         ipcRenderer.send('saveDialogSyntax', {command: syntax, defaultElements: isDefault});
     });
     // if syntax saved close window
-    ipcRenderer.on('syntaxSaved', (event, args) => {
-        if(args) {
-            let window = BrowserWindow.getFocusedWindow();
-            window.close();
-        } else {
-            $('#errors').show();
-        }
-    });
+    if (ipcRenderer) {
+        ipcRenderer.on('syntaxSaved', (event, args) => {
+            if (args) {
+                window.close();
+            } else {
+                $('#errors').show();
+            }
+        });
+    }
 });
 
 // add element to the table
